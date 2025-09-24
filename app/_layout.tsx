@@ -6,7 +6,10 @@ import '@/global.css';
 export default function RootLayout() {
   return (
     <GluestackUIProvider>
-      <Stack />
+      <Stack>
+        <Stack.Screen name="testComponent" />
+      </Stack>
+
     </GluestackUIProvider>
   )
 }

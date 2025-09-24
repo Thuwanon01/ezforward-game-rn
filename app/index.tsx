@@ -1,4 +1,5 @@
 import { Button, ButtonSpinner, ButtonText } from '@/components/ui/button';
+import { Link } from 'expo-router';
 import { Text, View } from "react-native";
 
 export default function Index() {
@@ -15,6 +16,8 @@ export default function Index() {
         <ButtonSpinner color="white" />
         <ButtonText>Get Started</ButtonText>
       </Button>
+      <Link href="/testComponent">Test Component</Link>
+      
     </View>
   );
 }
