@@ -1,6 +1,6 @@
 import QuestionBox from "@/components/lab/QuestionBox";
 import React, { useEffect, useState } from "react";
-import { Button, SafeAreaView, StyleSheet, Text, View } from "react-native";
+import { Button, StyleSheet, Text, View } from "react-native";
 
 const questionText = "What is the capital of France?";
 
@@ -9,7 +9,7 @@ export default function TextToSpeechPage() {
   const [status, setStatus] = useState('wait');
 
   useEffect(() => {
-    let timer;
+    let timer: any
     if (status === 'reading') {
       timer = setTimeout(() => {
         setStatus('wait'); // กลับเป็น wait หลังครบ 5 วิ
@@ -28,15 +28,15 @@ export default function TextToSpeechPage() {
   };
 
   return (
-    // ใช้ SafeAreaView เพื่อให้ Layout ไม่ชนขอบบนของจอ
-    <SafeAreaView style={styles.container}>
+    
+    <View style={styles.container}>
       <QuestionBox 
         question={questionText} 
         status={status}
         onPressQuestion={handleQuestionPress}
       />
 
-      {/* สร้าง View เพื่อจัดกลุ่มปุ่มทดสอบ */}
+      {/* กลุ่มปุ่มทดสอบ */}
       <View style={styles.controlsContainer}>
         <Text style={styles.controlTitle}>Test Panel</Text>
 
@@ -66,7 +66,7 @@ export default function TextToSpeechPage() {
           />
         </View>
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -79,6 +79,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fffac9ff',
   },
   controlsContainer: {
+    justifyContent: 'center',
     marginTop: 150, // ระยะห่างจากรูปภาพของ QuestionBox
     width: '60%',   // กำหนดความกว้างของกลุ่มปุ่ม
     padding: 20,
