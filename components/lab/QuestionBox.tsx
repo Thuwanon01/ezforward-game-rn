@@ -1,6 +1,6 @@
 import * as Speech from 'expo-speech';
 import React, { useEffect } from 'react';
-import { Image, StyleSheet, Text, View } from 'react-native';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 
 // สำหรับเปลี่ยนรูปภาพตามสถานะที่โดนรับมา
@@ -14,14 +14,14 @@ const imagesSource = {
 
 // component QuestionBox จะรับ props 2 ตัวคือ question (ข้อความคำถาม) และ status (สถานะของรูปภาพ)
 
-export default function QuestionBox({ question, status }: { question: string, status: string }) {
+export default function QuestionBox({ question, status, onPressQuestion }: { question: string, status: string, onPressQuestion: () => void }) {
 
   // ใช้ useEffect เฝ้ามอง status ที่รับค่าเข้ามา
   useEffect(() => {
     // ถ้า status รับค่ามาเป็น "reading" ให้เริ่มอ่านคำถาม
     if (status === 'reading') {
       // สั่งให้อ่านคำถามโดยใช้ expo-speech
-      Speech.speak(question, { language: 'en-Us' });
+      Speech.speak(question, { language: 'en-US' });
     }
     // Cleanup function: ถ้า component ถูกปิดกลางคัน ให้หยุดพูด
     return () => {
@@ -32,7 +32,10 @@ export default function QuestionBox({ question, status }: { question: string, st
   return (
     <View style={styles.container}>
       <View style={styles.parentBox}>
-        <Text style={styles.questionText}>{question}</Text>
+        {/* เอา TouchableOpacity มาครอบ Text แล้วผูกกับ onPressQuestion */}
+        <TouchableOpacity onPress={onPressQuestion}>
+          <Text style={styles.questionText}>{question}</Text>
+        </TouchableOpacity>
         <View>
           <Image
             style={styles.absoluteChild}
