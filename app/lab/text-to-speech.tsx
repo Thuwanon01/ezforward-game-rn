@@ -6,6 +6,6 @@ const questionText = "What is the capital of France?";
 
 export default function TextToSpeechPage() {
   return (
-    <QuestionBox question={questionText} status="bad" />
+    <QuestionBox question={questionText} status="wait" />
   );
 }
