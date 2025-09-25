@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Image, StyleSheet, Text, View } from 'react-native';
 
 
 
@@ -8,8 +8,10 @@ export default function QuestionBox({ question }: { question: string }) {
     <View style={styles.container}>
       <View style={styles.parentBox}>
         <Text style={styles.questionText}>{question}</Text>
-        <View style={styles.absoluteChild}>
-          <Text style={styles.childText}>ลอยอยู่!</Text>
+        <View>
+          <Image style={styles.absoluteChild}
+            source={require('../../assets/images/ram.png')}
+        />
         </View>
       </View>
     </View>
@@ -45,15 +47,13 @@ const styles = StyleSheet.create({
     textAlign: 'center'
   },
   absoluteChild: {
-    width: 80,
-    height: 80,
-    backgroundColor: '#e74c3c', // สีแดง
-    justifyContent: 'center',
-    alignItems: 'center',
+    width: 104,
+    height: 134,
+    boxShadow: '0 4px 8px rgba(178, 178, 178, 1)',
     // --- จุดสำคัญอยู่ตรงนี้ ---
     position: 'absolute', // ทำให้ Component นี้ลอยได้
-    bottom: -15,             // ห่างจากขอบล่างของ parentBox 15 pixels
-    right: -15,           // ห่างจากขอบขวาของ parentBox 15 pixels
+    bottom: -113,             // ห่างจากขอบล่างของ parentBox -113 pixels
+    right: -203.5          // ห่างจากขอบขวาของ parentBox -203.5 pixels
   },
   childText: {
     color: '#fff',
