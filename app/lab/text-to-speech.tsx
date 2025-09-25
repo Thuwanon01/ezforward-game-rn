@@ -76,7 +76,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fffac9ff', // ใช้เป็นสีพื้นหลังเดียวกับ QuestionBox เพื่อไม่ใหห้พื้นหลังพัง
+    backgroundColor: '#fffac9ff', // ใช้เป็นสีพื้นหลังเดียวกับ QuestionBox เพื่อไม่ให้พื้นหลังพัง
   },
   controlsContainer: {
     justifyContent: 'center',
@@ -84,9 +84,9 @@ const styles = StyleSheet.create({
     width: '60%',   // กำหนดความกว้างของกลุ่มปุ่ม
     padding: 20,
     borderWidth: 1,
-    borderColor: '#fffac9ff', // ใช้เป็นสีพื้นหลังเดียวกับ QuestionBox เพื่อไม่ใหห้พื้นหลังพัง
+    borderColor: '#fffac9ff', // ใช้เป็นสีพื้นหลังเดียวกับ QuestionBox เพื่อไม่ให้พื้นหลังพัง
     borderRadius: 10,
-    backgroundColor: '#fffac9ff' // ใช้เป็นสีพื้นหลังเดียวกับ QuestionBox เพื่อไม่ใหห้พื้นหลังพัง
+    backgroundColor: '#fffac9ff' // ใช้เป็นสีพื้นหลังเดียวกับ QuestionBox เพื่อไม่ให้พื้นหลังพัง
   },
   controlTitle: {
     fontSize: 16,
