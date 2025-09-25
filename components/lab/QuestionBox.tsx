@@ -1,11 +1,11 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
-export default function App() {
+export default function QuestionBox({ question }: { question: string }) {
   return (
     <View style={styles.container}>
       <View style={styles.parentBox}>
-        <Text>นี่คือกล่องแม่ (Parent)</Text>
+        <Text>{question}</Text>
         <View style={styles.absoluteChild}>
           <Text style={styles.childText}>ลอยอยู่!</Text>
         </View>
@@ -16,7 +16,7 @@ export default function App() {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flex: 1, 
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#fff',
