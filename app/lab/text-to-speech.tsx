@@ -9,7 +9,7 @@ export default function TextToSpeechPage() {
   const [status, setStatus] = useState('wait');
 
   useEffect(() => {
-    let timer: any
+    let timer: any //ตั้งเป็น any ไว้ไม่ให้มันแดง error
     if (status === 'reading') {
       timer = setTimeout(() => {
         setStatus('wait'); // กลับเป็น wait หลังครบ 5 วิ
