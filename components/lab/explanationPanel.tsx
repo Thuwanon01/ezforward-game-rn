@@ -12,7 +12,6 @@ interface Props {
   explanation: string
   helperStatus: { "eliminate": boolean, "double": boolean, "change": boolean }
   explanationStatus: boolean
-
 }
 
 export default function ExplanationPanel({ correctAnswer, correctExplanation, incorrectAnswer,
@@ -22,7 +21,6 @@ export default function ExplanationPanel({ correctAnswer, correctExplanation, in
     const toggleExplanation = () =>{
       openExplanation ? setOpenExplanation(false) : setOpenExplanation(true)
     }
-
 
   return (
     //All box of footer
@@ -48,14 +46,11 @@ export default function ExplanationPanel({ correctAnswer, correctExplanation, in
         </View>
       </View>}
       
-
       {/* Icon and button  */}
-      <View className="flex-row justify-between m-[16]">
+      <View className="flex-row justify-between my-[16] mx-[40]">
         <IconButton svgPath='eliminateIcon' isDisable={helperStatus['eliminate']} onPress={()=>{}}/>
         <IconButton svgPath='doubleIcon' isDisable={helperStatus['double']} onPress={()=>{}}/>
         <IconButton svgPath='changeIcon' isDisable={helperStatus['change']} onPress={()=>{}}/>
-        
-        
         <TextButton text='Next' onPress={()=>alert('TextButton')}  />
       </View>
     </View>

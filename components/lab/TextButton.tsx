@@ -11,7 +11,7 @@ export default function TextButton({ text, onPress }: Props) {
                       variant="solid"
                       size="lg"
                       action="primary"
-                      className="mr-[32] bg-[#FCC61D] rounded-3xl px-[32]" 
+                      className="bg-[#FCC61D] rounded-3xl px-[32]" 
                       onPress={onPress}>
                       <ButtonText className='text-white font-bold text-3xl'>{text}</ButtonText>
                     </Button>

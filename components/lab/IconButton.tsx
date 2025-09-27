@@ -11,9 +11,9 @@ interface Props {
 export default function IconButton({ svgPath, isDisable, onPress }: Props) {
     const [iconColor, setIconColor] = useState('white')
 
-    useEffect(()=>{
+    useEffect(() => {
         isDisable ? setIconColor('gray') : setIconColor('white')
-    },[isDisable])
+    }, [isDisable])
 
     const icon =
         svgPath === 'eliminateIcon'
@@ -23,10 +23,10 @@ export default function IconButton({ svgPath, isDisable, onPress }: Props) {
                 : require('assets/images/changeChoice.svg'); // default = changeIcon
 
     return (
-        <TouchableOpacity onPress={onPress}>
+        <TouchableOpacity onPress={onPress} className='justify-center'>
             <Image
                 source={icon}
-                style={{ width: 28, height: 28, marginLeft: 32, tintColor: iconColor }}
+                style={{ width: 28, height: 28, tintColor: iconColor }}
             />
         </TouchableOpacity>
 
