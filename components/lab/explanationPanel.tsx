@@ -1,7 +1,8 @@
-import { Button, ButtonText } from '@/components/ui/button';
 import { Image } from 'expo-image';
 import React, { useState } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
+import IconButton from './IconButton';
+import TextButton from './TextButton';
 
 interface Props {
   correctAnswer: string
@@ -50,29 +51,12 @@ export default function ExplanationPanel({ correctAnswer, correctExplanation, in
 
       {/* Icon and button  */}
       <View className="flex-row justify-between m-[16]">
-        <TouchableOpacity onPress={() => alert('heyyyy')}>
-          <Image
-            source={require('assets/images/Vector.svg')}
-            style={{ width: 28, height: 28, marginLeft: 32 }}
-          />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => alert('two')}>
-          <Image
-            source={require('assets/images/double.svg')}
-            style={{ width: 28, height: 28 }} />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => alert('xxxxxxxx')}>
-          <Image
-            source={require('assets/images/changeChoice.svg')}
-            style={{ width: 28, height: 28 }} />
-        </TouchableOpacity>
-        <Button
-          variant="solid"
-          size="lg"
-          action="primary"
-          className="mr-[32] bg-[#FCC61D] rounded-3xl px-[32]">
-          <ButtonText className='text-white font-bold text-3xl'>Next</ButtonText>
-        </Button>
+        <IconButton svgPath='eliminateIcon' isDisable={helperStatus['eliminate']} onPress={()=>{}}/>
+        <IconButton svgPath='doubleIcon' isDisable={helperStatus['double']} onPress={()=>{}}/>
+        <IconButton svgPath='changeIcon' isDisable={helperStatus['change']} onPress={()=>{}}/>
+        
+        
+        <TextButton text='Next' onPress={()=>alert('TextButton')}  />
       </View>
     </View>
   )
