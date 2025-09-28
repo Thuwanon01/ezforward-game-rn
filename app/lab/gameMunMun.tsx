@@ -1,3 +1,4 @@
+import { fetchRandomQuestion } from '@/apis/wordgame';
 import ChoiceBox from '@/components/lab/ChoiceBox';
 import ExplanationPanel from '@/components/lab/ExplanationPanel';
 import HeaderPanel from '@/components/lab/HeaderPanel';
@@ -5,7 +6,7 @@ import QuestionBox from '@/components/lab/QuestionBox';
 import React, { useEffect, useState } from 'react';
 import { View } from 'react-native';
 
-const questionText = "What is the capital of France?";
+
 
 export default function testComponent() {
     const [helperStatus, setHelperStatus] = useState({ "eliminate": false, "double": false, "change": false })
@@ -16,9 +17,13 @@ export default function testComponent() {
     const [incorrectExplanation, setIncorrectExplanation] = useState("Also Good answer but this is explanation for the incorrect answer, Like like like for long")
     const [explanation, setExplanation] = useState("Just explanation for plain text hahahahahahahahahaha")
     const [status, setStatus] = useState('wait');
+    const [question, setQuestion] = useState('');
+    const [choices, setChoices] = useState<string[]>([]);
+    
 
     
     useEffect(() => {
+      fetchData();
         let timer: any //ตั้งเป็น any ไว้ไม่ให้มันแดง error
         if (status === 'reading') {
           timer = setTimeout(() => {
@@ -47,6 +52,12 @@ export default function testComponent() {
                 ? setHelperStatus(current => { return { ...current, 'double': true } })
                 : setHelperStatus(current => { return { ...current, 'change': true } })
     }
+    const fetchData = async () => {
+      const questionData = await fetchRandomQuestion();
+      console.log('Fetched question data:', questionData);
+      setQuestion(questionData.text);
+      setChoices(questionData.choicelist.map(choice => choice.text));
+    }
 
     return (
         <View className='flex-1'>
@@ -56,15 +67,16 @@ export default function testComponent() {
                 <HeaderPanel title={'GameMunMun'} onPressBack={() => {} } onPressMenu={function (): void {
                     throw new Error('Function not implemented.');
                 } } ></HeaderPanel>
-                <QuestionBox 
-                        question={questionText} 
+                <QuestionBox
+                        question={question}
                         status={status}
                         onPressQuestion={handleQuestionPress}
                       />
-                      <ChoiceBox text='4.will be' status="wait" />
-                      <ChoiceBox text='4.will be' status="wait" />
-                      <ChoiceBox text='4.will be' status="wait" />
-                      <ChoiceBox text='4.will be' status="wait" />
+                      <View >
+                        {choices.map((choice, index) => (
+                          <ChoiceBox key={index} text={choice} status={'wait'} />
+                        ))}
+                      </View>
                 
             </View>
 
