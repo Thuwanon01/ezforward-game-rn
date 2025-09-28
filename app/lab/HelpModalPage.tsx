@@ -17,10 +17,10 @@ export default function HelpModalPage({ title, subtitle, icon, isVisible, onPres
 
     const imageSource =
         imageName === 'image1'
-            ? require('../assets/image1.png')
+            ? require('@/assets/images/helper-icons/change-question.svg')
             : imageName === 'image2'
-                ? require('../assets/image2.png')
-                : require('../assets/image3.png')
+                ? require('@/assets/images/helper-icons/double.svg')
+                : require('@/assets/images/helper-icons/eliminate.svg')
 
     return (
         <Modal
@@ -31,7 +31,7 @@ export default function HelpModalPage({ title, subtitle, icon, isVisible, onPres
             <Pressable style={styles.overlay} onPress={onClose}>
                 <View style={styles.modalBox}>
                     {/* Icon */}
-                    <Image source={icon as any} style={styles.icon} />
+                    <Image source={imageSource} style={styles.icon} />
 
                     {/* Title */}
                     <Text style={styles.title}>{title}</Text>
