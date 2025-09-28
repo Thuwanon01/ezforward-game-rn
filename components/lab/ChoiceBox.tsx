@@ -1,5 +1,5 @@
 import * as Speech from 'expo-speech'
-import { StyleSheet, Text, View } from 'react-native'
+import { StyleSheet, Text, TouchableOpacity } from 'react-native'
 import { Gesture, GestureDetector } from 'react-native-gesture-handler'
 interface Prop {
   text: string
@@ -14,7 +14,6 @@ export default function ChoiceBox({text, status,}:Prop) {
   }
 
   const singleTap = Gesture.Tap()
-    .maxDuration(250)
     .onStart(speak)
 
   const doubleTap = Gesture.Tap()
@@ -33,9 +32,9 @@ export default function ChoiceBox({text, status,}:Prop) {
   }
   return (
     <GestureDetector  gesture={Gesture.Exclusive(doubleTap, singleTap)}>
-      <View style ={[styles.boxChoice, {backgroundColor: color}]}>
+      <TouchableOpacity style ={[styles.boxChoice, {backgroundColor: color}]}>
         <Text style={styles.textChoice}>{text}</Text>
-      </View> 
+      </TouchableOpacity> 
     </GestureDetector >
   )
 }
