@@ -25,7 +25,7 @@ export default function testComponent() {
 
     return (
         <View className='flex-1'>
-            
+
             {/* for test components */}
             <View className='flex-1'>
                 <Text>testComponent</Text>

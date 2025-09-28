@@ -16,7 +16,7 @@ export default function GameTest() {
     return (
         <View>
             <HeaderPanel title='GameTest' onPressBack={() => { }} onPressMenu={() => { }} />
-            <HelpModalPage title='Change Question' subtitle='เปลี่ยนคำถามปัจจุบันเป็นคำถามใหม่ทันที' icon='reload' isVisible={modalVisible} onPressPlay={() => { }} onClose={closeModal} />
+            <HelpModalPage title={'ChangeQuestion'} subtitle={'เปลี่ยนคำถามปัจจุบันเป็นคำถามใหม่ทันที'} icon={''} isVisible={modalVisible} onPressPlay={() => { }} onClose={closeModal} imageName='image1'></HelpModalPage>
             <View className=''>
                 <TouchableOpacity onPress={openModal}> play </TouchableOpacity>
 
