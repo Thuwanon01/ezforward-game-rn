@@ -4,7 +4,6 @@ import React from 'react';
 import { TouchableOpacity } from 'react-native';
 
 interface Props {
-    // svgPath: 'eliminateIcon' | 'doubleIcon' | 'changeIcon';
     iconImage: string | ImageSource
     isDisable: boolean
     onPress: () => void

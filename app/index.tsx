@@ -1,5 +1,5 @@
 import { Link } from "expo-router";
-import { Pressable, Text, View } from "react-native";
+import { Text, View } from "react-native";
 
 export default function Index() {
   return (
@@ -9,22 +9,13 @@ export default function Index() {
            Tomorrow, Criseyde ______care of by her grandparents because her parents won't be available.
         </Text>
       </View>
+       
+        <Link href = "/testComponent">Test Components</Link>
 
-      <Pressable>
-        <View className="bg-white border-[#27548A] border-2 m-3 h-20 flex justify-center items-center rounded-2xl">
-          <Text className="text-[#183B4E] text-xl font-bold">Choice 1</Text>
-        </View>
-        <View className="bg-white border-[#27548A] border-2 m-3 h-20 flex justify-center items-center rounded-2xl">
-          <Text className="text-[#183B4E] text-xl font-bold">Choice 1</Text>
-        </View>
-        <View className="bg-white border-[#27548A] border-2 m-3 h-20 flex justify-center items-center rounded-2xl">
-          <Text className="text-[#183B4E] text-xl font-bold">Choice 1</Text>
-        </View>
-        <View className="bg-white border-[#27548A] border-2 m-3 h-20 flex justify-center items-center rounded-2xl">
-          <Text className="text-[#183B4E] text-xl font-bold">Choice 1</Text>
-        </View>
-      </Pressable>
-      <Link href='/lab/testComponent'>testComponent</Link>
+ 
+
+
+
     </View>
   );
 }

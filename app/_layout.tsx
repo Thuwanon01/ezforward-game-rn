@@ -7,7 +7,8 @@ export default function RootLayout() {
   return (
     <GluestackUIProvider>
       <Stack>
-        <Stack.Screen name="lab/testComponent" />
+        <Stack.Screen name="lab/testComponent" options={{headerShown:false}}/>
+        <Stack.Screen name="lab/gameMunMun" options={{headerShown:false}}/>
       </Stack>
 
     </GluestackUIProvider>
