@@ -8,8 +8,8 @@ import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 const imagesSource = {
   wait: require('../../assets/images/ram.png'),
   reading: require('../../assets/images/PixVerse-V5-ram-read.gif'),
-  good: require('../../assets/images/PixVerse-V5-ram-happy.gif'),
-  bad: require('../../assets/images/PixVerse-V5-ram-sad.gif'),
+  correct: require('../../assets/images/PixVerse-V5-ram-happy.gif'),
+  incorrect: require('../../assets/images/PixVerse-V5-ram-sad.gif'),
 };
 
 // component QuestionBox จะรับ props 2 ตัวคือ question (ข้อความคำถาม) และ status (สถานะของรูปภาพ)
@@ -21,7 +21,11 @@ export default function QuestionBox({ question, status, onPressQuestion }: { que
     // ถ้า status รับค่ามาเป็น "reading" ให้เริ่มอ่านคำถาม
     if (status === 'reading') {
       // สั่งให้อ่านคำถามโดยใช้ expo-speech
-      Speech.speak(question, { language: 'en-US' });
+      const isThai = /[\u0E00-\u0E7F]/.test(question);
+      const lang = isThai ? 'th-TH' : 'en-US';
+
+      Speech.stop();
+      Speech.speak(question, { language: lang });
     }
     // Cleanup function: ถ้า component ถูกปิดกลางคัน ให้หยุดพูด
     return () => {
