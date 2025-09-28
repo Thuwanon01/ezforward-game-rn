@@ -4,9 +4,10 @@ import { Gesture, GestureDetector } from 'react-native-gesture-handler'
 interface Prop {
   text: string
   status:"correct" | "incorrect" | "wait" | "inactive"
+  onPress?: ()=> void
 }
 
-export default function ChoiceBox({text, status,}:Prop) {
+export default function ChoiceBox({text, status, onPress}:Prop) {
 
   const speak = () =>{
      Speech.stop()
@@ -20,7 +21,7 @@ export default function ChoiceBox({text, status,}:Prop) {
   const doubleTap = Gesture.Tap()
     .maxDuration(250)
     .numberOfTaps(2)
-    .onStart(() => {alert("2tap")})
+    .onStart(onPress ? onPress : ()=>{})
 
   const isCorrect = status === "correct"
   let color = "white"
@@ -32,7 +33,7 @@ export default function ChoiceBox({text, status,}:Prop) {
     color="gray"
   }
   return (
-    <GestureDetector  gesture={Gesture.Exclusive(doubleTap, singleTap)}>
+    <GestureDetector  gesture={Gesture.Exclusive(doubleTap, singleTap)} >
       <View style ={[styles.boxChoice, {backgroundColor: color}]}>
         <Text style={styles.textChoice}>{text}</Text>
       </View> 
