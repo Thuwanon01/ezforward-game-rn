@@ -14,6 +14,10 @@ interface Props {
   explanationStatus: boolean
 }
 
+const eliminateIcon = require('@/assets/images/helper-icons/eliminate.svg');
+const doubleIcon = require('@/assets/images/helper-icons/double.svg');
+const changeIcon = require('@/assets/images/helper-icons/change-question.svg');
+
 export default function ExplanationPanel({ correctAnswer, correctExplanation, incorrectAnswer,
   incorrectExplanation, explanation, helperStatus, explanationStatus }: Props) {
     const [openExplanation, setOpenExplanation] = useState(false)
@@ -48,9 +52,9 @@ export default function ExplanationPanel({ correctAnswer, correctExplanation, in
       
       {/* Icon and button  */}
       <View className="flex-row justify-between my-[16] mx-[40]">
-        <IconButton svgPath='eliminateIcon' isDisable={helperStatus['eliminate']} onPress={()=>{}}/>
-        <IconButton svgPath='doubleIcon' isDisable={helperStatus['double']} onPress={()=>{}}/>
-        <IconButton svgPath='changeIcon' isDisable={helperStatus['change']} onPress={()=>{}}/>
+        <IconButton iconImage={eliminateIcon} isDisable={helperStatus['eliminate']} onPress={()=>{}}/>
+        <IconButton iconImage={doubleIcon} isDisable={helperStatus['double']} onPress={()=>{}}/>
+        <IconButton iconImage={changeIcon} isDisable={helperStatus['change']} onPress={()=>{}}/>
         <TextButton text='Next' onPress={()=>alert('TextButton')}  />
       </View>
     </View>
