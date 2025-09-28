@@ -10,7 +10,7 @@ export default function Index() {
         </Text>
       </View>
        
-        <Link href = "/testComponent">Test Components</Link>
+        <Link href = "/lab/gameMunMun">Test Components</Link>
 
  
 

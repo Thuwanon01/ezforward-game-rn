@@ -1,6 +1,8 @@
-import { Image } from "expo-image"
-import React from "react"
-import { Modal, Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native"
+import Change from '@/assets/images/helper-icons/change-question.svg';
+import Double from '@/assets/images/helper-icons/double.svg';
+import Eliminate from '@/assets/images/helper-icons/eliminate.svg';
+import React from "react";
+import { Modal, Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 interface Props {
     title: string
@@ -11,11 +13,7 @@ interface Props {
     imageName: "eliminate" | "double" | "change"
 }
 
-const images = {
-    eliminate: require('@/assets/images/helper-icons/eliminate.svg'),
-    double: require('@/assets/images/helper-icons/double.svg'),
-    change: require('@/assets/images/helper-icons/change-question.svg'),
-}
+
 export default function HelpModalPage({
     title,
     subtitle,
@@ -30,8 +28,12 @@ export default function HelpModalPage({
             <Pressable style={styles.overlay} onPress={onClose}>
                 <View style={styles.modalBox}>
                     {/* ใช้ expo-image */}
-                    <Image source={images[imageName]} style={[styles.iconColor, { tintColor: 'rgb(222, 169, 84)' }]} contentFit="contain" />
-
+                    {/* <Image source={images[imageName]} style={[styles.iconColor, { tintColor: 'rgb(222, 169, 84)' }]} contentFit="contain" /> */}
+                    {imageName === 'eliminate' 
+                                ? <Eliminate className={`w-[28] h-[28]`} />
+                                : imageName === 'double'
+                                ? <Double className={`w-[28] h-[28]`} />
+                                : <Change className={`w-[28] h-[28]`} />}
 
                     <Text style={styles.title}>{title}</Text>
                     <Text style={styles.subtitle}>{subtitle}</Text>
