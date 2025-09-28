@@ -13,6 +13,7 @@ export default function IconButton({ svgPath, isDisable, onPress }: Props) {
 
     useEffect(() => {
         isDisable ? setIconColor('gray') : setIconColor('white')
+        // console.log(require('assets/images/Vector.svg'))
     }, [isDisable])
 
     const icon =
