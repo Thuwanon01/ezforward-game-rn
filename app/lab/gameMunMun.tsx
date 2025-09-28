@@ -1,6 +1,6 @@
+import ChoiceBox from '@/components/lab/ChoiceBox';
 import ExplanationPanel from '@/components/lab/ExplanationPanel';
 import QuestionBox from '@/components/lab/QuestionBox';
-import { Button, ButtonText } from '@/components/ui/button';
 import React, { useEffect, useState } from 'react';
 import { View } from 'react-native';
 
@@ -57,21 +57,11 @@ export default function testComponent() {
                         status={status}
                         onPressQuestion={handleQuestionPress}
                       />
-                <Button variant="solid" size="md" action="primary" className="bg-sky-500 mt-[12]" onPress={toggleExplanation}>
-                    <ButtonText>Click for answer</ButtonText>
-                </Button>
-                <Button variant="solid" size="md" action="primary" className="bg-red-500 mt-[12]" onPress={() => setHelperUsed('eliminate')}>
-                    <ButtonText>Click for use eliminate</ButtonText>
-                </Button>
-                <Button variant="solid" size="md" action="primary" className="bg-green-500 mt-[12]" onPress={() => setHelperUsed('double')}>
-                    <ButtonText>Click for use double</ButtonText>
-                </Button>
-                <Button variant="solid" size="md" action="primary" className="bg-yellow-500 mt-[12]" onPress={() => setHelperUsed('change')}>
-                    <ButtonText>Click for use change</ButtonText>
-                </Button>
-                <Button variant="solid" size="md" action="primary" className="bg-black mt-[12]" onPress={() => setHelperStatus({ "eliminate": false, "double": false, "change": false })}>
-                    <ButtonText>Click for use refresh helper</ButtonText>
-                </Button>
+                      <ChoiceBox text='4.will be' status="wait" />
+                      <ChoiceBox text='4.will be' status="wait" />
+                      <ChoiceBox text='4.will be' status="wait" />
+                      <ChoiceBox text='4.will be' status="wait" />
+                
             </View>
 
             {/* Components for use */}
