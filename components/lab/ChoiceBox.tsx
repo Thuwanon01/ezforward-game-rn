@@ -12,11 +12,11 @@ interface Prop {
 
 export default function ChoiceBox({ text, status, onPress, disabled }: Prop) {
   const speak = () => {
-  Speech.stop()
-  const isThai = /[\u0E00-\u0E7F]/.test(text) // regex เช็คอักษรไทย
-  const lang = isThai ? 'th-TH' : 'en-US'
-  Speech.speak(text, { language: lang })
-}
+    Speech.stop()
+    const isThai = /[\u0E00-\u0E7F]/.test(text) // regex เช็คอักษรไทย
+    const lang = isThai ? 'th-TH' : 'en-US'
+    Speech.speak(text, { language: lang })
+  }
 
   // Single tap: แค่พูดออกเสียง
   const singleTap = Gesture.Tap()
@@ -33,7 +33,7 @@ export default function ChoiceBox({ text, status, onPress, disabled }: Prop) {
       if (onPress) runOnJS(onPress)()
     })
 
- const gesture =
+  const gesture =
     disabled
       ? Gesture.Tap().enabled(false) // dummy gesture ปิดการทำงาน
       : Gesture.Exclusive(doubleTap, singleTap)
