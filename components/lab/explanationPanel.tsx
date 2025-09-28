@@ -1,6 +1,7 @@
 import { Image } from 'expo-image';
 import React, { useState } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
+import HelpModalPage from './HelpModalPage';
 import IconButton from './IconButton';
 import TextButton from './TextButton';
 
@@ -14,13 +15,13 @@ interface Props {
   explanationStatus: boolean
 }
 
-const eliminateIcon = require('@/assets/images/helper-icons/eliminate.svg');
-const doubleIcon = require('@/assets/images/helper-icons/double.svg');
-const changeIcon = require('@/assets/images/helper-icons/change-question.svg');
+
 
 export default function ExplanationPanel({ correctAnswer, correctExplanation, incorrectAnswer,
   incorrectExplanation, explanation, helperStatus, explanationStatus }: Props) {
     const [openExplanation, setOpenExplanation] = useState(false)
+    const [openHelper, setOpenHelper] = useState({'eliminate': false, 'double': false, 'change': false})
+    
 
     const toggleExplanation = () =>{
       openExplanation ? setOpenExplanation(false) : setOpenExplanation(true)
@@ -52,12 +53,21 @@ export default function ExplanationPanel({ correctAnswer, correctExplanation, in
       
       {/* Icon and button  */}
       <View className="flex-row justify-between my-[16] mx-[40]">
-        <IconButton iconImage={eliminateIcon} isDisable={helperStatus['eliminate']} onPress={()=>{}}/>
-        <IconButton iconImage={doubleIcon} isDisable={helperStatus['double']} onPress={()=>{}}/>
-        <IconButton iconImage={changeIcon} isDisable={helperStatus['change']} onPress={()=>{}}/>
+        <IconButton iconImage='eliminateIcon' isDisable={helperStatus['eliminate']} onPress={()=> setOpenHelper({'eliminate': true, 'double': false, 'change': false})}/>
+        <IconButton iconImage='doubleIcon' isDisable={helperStatus['double']} onPress={()=>setOpenHelper({'eliminate': false, 'double': true, 'change': false})}/>
+        <IconButton iconImage='changeIcon' isDisable={helperStatus['change']} onPress={()=>setOpenHelper({'eliminate': false, 'double': false, 'change': true})}/>
         <TextButton text='Next' onPress={()=>alert('TextButton')}  />
       </View>
+
+      {/* Modal page */}
+      <HelpModalPage title='Eliminate' subtitle='Eliminate 2 wrong answers' isVisible={openHelper['eliminate']} 
+        onPressPlay={()=>{}} onClose={()=>setOpenHelper({'eliminate': false, 'double': false, 'change': false})} imageName='eliminate' ></HelpModalPage>
+      <HelpModalPage title='Double Chance' subtitle='Get 2 choices to answer' isVisible={openHelper['double']} 
+        onPressPlay={()=>{}} onClose={()=>setOpenHelper({'eliminate': false, 'double': false, 'change': false})} imageName='double' ></HelpModalPage>
+      <HelpModalPage title='Change Question' subtitle='Change to a new question' isVisible={openHelper['change']} 
+        onPressPlay={()=>{}} onClose={()=>setOpenHelper({'eliminate': false, 'double': false, 'change': false})} imageName='change' ></HelpModalPage>
     </View>
+
   )
 }
 

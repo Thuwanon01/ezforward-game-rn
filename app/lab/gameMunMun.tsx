@@ -1,5 +1,6 @@
 import ChoiceBox from '@/components/lab/ChoiceBox';
 import ExplanationPanel from '@/components/lab/ExplanationPanel';
+import HeaderPanel from '@/components/lab/HeaderPanel';
 import QuestionBox from '@/components/lab/QuestionBox';
 import React, { useEffect, useState } from 'react';
 import { View } from 'react-native';
@@ -52,6 +53,9 @@ export default function testComponent() {
 
             {/* for test components */}
             <View className='flex-1'>
+                <HeaderPanel title={'GameMunMun'} onPressBack={() => {} } onPressMenu={function (): void {
+                    throw new Error('Function not implemented.');
+                } } ></HeaderPanel>
                 <QuestionBox 
                         question={questionText} 
                         status={status}

@@ -1,25 +1,29 @@
-import type { ImageSource } from 'expo-image';
-import { Image } from 'expo-image';
+import Change from '@/assets/images/helper-icons/change-question.svg';
+import Double from '@/assets/images/helper-icons/double.svg';
+import Eliminate from '@/assets/images/helper-icons/eliminate.svg';
 import React from 'react';
 import { TouchableOpacity } from 'react-native';
 
 interface Props {
-    iconImage: string | ImageSource
+    iconImage: string 
     isDisable: boolean
     onPress: () => void
 }
 
 export default function IconButton({ iconImage, isDisable, onPress }: Props) {
+
+    
     return (
         <TouchableOpacity onPress={onPress} className='justify-center'>
-            <Image
-                source={iconImage}
-                style={{
-                    width: 28, 
-                    height: 28, 
-                    opacity: isDisable ? 0.5 : 1
-                }}
-            />
+            
+            {iconImage === 'eliminateIcon' 
+            ? <Eliminate className={`w-[28] h-[28] opacity-${isDisable ? 50 : 100}`} />
+            : iconImage === 'doubleIcon'
+            ? <Double className={`w-[28] h-[28] opacity-${isDisable ? 50 : 100}`} />
+            : <Change className={`w-[28] h-[28] opacity-${isDisable ? 50 : 100}`} />}
+            
+           
+            
         </TouchableOpacity>
 
     )
