@@ -30,10 +30,10 @@ export default function HelpModalPage({
                     {/* ใช้ expo-image */}
                     {/* <Image source={images[imageName]} style={[styles.iconColor, { tintColor: 'rgb(222, 169, 84)' }]} contentFit="contain" /> */}
                     {imageName === 'eliminate' 
-                                ? <Eliminate className={`w-[28] h-[28]`} />
+                                ? <Eliminate className={`w-[128] h-[128] stroke-[#DDA853]`} />
                                 : imageName === 'double'
-                                ? <Double className={`w-[28] h-[28]`} />
-                                : <Change className={`w-[28] h-[28]`} />}
+                                ? <Double className={`w-[128] h-[128] stroke-[#DDA853] `} />
+                                : <Change className={`w-[128] h-[128] stroke-[#DDA853] `} />}
 
                     <Text style={styles.title}>{title}</Text>
                     <Text style={styles.subtitle}>{subtitle}</Text>
