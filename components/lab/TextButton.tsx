@@ -1,4 +1,4 @@
-import { Pressable, Text } from "react-native";
+import { Button, ButtonText } from "@/components/ui/button";
 
 interface Props {
     text: string;
@@ -7,8 +7,16 @@ interface Props {
 
 export default function TextButton({ text, onPress }: Props) {
     return (
-        <Pressable className="border border-black p-3 hover:bg-slate-200 active:bg-stone-300" onPress={onPress}>
-            <Text>{text}</Text>
-        </Pressable>
+        <Button
+            variant="solid"
+            size="lg"
+            action="primary"
+            className="bg-[#FCC61D] rounded-3xl px-[32] data-[hover=true]:bg-blue-200 data-[active=true]:bg-blue-200"
+            onPress={onPress}>
+            <ButtonText 
+            className='text-white font-bold text-3xl '>
+                {text}</ButtonText>
+        </Button>
+
     );
 }

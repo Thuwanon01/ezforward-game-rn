@@ -1,21 +1,16 @@
 
-
+import ChoiceBox from '@/components/lab/ChoiceBox';
 import React from 'react';
-import { Text, View } from 'react-native';
+import { View } from 'react-native';
 
 export default function testComponent() {
 
     return (
         <View className='flex-1'>
-            
-            
-            <View className='flex-1'>
-                <Text>testComponent</Text>
-            </View>
-            <View className='bg-[#27548A] h-[64] rounded-t-xl'>
-
-            </View>
-
+            <ChoiceBox text='1.will take' status="correct" ></ChoiceBox>
+            <ChoiceBox text='2.will come' status="incorrect"></ChoiceBox>
+            <ChoiceBox text='3.will go' status="inactive"></ChoiceBox>
+            <ChoiceBox text='4.will be' status="wait"></ChoiceBox>
         </View>
     )
 }
