@@ -1,3 +1,4 @@
+import { Link } from "expo-router";
 import { Pressable, Text, View } from "react-native";
 
 export default function Index() {
@@ -23,6 +24,7 @@ export default function Index() {
           <Text className="text-[#183B4E] text-xl font-bold">Choice 1</Text>
         </View>
       </Pressable>
+      <Link href='/lab/testComponent'>testComponent</Link>
     </View>
   );
 }

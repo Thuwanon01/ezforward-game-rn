@@ -1,6 +1,5 @@
-import Ionicons from '@expo/vector-icons/Ionicons'
 import React from 'react'
-import { Modal, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Image, Modal, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 interface Props {
     title: string
@@ -9,8 +8,20 @@ interface Props {
     isVisible: boolean
     onPressPlay: () => void
     onClose: () => void
+    imageName: 'image1' | 'image2' | 'image3'
 }
-export default function HelpModalPage({ title, subtitle, icon, isVisible, onPressPlay, onClose }: Props) {
+
+
+
+export default function HelpModalPage({ title, subtitle, icon, isVisible, onPressPlay, onClose, imageName }: Props) {
+
+    const imageSource =
+        imageName === 'image1'
+            ? require('../assets/image1.png')
+            : imageName === 'image2'
+                ? require('../assets/image2.png')
+                : require('../assets/image3.png')
+
     return (
         <Modal
             visible={isVisible}
@@ -20,7 +31,7 @@ export default function HelpModalPage({ title, subtitle, icon, isVisible, onPres
             <Pressable style={styles.overlay} onPress={onClose}>
                 <View style={styles.modalBox}>
                     {/* Icon */}
-                    <Ionicons name={icon as any} size={240} color="black" style={styles.icon} />
+                    <Image source={icon as any} style={styles.icon} />
 
                     {/* Title */}
                     <Text style={styles.title}>{title}</Text>

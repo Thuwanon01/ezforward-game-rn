@@ -7,7 +7,7 @@ export default function RootLayout() {
   return (
     <GluestackUIProvider>
       <Stack>
-        <Stack.Screen name="testComponent" />
+        <Stack.Screen name="lab/testComponent" />
       </Stack>
 
     </GluestackUIProvider>
