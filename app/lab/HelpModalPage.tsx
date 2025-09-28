@@ -1,14 +1,90 @@
+import Ionicons from '@expo/vector-icons/Ionicons'
 import React from 'react'
-import { StyleSheet, Text, View } from 'react-native'
+import { Modal, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
-const HelpModalPage = () => {
+interface Props {
+    title: string
+    subtitle: string
+    icon: string
+    isVisible: boolean
+    onPressPlay: () => void
+    onClose: () => void
+}
+export default function HelpModalPage({ title, subtitle, icon, isVisible, onPressPlay, onClose }: Props) {
     return (
-        <View>
-            <Text>HelpModalPage</Text>
-        </View>
+        <Modal
+            visible={isVisible}
+            transparent
+            animationType="fade"
+        >
+            <Pressable style={styles.overlay} onPress={onClose}>
+                <View style={styles.modalBox}>
+                    {/* Icon */}
+                    <Ionicons name={icon as any} size={240} color="black" style={styles.icon} />
+
+                    {/* Title */}
+                    <Text style={styles.title}>{title}</Text>
+
+                    {/* Subtitle */}
+                    <Text style={styles.subtitle}>{subtitle}</Text>
+
+                    {/* Play Button */}
+                    <TouchableOpacity onPress={onPressPlay} style={styles.button} >
+                        <Text style={styles.textStyle}>Play</Text>
+                    </TouchableOpacity>
+
+
+                </View>
+            </Pressable>
+        </Modal >
     )
 }
 
-export default HelpModalPage
+const styles = StyleSheet.create({
+    overlay: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0,0,0,0.4)', // dimmed background
+    },
+    modalBox: {
+        width: "30%",
+        height: "75%",
+        backgroundColor: 'rgb(255, 253, 232)',
+        borderRadius: 20,
+        padding: 20,
+        alignItems: 'center',
+    },
+    title: {
+        fontSize: 40,
+        fontWeight: 'bold',
+        marginTop: 10,
+        color: "rgb(25, 60, 79)"
+    },
+    subtitle: {
+        fontSize: 18,
+        marginVertical: 10,
+        textAlign: 'center',
+    },
+    icon: {
+        marginBottom: 20,
+    },
+    button: {
+        marginTop: 20,
+        paddingHorizontal: 40,
+        borderRadius: 50,
+        backgroundColor: ' rgb(252, 197, 30)',
 
-const styles = StyleSheet.create({})
+    },
+    textStyle: {
+        padding: 10,
+        fontWeight: "bold",
+        fontSize: 28,
+        color: "white",
+        textShadowColor: "rgba(0, 0, 0, 0.75)", // shadow color
+        textShadowOffset: { width: 2, height: 2 }, // shadow direction
+        textShadowRadius: 3,
+        justifyContent: "center",
+        alignItems: "center"
+    }
+})
