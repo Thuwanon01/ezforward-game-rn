@@ -1,9 +1,7 @@
-
 import ExplanationPanel from '@/components/lab/ExplanationPanel';
 import { Button, ButtonText } from '@/components/ui/button';
 import React, { useState } from 'react';
 import { Text, View } from 'react-native';
-
 
 export default function testComponent() {
     const [helperStatus, setHelperStatus] = useState({ "eliminate": false, "double": false, "change": false })
@@ -15,7 +13,7 @@ export default function testComponent() {
     const [explanation, setExplanation] = useState("Just explanation for plain text hahahahahahahahahaha")
 
     const toggleExplanation = () => {
-        explanationStatus ? setExplanationStatus(false) : setExplanationStatus(true)
+        setExplanationStatus(!explanationStatus)
     }
 
     const setHelperUsed = (helpType: string) => {
@@ -27,6 +25,8 @@ export default function testComponent() {
 
     return (
         <View className='flex-1'>
+            
+            {/* for test components */}
             <View className='flex-1'>
                 <Text>testComponent</Text>
                 <Button variant="solid" size="md" action="primary" className="bg-sky-500 mt-[12]" onPress={toggleExplanation}>
@@ -45,7 +45,8 @@ export default function testComponent() {
                     <ButtonText>Click for use refresh helper</ButtonText>
                 </Button>
             </View>
-            
+
+            {/* Components for use */}
             <ExplanationPanel
                 correctAnswer={correctAnswer}
                 correctExplanation={correctExplanation}
