@@ -36,6 +36,7 @@
     "expo-web-browser": "~15.0.7",
     "lucide-react-native": "^0.510.0",
     "nativewind": "^4.2.1",
+    "ofetch": "^1.4.1",
     "prettier-plugin-tailwindcss": "^0.5.14",
     "react": "19.1.0",
     "react-aria": "^3.43.2",
