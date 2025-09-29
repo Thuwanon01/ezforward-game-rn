@@ -40,12 +40,12 @@ export default function ExplanationPanel({ correctAnswer, correctExplanation, in
       </View>}
 
       {/* Text explanation */}
-      {openExplanation && <View className="m-[16]">
+      {explanationStatus && openExplanation && <View className="mx-[40]">
         <View>
-          <Text className="text-red-700">{correctAnswer}</Text>
-          <Text className="text-white">{`  - ${correctExplanation}`}</Text>
-          <Text className="text-green-700">{incorrectAnswer}</Text>
-          <Text className="text-white">{`  - ${incorrectExplanation}`}</Text>
+          <Text className="text-green-500 text-2xl">{correctAnswer}</Text>
+          <Text className="text-white text-lg">{`  - ${correctExplanation}`}</Text>
+          <Text className="text-red-500 text-2xl">{incorrectAnswer}</Text>
+          <Text className="text-white text-lg">{`  - ${incorrectExplanation}`}</Text>
           <View className='h-[8]'></View>
           <Text className="text-white font-bold ">{explanation}</Text>
         </View>
