@@ -1,58 +1,71 @@
 import * as Speech from 'expo-speech'
 import { StyleSheet, Text, View } from 'react-native'
 import { Gesture, GestureDetector } from 'react-native-gesture-handler'
+import { runOnJS } from 'react-native-reanimated'
+
 interface Prop {
   text: string
-  status:"correct" | "incorrect" | "wait" | "inactive"
-  onPress?: ()=> void
+  status: 'correct' | 'incorrect' | undefined | 'wait'
+  onPress?: () => void
+  disabled?: boolean
 }
 
-export default function ChoiceBox({text, status, onPress}:Prop) {
-
-  const speak = () =>{
-     Speech.stop()
-     Speech.speak(text,{language:'eng-ENG'})  
+export default function ChoiceBox({ text, status, onPress, disabled }: Prop) {
+  const speak = () => {
+    Speech.stop()
+    const isThai = /[\u0E00-\u0E7F]/.test(text) // regex เช็คอักษรไทย
+    const lang = isThai ? 'th-TH' : 'en-US'
+    Speech.speak(text, { language: lang })
   }
 
+  // Single tap: แค่พูดออกเสียง
   const singleTap = Gesture.Tap()
     .maxDuration(250)
-    .onStart(speak)
+    .onEnd(() => {
+      runOnJS(speak)()
+    })
 
+  // Double tap: run onPress
   const doubleTap = Gesture.Tap()
     .maxDuration(250)
     .numberOfTaps(2)
-    .onStart(onPress ? onPress : ()=>{})
+    .onEnd(() => {
+      if (onPress) runOnJS(onPress)()
+    })
 
+  const gesture =
+    disabled
+      ? Gesture.Tap().enabled(false) // dummy gesture ปิดการทำงาน
+      : Gesture.Exclusive(doubleTap, singleTap)
+
+
+  // กำหนดสีพื้นหลังตามสถานะ
   const isCorrect = status === "correct"
-  let color = "white"
-  if (status === "correct"){
-    color="green"
-  } else if (status === "incorrect"){
-    color="red"
-  } else if (status === "inactive"){
-    color="gray"
-  }
+  let color = "white" // สีพื้นหลังเริ่มต้น
+  if (isCorrect) { color = "green" }
+  else if (status === "incorrect") { color = "red" }
+  else if (disabled) { color = "grey" }
+
   return (
-    <GestureDetector  gesture={Gesture.Exclusive(doubleTap, singleTap)} >
-      <View style ={[styles.boxChoice, {backgroundColor: color}]}>
+    <GestureDetector gesture={gesture}>
+      <View style={[styles.boxChoice, { backgroundColor: color }]}>
         <Text style={styles.textChoice}>{text}</Text>
-      </View> 
-    </GestureDetector >
+      </View>
+    </GestureDetector>
   )
 }
 
 const styles = StyleSheet.create({
-  boxChoice:{
-    borderWidth:2,
-    borderRadius:10,
-    borderColor:"lightblue",
-    margin:10,
-    padding:10,
-    alignItems:"center"
-    
+  boxChoice: {
+    borderWidth: 2,
+    borderRadius: 10,
+    borderColor: 'lightblue',
+    margin: 10,
+    padding: 10,
+    alignItems: 'center',
   },
-  textChoice:{
-    fontSize:20,
-    fontWeight:"bold"
-  }
+  textChoice: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
 })

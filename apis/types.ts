@@ -2,6 +2,12 @@
 export interface QuizChoice {
     id: number;
     text: string;
+
+}
+export interface NewQuizChoice {
+    id: number;
+    text: string;
+    is_selected: boolean;
 }
 
 // Interface for random quiz question
@@ -9,7 +15,7 @@ export interface RandomQuizResponse {
     id: number;
     text: string;
     type: string;
-    choicelist: QuizChoice[];
+    choicelist: NewQuizChoice[];
 }
 
 // Interface for quiz answer submission
