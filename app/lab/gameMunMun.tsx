@@ -1,3 +1,4 @@
+import { QuizChoice } from '@/apis/types';
 import { fetchRandomQuestion } from '@/apis/wordgame';
 import ChoiceBox from '@/components/lab/ChoiceBox';
 import ExplanationPanel from '@/components/lab/ExplanationPanel';
@@ -18,45 +19,34 @@ export default function testComponent() {
     const [explanation, setExplanation] = useState("Just explanation for plain text hahahahahahahahahaha")
     const [status, setStatus] = useState('wait');
     const [question, setQuestion] = useState('');
-    const [choices, setChoices] = useState<string[]>([]);
-    
+    const [choices, setChoices] = useState<QuizChoice[]>([]);
 
-    
     useEffect(() => {
-      fetchData();
-        let timer: any //ตั้งเป็น any ไว้ไม่ให้มันแดง error
+        fetchData();
+    }, []);
+
+    useEffect(() => {
         if (status === 'reading') {
-          timer = setTimeout(() => {
-            setStatus('wait'); // กลับเป็น wait หลังครบ 5 วิ
-          }, 5000);
+            setTimeout(() => {
+                setStatus('wait'); // กลับเป็น wait หลังครบ 5 วิ
+            }, 5000);
         }
-        return () => {
-          if (timer) clearTimeout(timer);
-        };
-      }, [status]);
-    
-      // สร้างฟังก์ชันที่จะส่งลงไปให้ QuestionBox
-      const handleQuestionPress = () => {
+
+    }, [status]);
+
+    // สร้างฟังก์ชันที่จะส่งลงไปให้ QuestionBox
+    const handleQuestionPress = () => {
         if (status === 'wait') {
-          setStatus('reading');
+            setStatus('reading');
         }
-      };
+    };
 
-    const toggleExplanation = () => {
-        setExplanationStatus(!explanationStatus)
-    }
 
-    const setHelperUsed = (helpType: string) => {
-        helpType === 'eliminate' ? setHelperStatus(current => { return { ...current, 'eliminate': true } })
-            : helpType === 'double'
-                ? setHelperStatus(current => { return { ...current, 'double': true } })
-                : setHelperStatus(current => { return { ...current, 'change': true } })
-    }
     const fetchData = async () => {
-      const questionData = await fetchRandomQuestion();
-      console.log('Fetched question data:', questionData);
-      setQuestion(questionData.text);
-      setChoices(questionData.choicelist.map(choice => choice.text));
+        const questionData = await fetchRandomQuestion();
+        console.log('Fetched question data:', questionData);
+        setQuestion(questionData.text);
+        setChoices(questionData.choicelist);
     }
 
     return (
@@ -64,20 +54,20 @@ export default function testComponent() {
 
             {/* for test components */}
             <View className='flex-1'>
-                <HeaderPanel title={'GameMunMun'} onPressBack={() => {} } onPressMenu={function (): void {
+                <HeaderPanel title={'GameMunMun'} onPressBack={() => { }} onPressMenu={function (): void {
                     throw new Error('Function not implemented.');
-                } } ></HeaderPanel>
+                }} ></HeaderPanel>
                 <QuestionBox
-                        question={question}
-                        status={status}
-                        onPressQuestion={handleQuestionPress}
-                      />
-                      <View >
-                        {choices.map((choice, index) => (
-                          <ChoiceBox key={index} text={choice} status={'wait'} />
-                        ))}
-                      </View>
-                
+                    question={question}
+                    status={status}
+                    onPressQuestion={handleQuestionPress}
+                />
+                <View >
+                    {choices.map((choice, index) => (
+                        <ChoiceBox key={index} text={choice.text} status={'wait'} />
+                    ))}
+                </View>
+
             </View>
 
             {/* Components for use */}
