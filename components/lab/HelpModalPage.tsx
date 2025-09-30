@@ -1,6 +1,6 @@
-import Change from '@/assets/images/helper-icons/change-question.svg';
-import Double from '@/assets/images/helper-icons/double.svg';
-import Eliminate from '@/assets/images/helper-icons/eliminate.svg';
+import Change from '@/assets/images/helper-icons/changeColor.svg';
+import Double from '@/assets/images/helper-icons/doubleColor.svg';
+import Eliminate from '@/assets/images/helper-icons/eliminateColor.svg';
 import React from "react";
 import { Modal, Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
@@ -27,10 +27,11 @@ export default function HelpModalPage({
         <Modal visible={isVisible} transparent animationType="fade">
             <Pressable style={styles.overlay} onPress={onClose}>
                 <View style={styles.modalBox}>
+                    
                     {/* ใช้ expo-image */}
                     {/* <Image source={images[imageName]} style={[styles.iconColor, { tintColor: 'rgb(222, 169, 84)' }]} contentFit="contain" /> */}
                     {imageName === 'eliminate' 
-                                ? <Eliminate className={`w-[128] h-[128] stroke-[#DDA853]`} />
+                                ? <Eliminate className={`w-[128] h-[128]`} />
                                 : imageName === 'double'
                                 ? <Double className={`w-[128] h-[128] stroke-[#DDA853] `} />
                                 : <Change className={`w-[128] h-[128] stroke-[#DDA853] `} />}
@@ -55,8 +56,7 @@ const styles = StyleSheet.create({
         backgroundColor: "rgba(0,0,0,0.4)",
     },
     modalBox: {
-        width: "30%",
-        height: "70%",
+        
         backgroundColor: "rgb(255, 253, 232)",
         borderRadius: 20,
         padding: 20,

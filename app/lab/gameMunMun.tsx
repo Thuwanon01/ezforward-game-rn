@@ -12,16 +12,15 @@ import { View } from 'react-native';
 export default function testComponent() {
   const [helperStatus, setHelperStatus] = useState({ "eliminate": false, "double": false, "change": false })
   const [explanationStatus, setExplanationStatus] = useState(false)
-  const [correctAnswer, setCorrectAnswer] = useState("A. will take")
-  const [correctExplanation, setCorrectExplanation] = useState("Good answer this is explanation for the correct answer, Like like like for long")
-  const [incorrectAnswer, setIncorrectAnswer] = useState("B. is taking")
-  const [incorrectExplanation, setIncorrectExplanation] = useState("Also Good answer but this is explanation for the incorrect answer, Like like like for long")
-  const [explanation, setExplanation] = useState("Just explanation for plain text hahahahahahahahahaha")
+  const [correctAnswer, setCorrectAnswer] = useState("")
+  const [correctExplanation, setCorrectExplanation] = useState("")
+  const [incorrectAnswer, setIncorrectAnswer] = useState("")
+  const [incorrectExplanation, setIncorrectExplanation] = useState("")
+  const [explanation, setExplanation] = useState("")
   const [status, setStatus] = useState('wait');
   const [question, setQuestion] = useState<RandomQuizResponse | null>(null);
   const [choices, setChoices] = useState<NewQuizChoice[]>([]);
   const [answer, setAnswer] = useState<QuizAnswerResponse | null>(null);
-  const [isSelected, setIsSelected] = useState(false);
   const [gameState, setGameState] = useState<'wait' | 'correct' | 'incorrect'>('wait');
 
   useEffect(() => {
@@ -29,15 +28,11 @@ export default function testComponent() {
   }, []);
 
   useEffect(() => {
-    let timer: any //ตั้งเป็น any ไว้ไม่ให้มันแดง error
     if (status === 'reading') {
-      timer = setTimeout(() => {
+      setTimeout(() => {
         setStatus('wait'); // กลับเป็น wait หลังครบ 5 วิ
       }, 5000);
     }
-    return () => {
-      if (timer) clearTimeout(timer);
-    };
   }, [status]);
 
   // สร้างฟังก์ชันที่จะส่งลงไปให้ QuestionBox
@@ -47,16 +42,6 @@ export default function testComponent() {
     }
   };
 
-  const toggleExplanation = () => {
-    setExplanationStatus(!explanationStatus)
-  }
-
-  const setHelperUsed = (helpType: string) => {
-    helpType === 'eliminate' ? setHelperStatus(current => { return { ...current, 'eliminate': true } })
-      : helpType === 'double'
-        ? setHelperStatus(current => { return { ...current, 'double': true } })
-        : setHelperStatus(current => { return { ...current, 'change': true } })
-  }
   const fetchData = async () => {
     const questionData = await fetchRandomQuestion();
     console.log('Fetched question data:', questionData);
@@ -64,6 +49,7 @@ export default function testComponent() {
     setChoices(questionData.choicelist.map(choice => ({ ...choice, is_selected: false })));
     setStatus('wait'); // เริ่มต้นด้วยสถานะ wait
     setGameState('wait');
+    setExplanationStatus(false);
   }
   const handleSubmitAnswer = async (choiceId: number, index: number) => {
     if (!question) return;
@@ -71,6 +57,12 @@ export default function testComponent() {
     const answerData = await fetchSubmitAnswer(question.id, choiceId);
     console.log('Fetched answer data:', answerData);
     setAnswer(answerData);
+    setCorrectAnswer(answerData.choices.find(choice => choice.is_correct)?.text || "");
+    setCorrectExplanation(answerData.choices.find(choice => choice.is_correct)?.explanation || "");
+    setIncorrectAnswer(answerData.choices.find(choice => !choice.is_correct)?.text || "");
+    setIncorrectExplanation(answerData.choices.find(choice => !choice.is_correct)?.explanation || "");
+    setExplanation(answerData.explanation);
+    // Update choices to mark the selected one
     const newChoices = [...choices];
     newChoices[index].is_selected = true;
     setChoices(newChoices);
@@ -83,14 +75,9 @@ export default function testComponent() {
     }
   }
   const handleSelectChoice = (choiceId: number) => {
-    if (isSelected) return; // ถ้าเลือกไปแล้วไม่ให้เลือกซ้ำ
     if (choices.find(choice => choice.id === choiceId)?.is_selected && answer?.choices.find(choice => choice.id === choiceId)?.is_correct) return ("correct")
     else if (choices.find(choice => choice.id === choiceId)?.is_selected && !answer?.choices.find(choice => choice.id === choiceId)?.is_correct) return ("incorrect")
     else { return ("wait") }
-
-
-
-
   }
 
   return (

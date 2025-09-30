@@ -13,8 +13,8 @@ export default function TextButton({ text, onPress }: Props) {
             action="primary"
             className="bg-[#FCC61D] rounded-3xl px-[32] data-[hover=true]:bg-blue-200 data-[active=true]:bg-blue-200"
             onPress={onPress}>
-            <ButtonText 
-            className='text-white font-bold text-3xl '>
+            <ButtonText
+                className='text-white font-bold text-3xl '>
                 {text}</ButtonText>
         </Button>
 
