@@ -54,7 +54,8 @@ export default function testComponent() {
                 incorrectExplanation={incorrectExplanation}
                 explanation={explanation}
                 helperStatus={helperStatus}
-                explanationStatus={explanationStatus} />
+                explanationStatus={explanationStatus}
+                onPress={()=>{}} />
         </View>
     )
 }
