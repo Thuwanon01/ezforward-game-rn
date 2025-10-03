@@ -28,13 +28,13 @@ export default function LoginScreen() {
 
     try {
       // ยิง POST Request ไปยัง API หลังบ้าน เพื่อขอ Token
-      const reponse = await axios.post(API_URL, {
+      const response = await axios.post(API_URL, {
         username: username,
         password: password
       });
 
       // ถ้าสำเร็จ (response.status === 200-299)
-      const { access, refresh } = reponse.data;
+      const { access, refresh } = response.data;
       console.log('Login Successful, Access Token:', access);
 
       // นำ Token ไปเก็บไว้ใน AsyncStorage
