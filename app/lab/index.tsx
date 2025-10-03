@@ -6,7 +6,10 @@ export default function Index() {
         "/lab/text-to-speech",
         "/lab/modal",
         '/lab/testComponent',
-        "/lab/testcode"
+        "/lab/testcode",
+        "/lab/loginScreen",
+        "/lab/gameMunMun",
+        "/lab/register"
     ]
 
     return (

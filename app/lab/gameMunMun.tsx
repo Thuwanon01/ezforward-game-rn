@@ -1,7 +1,7 @@
 import { NewQuizChoice, QuizAnswerResponse, RandomQuizResponse } from '@/apis/types';
 import { fetchRandomQuestion, fetchSubmitAnswer } from '@/apis/wordgame';
 import ChoiceBox from '@/components/lab/ChoiceBox';
-import ExplanationPanel from '@/components/lab/ExplanationPanel';
+import ExplanationPanel from '@/components/lab/explanationPanel';
 import HeaderPanel from '@/components/lab/HeaderPanel';
 import QuestionBox from '@/components/lab/QuestionBox';
 import React, { useEffect, useState } from 'react';
