@@ -9,6 +9,7 @@ export default function RootLayout() {
       <Stack>
         <Stack.Screen name="lab/testComponent" options={{headerShown:false}}/>
         <Stack.Screen name="lab/gameMunMun" options={{headerShown:false}}/>
+        <Stack.Screen name="/lab/loginScreen" options={{headerShown:false}}/>
       </Stack>
 
     </GluestackUIProvider>
