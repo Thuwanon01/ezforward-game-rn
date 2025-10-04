@@ -13,12 +13,13 @@ interface Props {
   helperStatus: { "eliminate": boolean, "double": boolean, "change": boolean }
   explanationStatus: boolean
   onPress: () => void
+  gameState?: 'wait' | 'correct' | 'incorrect'
 }
 
 
 
 export default function ExplanationPanel({ correctAnswer, correctExplanation, incorrectAnswer,
-  incorrectExplanation, explanation, helperStatus, explanationStatus, onPress }: Props) {
+  incorrectExplanation, explanation, helperStatus, explanationStatus, onPress, gameState }: Props) {
   const [openExplanation, setOpenExplanation] = useState(false)
   const [openHelper, setOpenHelper] = useState({ 'eliminate': false, 'double': false, 'change': false })
 
@@ -52,12 +53,16 @@ export default function ExplanationPanel({ correctAnswer, correctExplanation, in
       </View>}
 
       {/* Icon and button  */}
-      <View className="flex-row justify-between my-[16] mx-[40]">
+      {gameState !== "incorrect" && <View className="flex-row justify-between my-[16] mx-[40]">
         <IconButton iconImage='eliminateIcon' isDisable={helperStatus['eliminate']} onPress={() => setOpenHelper({ 'eliminate': true, 'double': false, 'change': false })} />
         <IconButton iconImage='doubleIcon' isDisable={helperStatus['double']} onPress={() => setOpenHelper({ 'eliminate': false, 'double': true, 'change': false })} />
         <IconButton iconImage='changeIcon' isDisable={helperStatus['change']} onPress={() => setOpenHelper({ 'eliminate': false, 'double': false, 'change': true })} />
         <TextButton text='Next' onPress={onPress} />
-      </View>
+      </View> }
+      {gameState === "incorrect" && <View className="flex-row justify-center my-[16] mx-[40]">
+        <TextButton text='Try Again' onPress={onPress} />
+      </View> }
+      
 
       {/* Modal page */}
       <HelpModalPage title='Eliminate' subtitle='Eliminate 2 wrong answers' isVisible={openHelper['eliminate']}

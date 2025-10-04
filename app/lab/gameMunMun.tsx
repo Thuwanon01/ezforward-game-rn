@@ -1,11 +1,11 @@
 import { NewQuizChoice, QuizAnswerResponse, RandomQuizResponse } from '@/apis/types';
 import { fetchRandomQuestion, fetchSubmitAnswer } from '@/apis/wordgame';
 import ChoiceBox from '@/components/lab/ChoiceBox';
-import ExplanationPanel from '@/components/lab/explanationPanel';
+import ExplanationPanel from '@/components/lab/ExplanationPanel';
 import HeaderPanel from '@/components/lab/HeaderPanel';
 import QuestionBox from '@/components/lab/QuestionBox';
 import React, { useEffect, useState } from 'react';
-import { View } from 'react-native';
+import { Text, View } from 'react-native';
 
 
 
@@ -22,6 +22,7 @@ export default function testComponent() {
   const [choices, setChoices] = useState<NewQuizChoice[]>([]);
   const [answer, setAnswer] = useState<QuizAnswerResponse | null>(null);
   const [gameState, setGameState] = useState<'wait' | 'correct' | 'incorrect'>('wait');
+  const [score, setScore] = useState(0);
 
   useEffect(() => {
     fetchData();
@@ -57,11 +58,7 @@ export default function testComponent() {
     const answerData = await fetchSubmitAnswer(question.id, choiceId);
     console.log('Fetched answer data:', answerData);
     setAnswer(answerData);
-    setCorrectAnswer(answerData.choices.find(choice => choice.is_correct)?.text || "");
-    setCorrectExplanation(answerData.choices.find(choice => choice.is_correct)?.explanation || "");
-    setIncorrectAnswer(answerData.choices.find(choice => !choice.is_correct)?.text || "");
-    setIncorrectExplanation(answerData.choices.find(choice => !choice.is_correct)?.explanation || "");
-    setExplanation(answerData.explanation);
+
     // Update choices to mark the selected one
     const newChoices = [...choices];
     newChoices[index].is_selected = true;
@@ -69,10 +66,18 @@ export default function testComponent() {
     if (answerData.choices.find(choice => choice.id === choiceId)?.is_correct) {
       setGameState('correct');
       setStatus('correct');
+      setScore(score + 1);
     } else {
       setGameState('incorrect');
       setStatus('incorrect');
+      setScore(0);
     }
+    const incorrectChoiceId = newChoices.find(choice => choice.is_selected && !answerData.choices.find(ansChoice => ansChoice.id === choice.id)?.is_correct)?.id
+    setCorrectAnswer(answerData.choices.find(choice => choice.is_correct)?.text || "");
+    setCorrectExplanation(answerData.choices.find(choice => choice.is_correct)?.explanation || "");
+    setIncorrectAnswer(newChoices.find(choice => choice.is_selected && !answerData.choices.find(ansChoice => ansChoice.id === choice.id)?.is_correct)?.text || "");
+    setIncorrectExplanation(answerData.choices.find(choice => choice.id === incorrectChoiceId)?.explanation || "");
+    setExplanation(answerData.explanation);
   }
   const handleSelectChoice = (choiceId: number) => {
     if (choices.find(choice => choice.id === choiceId)?.is_selected && answer?.choices.find(choice => choice.id === choiceId)?.is_correct) return ("correct")
@@ -86,6 +91,13 @@ export default function testComponent() {
       {/* for test components */}
       <View className='flex-1'>
         <HeaderPanel title={'GameMunMun'} onPressBack={() => { }} onPressMenu={() => { }} ></HeaderPanel>
+        <View className='flex-row justify-end'>
+          <View className='flex-row mx-6 mt-4 bg-[#FCC61D] px-3 py-1 rounded-[20]'>
+            {gameState === "incorrect" ? <Text>Game Over : {score}</Text> : <Text>{score}</Text>}
+
+          </View>
+        </View>
+
         <QuestionBox
           question={question?.text || 'Loading question...'}
           status={status}
@@ -108,7 +120,8 @@ export default function testComponent() {
         explanation={explanation}
         helperStatus={helperStatus}
         explanationStatus={explanationStatus}
-        onPress={fetchData} />
+        onPress={fetchData}
+        gameState={gameState} />
 
     </View>
   )
