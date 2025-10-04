@@ -1,15 +1,16 @@
 import { NewQuizChoice, QuizAnswerResponse, RandomQuizResponse } from '@/apis/types';
-import { fetchRandomQuestion, fetchSubmitAnswer } from '@/apis/wordgame';
 import ChoiceBox from '@/components/lab/ChoiceBox';
 import ExplanationPanel from '@/components/lab/ExplanationPanel';
 import HeaderPanel from '@/components/lab/HeaderPanel';
 import QuestionBox from '@/components/lab/QuestionBox';
+import { useAuth } from '@/contexts/AuthContext';
+import useRepositories from '@/hooks/useRepositories';
 import React, { useEffect, useState } from 'react';
 import { Text, View } from 'react-native';
 
 
 
-export default function testComponent() {
+export default function GamePage() {
   const [helperStatus, setHelperStatus] = useState({ "eliminate": false, "double": false, "change": false })
   const [explanationStatus, setExplanationStatus] = useState(false)
   const [correctAnswer, setCorrectAnswer] = useState("")
@@ -23,6 +24,9 @@ export default function testComponent() {
   const [answer, setAnswer] = useState<QuizAnswerResponse | null>(null);
   const [gameState, setGameState] = useState<'wait' | 'correct' | 'incorrect'>('wait');
   const [score, setScore] = useState(0);
+
+  const auth = useAuth()
+  const repos = useRepositories(auth.accessToken).current
 
   useEffect(() => {
     fetchData();
@@ -44,7 +48,8 @@ export default function testComponent() {
   };
 
   const fetchData = async () => {
-    const questionData = await fetchRandomQuestion();
+    // const questionData = await fetchRandomQuestion();
+    const questionData = await repos.game.fetchRandomQuestion();
     console.log('Fetched question data:', questionData);
     setQuestion(questionData);
     setChoices(questionData.choicelist.map(choice => ({ ...choice, is_selected: false })));
@@ -55,7 +60,7 @@ export default function testComponent() {
   const handleSubmitAnswer = async (choiceId: number, index: number) => {
     if (!question) return;
     setExplanationStatus(true)
-    const answerData = await fetchSubmitAnswer(question.id, choiceId);
+    const answerData = await repos.game.fetchSubmitAnswer(question.id, choiceId)
     console.log('Fetched answer data:', answerData);
     setAnswer(answerData);
 

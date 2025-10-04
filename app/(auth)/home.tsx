@@ -2,7 +2,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
-export default function Home() {
+export default function HomePage() {
     const auth = useAuth();
     console.log("Home", auth);
 
