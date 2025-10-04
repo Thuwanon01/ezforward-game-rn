@@ -6,7 +6,7 @@ import { ActivityIndicator, Text, TextInput, TouchableOpacity, View } from 'reac
 
 
 {/* กำหนด URL ของ API หลังบ้าน */ }
-const API_URL = ''; // กำหนด URL ของ API หลังบ้าน
+const API_URL = 'https://job8001.dobybot.com/users/api/token/'; // กำหนด URL ของ API หลังบ้าน
 let isLoading: any //ตั้งเป็น any ไว้ไม่ให้มันแดง error
 export default function LoginScreen() {
   const router = useRouter();
@@ -69,7 +69,7 @@ export default function LoginScreen() {
   };
 
   return (
-    <View className='flex-1 justify-center items-center bg-gray-100'>
+    <View className='flex-1 justify-center items-center bg-[#fffac9ff]'>
       <View className='w-full px-8'>
         <Text className='text-4xl font-bold text-center text-gray-800 mb-10'>
           Login
