@@ -35,7 +35,7 @@ export default function LoginScreen() {
 
       // ถ้าสำเร็จ (response.status === 200-299)
       const { access, refresh } = response.data;
-      console.log('Login Successful, Access Token:', access);
+      // console.log('Login Successful, Access Token:', access);
 
       // นำ Token ไปเก็บไว้ใน AsyncStorage
       await AsyncStorage.setItem('accessToken', access);
