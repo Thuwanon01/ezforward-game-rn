@@ -31,7 +31,7 @@ export default function LoginScreen() {
       await auth.login(username, password);
       setIsLoading(false);
       setMessage('เข้าสู่ระบบสำเร็จ! กำลังไปยังหน้าหลัก...');
-      router.push("/home");
+      router.push("/game");
     } catch (error: any) {
       if (error instanceof FetchError) {
         console.log(error.response)

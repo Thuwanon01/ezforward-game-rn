@@ -45,8 +45,14 @@ export default function ExplanationPanel({ correctAnswer, correctExplanation, in
         <View>
           <Text className="text-green-500 text-2xl">{correctAnswer}</Text>
           <Text className="text-white text-lg">{`  - ${correctExplanation}`}</Text>
+          {gameState === "incorrect" && 
+          <>
           <Text className="text-red-500 text-2xl">{incorrectAnswer}</Text>
           <Text className="text-white text-lg">{`  - ${incorrectExplanation}`}</Text>
+          </>
+           
+          }
+          
           <View className='h-[8]'></View>
           <Text className="text-white font-bold ">{explanation}</Text>
         </View>
