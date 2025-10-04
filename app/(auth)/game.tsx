@@ -85,7 +85,7 @@ export default function GamePage() {
     setExplanation(answerData.explanation);
   }
   const handleSelectChoice = (choiceId: number) => {
-    if (choices.find(choice => choice.id === choiceId)?.is_selected && answer?.choices.find(choice => choice.id === choiceId)?.is_correct) return ("correct")
+    if ( answer?.choices.find(choice => choice.id === choiceId)?.is_correct) return ("correct")
     else if (choices.find(choice => choice.id === choiceId)?.is_selected && !answer?.choices.find(choice => choice.id === choiceId)?.is_correct) return ("incorrect")
     else { return ("wait") }
   }
