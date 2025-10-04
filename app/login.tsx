@@ -1,6 +1,6 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import axios from 'axios';
+import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'expo-router';
+import { FetchError } from 'ofetch';
 import React, { useState } from 'react';
 import { ActivityIndicator, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
@@ -14,6 +14,7 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [loading, setIsLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const auth = useAuth();
 
   {/* ฟังก์ชันสำหรับจัดการการเข้าสู่ระบบ */ }
   {/* เชื่อมต่อ API จริง */ }
@@ -27,40 +28,21 @@ export default function LoginScreen() {
     setMessage('กำลังตรวจสอบข้อมูล...');
 
     try {
-      // ยิง POST Request ไปยัง API หลังบ้าน เพื่อขอ Token
-      const response = await axios.post(API_URL, {
-        username: username,
-        password: password
-      });
-
-      // ถ้าสำเร็จ (response.status === 200-299)
-      const { access, refresh } = response.data;
-      // console.log('Login Successful, Access Token:', access);
-
-      // นำ Token ไปเก็บไว้ใน AsyncStorage
-      await AsyncStorage.setItem('accessToken', access);
-      await AsyncStorage.setItem('refreshToken', refresh);
-
+      await auth.login(username, password);
       setIsLoading(false);
       setMessage('เข้าสู่ระบบสำเร็จ! กำลังไปยังหน้าหลัก...');
-
-      // รอ 1 วินาที เมื่อครบ 1 วินาที ให้ไปยังหน้าหลัก
-      setTimeout(() => {
-        router.replace('/lab/gameMunMun'); // ใช้ replace เพื่อไม่ให้ผู้ใช้กด back กลับมาหน้า login ได้
-      }, 1000);
-
-    } catch (error) {
-      // ถ้าเกิดข้อผิดพลาด (เช่น รหัสผ่านผิด, server ล่ม)
-      setIsLoading(false);
-      if (axios.isAxiosError(error) && error.response) {
-        if (error.response.status === 401) {
-          setMessage('ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
-        } else {
-          setMessage(`เกิดข้อผิดพลาด: ${error.response.status}`);
+      router.push("/home");
+    } catch (error: any) {
+      if (error instanceof FetchError) {
+        console.log(error.response)
+        if (error.response?.status == 401) {
+          setMessage(error.response._data.detail)
         }
       } else {
         setMessage('ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้');
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -103,7 +85,8 @@ export default function LoginScreen() {
           onPress={handleLogin}
           disabled={loading}
           className={`p-4 rounded-lg ${loading ? 'bg-gray-400' : 'bg-green-500'}`}
-        ><Text className="text-white text-lg font-bold text-center">
+        >
+          <Text className="text-white text-lg font-bold text-center">
             Sign In
           </Text>
         </TouchableOpacity>
