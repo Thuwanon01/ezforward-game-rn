@@ -1,12 +1,9 @@
 import { ofetch } from 'ofetch'
 import type { QuizAnswerResponse, RandomQuizResponse } from './types'
 
-const access_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzU5NjYwNTYzLCJpYXQiOjE3NTkwNTU3NjMsImp0aSI6IjJmMTEyOGIxMTAyNDRjMDM5YjRlOTI2MTdmZmQzOTljIiwidXNlcl9pZCI6IjEifQ.hti4hNLT9Ocw52V9rhkDAm4E5BJcQwhflDCp0ehyBRI"
 const $fetch = ofetch.create({
     baseURL: 'https://job8001.dobybot.com',
-    headers: {
-        Authorization: `Bearer ${access_token}`
-    }
+    
 })
 
 /**

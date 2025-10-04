@@ -11,6 +11,7 @@ export default function Index() {
       </View>
        
         <Link href = "/lab/gameMunMun">Test Components</Link>
+        <Link href = "/lab/loginScreen">Test loginScreen</Link>
 
  
 
