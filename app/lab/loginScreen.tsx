@@ -7,7 +7,7 @@ import { ActivityIndicator, Text, TextInput, TouchableOpacity, View } from 'reac
 
 {/* กำหนด URL ของ API หลังบ้าน */ }
 const API_URL = 'https://job8001.dobybot.com/users/api/token/'; // กำหนด URL ของ API หลังบ้าน
-let isLoading: any //ตั้งเป็น any ไว้ไม่ให้มันแดง error
+
 export default function LoginScreen() {
   const router = useRouter();
   const [username, setUsername] = useState('');
@@ -97,12 +97,12 @@ export default function LoginScreen() {
           </Text>
         )}
 
-        {isLoading && <ActivityIndicator size='large' color='#3b82f6' className='mb-4' />}
+        {loading && <ActivityIndicator size='large' color='#3b82f6' className='mb-4' />}
 
         <TouchableOpacity
           onPress={handleLogin}
-          disabled={isLoading}
-          className={`p-4 rounded-lg ${isLoading ? 'bg-gray-400' : 'bg-green-500'}`}
+          disabled={loading}
+          className={`p-4 rounded-lg ${loading ? 'bg-gray-400' : 'bg-green-500'}`}
         ><Text className="text-white text-lg font-bold text-center">
             Sign In
           </Text>
@@ -110,7 +110,7 @@ export default function LoginScreen() {
 
         <View className="flex-row justify-center mt-6">
           <Text className="text-gray-500">Don't have an account? </Text>
-          <TouchableOpacity onPress={handleRegister} disabled={isLoading}>
+          <TouchableOpacity onPress={handleRegister} disabled={loading}>
             <Text className="text-blue-500 font-bold">Register here</Text>
           </TouchableOpacity>
         </View>
