@@ -38,6 +38,10 @@ export default function LoginScreen() {
         if (error.response?.status == 401) {
           setMessage(error.response._data.detail)
         }
+        else {
+          setMessage('ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้');
+          console.error('Network Error or CORS issue:', error);
+        }
       } else {
         setMessage('ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้');
       }
