@@ -1,4 +1,4 @@
-import ExplanationPanel from '@/components/lab/ExplanationPanel';
+import ExplanationPanel from '@/components/lab/explanationPanel';
 import { Button, ButtonText } from '@/components/ui/button';
 import React, { useState } from 'react';
 import { Text, View } from 'react-native';
