@@ -4,7 +4,7 @@ import { GameV2Repository } from "@/apis/GameV2Repository";
 import { useRef } from "react";
 
 function getBaseURL () {
-    return process.env.EXPO_PUBLIC_API_BASE_URL || "https://job8001.dobybot.com"
+    return process.env.EXPO_PUBLIC_API_BASE_URL || "https://uat-ezram-game-service.ez-zone.com"
 }
 
 
