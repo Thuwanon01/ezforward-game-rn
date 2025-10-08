@@ -1,7 +1,6 @@
 import * as Speech from 'expo-speech'
 import { StyleSheet, Text, View } from 'react-native'
 import { Gesture, GestureDetector } from 'react-native-gesture-handler'
-import { runOnJS } from 'react-native-reanimated'
 
 interface Prop {
   text: string
@@ -20,17 +19,19 @@ export default function ChoiceBox({ text, status, onPress, disabled }: Prop) {
 
   // Single tap: แค่พูดออกเสียง
   const singleTap = Gesture.Tap()
-    .maxDuration(250)
     .onEnd(() => {
-      runOnJS(speak)()
+      speak()
     })
 
   // Double tap: run onPress
   const doubleTap = Gesture.Tap()
-    .maxDuration(250)
+    .maxDuration(400)
     .numberOfTaps(2)
     .onEnd(() => {
-      if (onPress) runOnJS(onPress)()
+      if (onPress) {
+        speak()
+        onPress()
+      }
     })
 
   const gesture =

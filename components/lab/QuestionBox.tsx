@@ -34,12 +34,10 @@ export default function QuestionBox({ question, status, onPressQuestion }: { que
   }, [status]); // Effect นี้จะทำงานใหม่ทุกครั้งที่ prop 'status' เปลี่ยนค่า
 
   return (
-    <View className='QuestionBox' style={styles.container}>
+    <TouchableOpacity className='QuestionBox' style={styles.container} onPress={onPressQuestion}>
       <View style={styles.parentBox}>
         {/* เอา TouchableOpacity มาครอบ Text แล้วผูกกับ onPressQuestion */}
-        <TouchableOpacity onPress={onPressQuestion}>
-          <Text style={styles.questionText}>{question}</Text>
-        </TouchableOpacity>
+        <Text style={styles.questionText}>{question}</Text>
         <View>
           <Image
             style={styles.absoluteChild}
@@ -47,7 +45,7 @@ export default function QuestionBox({ question, status, onPressQuestion }: { que
           />
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }
 
@@ -66,7 +64,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FCC61D', // สีเหลือง
     justifyContent: 'center',
     alignItems: 'center',
-    
+
     // กำหนดให้เป็น relative เพื่อให้ตัวลูกอ้างอิงตำแหน่งจากกล่องนี้
     position: 'relative',
     borderWidth: 1,

@@ -1,5 +1,5 @@
 import { BaseRepository } from "./BaseRepository";
-import { QuizAnswerResponse, RandomQuizResponse } from "./types";
+import { QuizAnswerResponse, QuizResponse } from "./types";
 
 export class GameRepository extends BaseRepository {
     async getQuestion() {
@@ -17,7 +17,7 @@ export class GameRepository extends BaseRepository {
         return data
     }
 
-    async fetchRandomQuestion(): Promise<RandomQuizResponse> {
+    async fetchSuggestedQuestion(): Promise<QuizResponse> {
         const data = this.sfetch('/quizzes/api/random-quiz/')
         return data
     }

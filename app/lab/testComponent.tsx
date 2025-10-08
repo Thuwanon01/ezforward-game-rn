@@ -55,7 +55,7 @@ export default function testComponent() {
                 explanation={explanation}
                 helperStatus={helperStatus}
                 explanationStatus={explanationStatus}
-                onPress={()=>{}} />
+                onPressNext={()=>{}} />
         </View>
     )
 }

@@ -1,4 +1,4 @@
-import { NewQuizChoice, QuizAnswerResponse, RandomQuizResponse } from '@/apis/types';
+import { NewQuizChoice, QuizAnswerResponse, QuizResponse } from '@/apis/types';
 import ChoiceBox from '@/components/lab/ChoiceBox';
 import ExplanationPanel from '@/components/lab/explanationPanel';
 import HeaderPanel from '@/components/lab/HeaderPanel';
@@ -19,7 +19,7 @@ export default function GamePage() {
   const [incorrectExplanation, setIncorrectExplanation] = useState("")
   const [explanation, setExplanation] = useState("")
   const [status, setStatus] = useState('wait');
-  const [question, setQuestion] = useState<RandomQuizResponse | null>(null);
+  const [question, setQuestion] = useState<QuizResponse | null>(null);
   const [choices, setChoices] = useState<NewQuizChoice[]>([]);
   const [answer, setAnswer] = useState<QuizAnswerResponse | null>(null);
   const [gameState, setGameState] = useState<'wait' | 'correct' | 'incorrect'>('wait');
@@ -49,19 +49,20 @@ export default function GamePage() {
 
   const fetchData = async () => {
     // const questionData = await fetchRandomQuestion();
-    const questionData = await repos.game.fetchRandomQuestion();
+    const questionData = await repos.gamev2.fetchSuggestedQuestion();
     console.log('Fetched question data:', questionData);
     setQuestion(questionData);
     setChoices(questionData.choicelist.map(choice => ({ ...choice, is_selected: false })));
     setStatus('wait'); // เริ่มต้นด้วยสถานะ wait
     setGameState('wait');
     setExplanationStatus(false);
+    setCorrectExplanation("");
+    setIncorrectExplanation("");
   }
-  const handleSubmitAnswer = async (choiceId: number, index: number) => {
+  const handleSubmitAnswer = async (choiceId: any, index: any) => {
     if (!question) return;
+    const answerData = await repos.gamev2.fetchSubmitAnswer(question.id as string, choiceId, 0, 0, [], []);
     setExplanationStatus(true)
-    const answerData = await repos.game.fetchSubmitAnswer(question.id, choiceId)
-    console.log('Fetched answer data:', answerData);
     setAnswer(answerData);
 
     // Update choices to mark the selected one
@@ -85,7 +86,7 @@ export default function GamePage() {
     setExplanation(answerData.explanation);
   }
   const handleSelectChoice = (choiceId: number) => {
-    if ( answer?.choices.find(choice => choice.id === choiceId)?.is_correct) return ("correct")
+    if (answer?.choices.find(choice => choice.id === choiceId)?.is_correct) return ("correct")
     else if (choices.find(choice => choice.id === choiceId)?.is_selected && !answer?.choices.find(choice => choice.id === choiceId)?.is_correct) return ("incorrect")
     else { return ("wait") }
   }
@@ -125,7 +126,7 @@ export default function GamePage() {
         explanation={explanation}
         helperStatus={helperStatus}
         explanationStatus={explanationStatus}
-        onPress={fetchData}
+        onPressNext={fetchData}
         gameState={gameState} />
 
     </View>

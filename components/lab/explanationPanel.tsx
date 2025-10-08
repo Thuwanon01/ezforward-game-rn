@@ -12,14 +12,14 @@ interface Props {
   explanation: string
   helperStatus: { "eliminate": boolean, "double": boolean, "change": boolean }
   explanationStatus: boolean
-  onPress: () => void
+  onPressNext: () => void
   gameState?: 'wait' | 'correct' | 'incorrect'
 }
 
 
 
 export default function ExplanationPanel({ correctAnswer, correctExplanation, incorrectAnswer,
-  incorrectExplanation, explanation, helperStatus, explanationStatus, onPress, gameState }: Props) {
+  incorrectExplanation, explanation, helperStatus, explanationStatus, onPressNext: onPress, gameState }: Props) {
   const [openExplanation, setOpenExplanation] = useState(false)
   const [openHelper, setOpenHelper] = useState({ 'eliminate': false, 'double': false, 'change': false })
 
@@ -45,14 +45,16 @@ export default function ExplanationPanel({ correctAnswer, correctExplanation, in
         <View>
           <Text className="text-green-500 text-2xl">{correctAnswer}</Text>
           <Text className="text-white text-lg">{`  - ${correctExplanation}`}</Text>
-          {gameState === "incorrect" && 
-          <>
-          <Text className="text-red-500 text-2xl">{incorrectAnswer}</Text>
-          <Text className="text-white text-lg">{`  - ${incorrectExplanation}`}</Text>
-          </>
-           
+          {/* <Markdown mergeStyle={false}debugPrintTree>{correctExplanation}</Markdown> */}
+          {gameState === "incorrect" &&
+            <>
+              <Text className="text-red-500 text-2xl">{incorrectAnswer}</Text>
+              <Text className="text-white text-lg">{`  - ${incorrectExplanation}`}</Text>
+              {/* <Markdown mergeStyle={false}>{incorrectExplanation}</Markdown> */}
+            </>
+
           }
-          
+
           <View className='h-[8]'></View>
           <Text className="text-white font-bold ">{explanation}</Text>
         </View>
@@ -64,11 +66,11 @@ export default function ExplanationPanel({ correctAnswer, correctExplanation, in
         <IconButton iconImage='doubleIcon' isDisable={helperStatus['double']} onPress={() => setOpenHelper({ 'eliminate': false, 'double': true, 'change': false })} />
         <IconButton iconImage='changeIcon' isDisable={helperStatus['change']} onPress={() => setOpenHelper({ 'eliminate': false, 'double': false, 'change': true })} />
         <TextButton text='Next' onPress={onPress} />
-      </View> }
+      </View>}
       {gameState === "incorrect" && <View className="flex-row justify-center my-[16] mx-[40]">
         <TextButton text='Try Again' onPress={onPress} />
-      </View> }
-      
+      </View>}
+
 
       {/* Modal page */}
       <HelpModalPage title='Eliminate' subtitle='Eliminate 2 wrong answers' isVisible={openHelper['eliminate']}
