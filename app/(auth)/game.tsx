@@ -1,6 +1,6 @@
 import { NewQuizChoice, QuizAnswerResponse, QuizResponse } from '@/apis/types';
 import ChoiceBox from '@/components/lab/ChoiceBox';
-import ExplanationPanel from '@/components/lab/explanationPanel';
+import ExplanationPanel from '@/components/lab/ExplanationPanel';
 import HeaderPanel from '@/components/lab/HeaderPanel';
 import QuestionBox from '@/components/lab/QuestionBox';
 import { useAuth } from '@/contexts/AuthContext';
