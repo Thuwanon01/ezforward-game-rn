@@ -12,10 +12,11 @@ export default function AuthLayout() {
   useEffect(() => {
     const setup = async () => {
       const success = await auth.autoLogin()
-      setLoading(false)
       if (!success) {
         router.replace('/login')
+        return
       }
+      setLoading(false)
     }
 
     if (!auth.user) {
