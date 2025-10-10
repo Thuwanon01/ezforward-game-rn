@@ -61,14 +61,17 @@ export default function ExplanationPanel({ correctAnswer, correctExplanation, in
       </View>}
 
       {/* Icon and button  */}
-      {gameState !== "incorrect" && <View className="flex-row justify-between my-[16] mx-[40]">
+      {gameState === "wait"  && <View className="flex-row justify-between my-[16] mx-[100]">
         <IconButton iconImage='eliminateIcon' isDisable={helperStatus['eliminate']} onPress={() => setOpenHelper({ 'eliminate': true, 'double': false, 'change': false })} />
         <IconButton iconImage='doubleIcon' isDisable={helperStatus['double']} onPress={() => setOpenHelper({ 'eliminate': false, 'double': true, 'change': false })} />
         <IconButton iconImage='changeIcon' isDisable={helperStatus['change']} onPress={() => setOpenHelper({ 'eliminate': false, 'double': false, 'change': true })} />
-        <TextButton text='Next' onPress={onPress} />
+        
       </View>}
       {gameState === "incorrect" && <View className="flex-row justify-center my-[16] mx-[40]">
         <TextButton text='Try Again' onPress={onPress} />
+      </View>}
+      {gameState === "correct" && <View className="flex-row justify-end my-[16] mx-[40]">
+        <TextButton text='Next' onPress={onPress} />
       </View>}
 
 

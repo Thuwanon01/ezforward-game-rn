@@ -91,6 +91,8 @@ export default function GamePage() {
     else { return ("wait") }
   }
 
+  
+
   return (
     <View className='flex-1'>
 
