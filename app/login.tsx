@@ -2,7 +2,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'expo-router';
 import { FetchError } from 'ofetch';
 import React, { useState } from 'react';
-import { ActivityIndicator, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Image, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 
 {/* กำหนด URL ของ API หลังบ้าน */ }
@@ -56,7 +56,11 @@ export default function LoginScreen() {
 
   return (
     <View className='flex-1 justify-center items-center bg-[#fffac9ff]'>
-      <View className='w-full px-8'>
+      <View className='h-full w-full px-8'>
+        <Image
+          source={require('@/assets/images/ram-small.png')} // path รูปภาพ
+          className="w-32 h-32 mb-8 self-center" // กำหนดขนาดและระยะห่าง
+        />
         <Text className='text-4xl font-bold text-center text-gray-800 mb-10'>
           Login
         </Text>
