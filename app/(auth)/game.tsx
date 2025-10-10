@@ -5,7 +5,7 @@ import HeaderPanel from '@/components/lab/HeaderPanel';
 import QuestionBox from '@/components/lab/QuestionBox';
 import { useAuth } from '@/contexts/AuthContext';
 import useRepositories from '@/hooks/useRepositories';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Text, View } from 'react-native';
 
 
@@ -24,6 +24,7 @@ export default function GamePage() {
   const [answer, setAnswer] = useState<QuizAnswerResponse | null>(null);
   const [gameState, setGameState] = useState<'wait' | 'correct' | 'incorrect'>('wait');
   const [score, setScore] = useState(0);
+  const timerRef = useRef<number | null>(null);
 
   const auth = useAuth()
   const repos = useRepositories(auth.accessToken).current
@@ -32,19 +33,27 @@ export default function GamePage() {
     fetchData();
   }, []);
 
-  useEffect(() => {
-    if (status === 'reading') {
-      setTimeout(() => {
-        setStatus('wait'); // กลับเป็น wait หลังครบ 3.5 วิ
-      }, 3500);
-    }
-  }, [status]);
-
   // สร้างฟังก์ชันที่จะส่งลงไปให้ QuestionBox
   const handleQuestionPress = () => {
-    if (status === 'wait') {
-      setStatus('reading');
+
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
     }
+
+    // ทำให้ state เปลี่ยนเสมอเพื่อ re-trigger speech
+    // โดยการเซ็ตเป็น 'wait' ก่อน เพื่อให้ useEffect ใน QuestionBox ทำงาน (ส่วน cleanup) และหยุดเสียงพูดปัจจุบัน
+    setStatus('wait');
+
+    // ใช้ setTimeout เล็กน้อย (10ms) เพื่อให้ React อัปเดต UI เป็น 'wait' ก่อน
+    // แล้วค่อยสั่งให้เป็น 'reading' อีกครั้ง
+    setTimeout(() => {
+      setStatus('reading');
+
+      // เมื่อเข้าสู่สถานะ 'reading' แล้ว ให้ตั้ง Timer ใหม่เพื่อนับ 5 วินาที
+      timerRef.current = setTimeout(() => {
+        setStatus('wait'); // กลับเป็น wait หลังครบ 5 วิ
+      }, 5000);
+    }, 10);
   };
 
   const fetchData = async () => {
