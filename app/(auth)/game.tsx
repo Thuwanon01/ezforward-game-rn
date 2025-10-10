@@ -35,8 +35,8 @@ export default function GamePage() {
   useEffect(() => {
     if (status === 'reading') {
       setTimeout(() => {
-        setStatus('wait'); // กลับเป็น wait หลังครบ 5 วิ
-      }, 5000);
+        setStatus('wait'); // กลับเป็น wait หลังครบ 3.5 วิ
+      }, 3500);
     }
   }, [status]);
 
