@@ -5,7 +5,11 @@ export default function Index() {
     const pages: any[] = [
         "/lab/text-to-speech",
         "/lab/modal",
-        "/lab/testcode"
+        '/lab/testComponent',
+        "/lab/testcode",
+        "/lab/loginScreen",
+        "/lab/gameMunMun",
+        "/lab/register"
     ]
 
     return (
