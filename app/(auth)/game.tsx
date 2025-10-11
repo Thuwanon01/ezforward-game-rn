@@ -96,7 +96,8 @@ export default function GamePage() {
     else { return ("wait") }
   }
 
-  const logOutHandler = () => {
+  const logOutHandler = async () => {
+    await auth.logout();
     router.push("/login");
   }
 
