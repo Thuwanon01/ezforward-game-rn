@@ -9,10 +9,9 @@ export default function RootLayout() {
     <GluestackUIProvider>
       <AuthProvider>
         <Stack>
-          <Stack.Screen name="lab/testComponent" options={{ headerShown: false }} />
-          <Stack.Screen name="lab/gameMunMun" options={{ headerShown: false }} />
-          <Stack.Screen name="lab/loginScreen" options={{ headerShown: false }} />
-          <Stack.Screen name="home" options={{ headerShown: false }} />
+          <Stack.Screen name="login" options={{ headerShown: false }} />
+          
+          {/* <Stack.Screen name="home" options={{ headerShown: false }} /> */}
           <Stack.Screen name="(auth)" options={{ headerShown: false }} />
         </Stack>
       </AuthProvider>

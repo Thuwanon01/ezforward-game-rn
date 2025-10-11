@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
+import Markdown from 'react-native-markdown-display';
 import HelpModalPage from './HelpModalPage';
 import IconButton from './IconButton';
 import TextButton from './TextButton';
@@ -44,19 +45,21 @@ export default function ExplanationPanel({ correctAnswer, correctExplanation, in
       {explanationStatus && openExplanation && <View className="mx-[40]">
         <View>
           <Text className="text-green-500 text-2xl">{correctAnswer}</Text>
-          <Text className="text-white text-lg">{`  - ${correctExplanation}`}</Text>
-          {/* <Markdown mergeStyle={false}debugPrintTree>{correctExplanation}</Markdown> */}
+          {/* <Text className="text-white text-lg">{`  - ${correctExplanation}`}</Text> */}
+          <Markdown style={styles}>{correctExplanation}</Markdown>
+          
           {gameState === "incorrect" &&
             <>
               <Text className="text-red-500 text-2xl">{incorrectAnswer}</Text>
-              <Text className="text-white text-lg">{`  - ${incorrectExplanation}`}</Text>
-              {/* <Markdown mergeStyle={false}>{incorrectExplanation}</Markdown> */}
+              {/* <Text className="text-white text-lg">{`  - ${incorrectExplanation}`}</Text> */}
+              <Markdown style={styles} >{incorrectExplanation}</Markdown>
             </>
 
           }
 
           <View className='h-[8]'></View>
-          <Text className="text-white font-bold ">{explanation}</Text>
+          {/* <Text className="text-white font-bold ">{explanation}</Text> */}
+          <Markdown style={styles}>{explanation}</Markdown>
         </View>
       </View>}
 
@@ -89,6 +92,19 @@ export default function ExplanationPanel({ correctAnswer, correctExplanation, in
 
 
 
-{/* <Image source={require('assets/images/downArrow.svg')} style={{width:28, height:28 }} />
-                <Image source={require('assets/images/upArrow.svg')} style={{width:28, height:28 }} /> */}
+const styles = StyleSheet.create({
+  body: {
+    
+    color: 'white'
+  }, 
+   code_inline: {
+    borderWidth: 1,
+    borderColor: '#CCCCCC',
+    backgroundColor: '#3e3e3cff',
+    padding: 8,
+    borderRadius: 4,
+    lineHeight: 40, 
+    
+   }
+})
 

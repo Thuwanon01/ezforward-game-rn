@@ -8,6 +8,7 @@ interface AuthContextType {
     refreshToken: string;
     login: (username: string, password: string) => Promise<void>;
     autoLogin: () => Promise<boolean>;
+    logout: () => Promise<void>;
 }
 
 interface AuthProviderProps {
@@ -46,6 +47,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
         setRefreshToken(refresh)
     }
 
+    async function logout() {
+        await AsyncStorage.removeItem('accessToken');
+        await AsyncStorage.removeItem('refreshToken');
+        setUser(null);
+        setAccessToken("");
+        setRefreshToken("");
+    }
+
     async function autoLogin(): Promise<boolean> {
         const refreshToken = await AsyncStorage.getItem('refreshToken')
         if (!refreshToken) {
@@ -71,7 +80,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
 
     return (
-        <AuthContext.Provider value={{ user, accessToken, refreshToken, login, autoLogin }}>
+        <AuthContext.Provider value={{ user, accessToken, refreshToken, login, autoLogin, logout }}>
             {children}
         </AuthContext.Provider>
     )
