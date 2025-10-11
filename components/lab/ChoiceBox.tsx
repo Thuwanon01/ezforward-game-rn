@@ -46,10 +46,15 @@ export default function ChoiceBox({ text, status, onPress, disabled }: Prop) {
 
   // กำหนดสีพื้นหลังตามสถานะ
   const isCorrect = status === "correct"
-  let color = "white" // สีพื้นหลังเริ่มต้น
-  if (isCorrect) { color = "green" }
-  else if (status === "incorrect") { color = "red" }
-  else if (disabled) { color = "grey" }
+  let bgColor = "white" // สีพื้นหลังเริ่มต้น
+  let fontColor = "black"
+  if (isCorrect) {
+     bgColor = "green"
+     fontColor = "white"}
+  else if (status === "incorrect") { 
+    bgColor = "red" 
+    fontColor = "white"}
+  else if (disabled) { bgColor = "lightgrey" }
 
   return (
 <<<<<<< HEAD
@@ -60,8 +65,8 @@ export default function ChoiceBox({ text, status, onPress, disabled }: Prop) {
     </GestureDetector >
 =======
     <GestureDetector gesture={gesture}>
-      <View style={[styles.boxChoice, { backgroundColor: color }]}>
-        <Text style={styles.textChoice}>{text}</Text>
+      <View style={[styles.boxChoice, { backgroundColor: bgColor }]}>
+        <Text style={[styles.textChoice,{color: fontColor}]}>{text}</Text>
       </View>
     </GestureDetector>
 >>>>>>> 7d90cc5b3ad5bbfce7fcf82ba3452af60c6f28fb
