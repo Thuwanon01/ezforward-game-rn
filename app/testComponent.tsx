@@ -1,16 +1,29 @@
-
-import ChoiceBox from '@/components/lab/ChoiceBox';
 import React from 'react';
-import { View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
+
+import Markdown from 'react-native-markdown-display';
+
+const copy = `# h1 Heading 8-)
+
+**This is some bold text!**
+
+This is normal text
+`
 
 export default function testComponent() {
-
-    return (
-        <View className='flex-1'>
-            <ChoiceBox text='1.will take' status="correct" ></ChoiceBox>
-            <ChoiceBox text='2.will come' status="incorrect"></ChoiceBox>
-            <ChoiceBox text='3.will go' status="wait"></ChoiceBox>
-            <ChoiceBox text='4.will be' status="wait"></ChoiceBox>
-        </View>
-    )
+  return (
+    <View>
+      <Text>test      Component</Text>
+      <Markdown style={styles}>
+            {copy}
+          </Markdown>
+    </View>
+  )
 }
+
+const styles = StyleSheet.create({
+  body: {
+    
+    color: 'blue'
+  }
+})

@@ -5,8 +5,10 @@ import HeaderPanel from '@/components/lab/HeaderPanel';
 import QuestionBox from '@/components/lab/QuestionBox';
 import { useAuth } from '@/contexts/AuthContext';
 import useRepositories from '@/hooks/useRepositories';
+import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Text, View } from 'react-native';
+import { ScrollView } from 'react-native-gesture-handler';
 
 
 
@@ -24,6 +26,8 @@ export default function GamePage() {
   const [answer, setAnswer] = useState<QuizAnswerResponse | null>(null);
   const [gameState, setGameState] = useState<'wait' | 'correct' | 'incorrect'>('wait');
   const [score, setScore] = useState(0);
+
+  const router = useRouter();
 
   const auth = useAuth()
   const repos = useRepositories(auth.accessToken).current
@@ -62,6 +66,7 @@ export default function GamePage() {
   const handleSubmitAnswer = async (choiceId: any, index: any) => {
     if (!question) return;
     const answerData = await repos.gamev2.fetchSubmitAnswer(question.id as string, choiceId, 0, 0, [], []);
+    console.log('Submitted answer data:', answerData);
     setExplanationStatus(true)
     setAnswer(answerData);
 
@@ -91,17 +96,21 @@ export default function GamePage() {
     else { return ("wait") }
   }
 
-  
+  const logOutHandler = () => {
+    router.push("/login");
+  }
+
 
   return (
+    
     <View className='flex-1'>
 
       {/* for test components */}
-      <View className='flex-1'>
-        <HeaderPanel title={'GameMunMun'} onPressBack={() => { }} onPressMenu={() => { }} ></HeaderPanel>
+      <ScrollView className='flex-1'>
+        <HeaderPanel title={'GameMunMun'} onPressBack={logOutHandler} onPressMenu={() => { }} ></HeaderPanel>
         <View className='flex-row justify-end'>
           <View className='flex-row mx-6 mt-4 bg-[#FCC61D] px-3 py-1 rounded-[20]'>
-            {gameState === "incorrect" ? <Text>Game Over : {score}</Text> : <Text>{score}</Text>}
+            {gameState === "incorrect" ? <Text className='text-xl font-bold'>Game Over : {score}</Text> : <Text className='text-xl font-bold'>{score}</Text>}
 
           </View>
         </View>
@@ -117,7 +126,7 @@ export default function GamePage() {
           ))}
         </View>
 
-      </View>
+      </ScrollView>
 
       {/* Components for use */}
       <ExplanationPanel
@@ -132,5 +141,6 @@ export default function GamePage() {
         gameState={gameState} />
 
     </View>
+    
   )
 }
