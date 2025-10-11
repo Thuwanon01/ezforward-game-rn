@@ -24,10 +24,9 @@ export default function QuestionBox({ question, status, onPressQuestion }: { que
       const isThai = /[\u0E00-\u0E7F]/.test(question);
       const lang = isThai ? 'th-TH' : 'en-US';
 
-      Speech.stop();
       Speech.speak(question, { language: lang });
     }
-    // Cleanup function: ถ้า component ถูกปิดกลางคัน ให้หยุดพูด
+    // Cleanup function: จะทำงานเมื่อ status เปลี่ยน หรือ component ถูกปิด
     return () => {
       Speech.stop();
     };
