@@ -19,13 +19,9 @@ export default function ChoiceBox({ text, status, onPress, disabled }: Prop) {
 
   // Single tap: แค่พูดออกเสียง
   const singleTap = Gesture.Tap()
-<<<<<<< HEAD
-    .onStart(speak)
-=======
     .onEnd(() => {
       speak()
     })
->>>>>>> 7d90cc5b3ad5bbfce7fcf82ba3452af60c6f28fb
 
   // Double tap: run onPress
   const doubleTap = Gesture.Tap()
@@ -57,19 +53,11 @@ export default function ChoiceBox({ text, status, onPress, disabled }: Prop) {
   else if (disabled) { bgColor = "lightgrey" }
 
   return (
-<<<<<<< HEAD
-    <GestureDetector  gesture={Gesture.Exclusive(doubleTap, singleTap)}>
-      <TouchableOpacity style ={[styles.boxChoice, {backgroundColor: color}]}>
-        <Text style={styles.textChoice}>{text}</Text>
-      </TouchableOpacity> 
-    </GestureDetector >
-=======
     <GestureDetector gesture={gesture}>
-      <View style={[styles.boxChoice, { backgroundColor: bgColor }]}>
+      <TouchableOpacity style={[styles.boxChoice, { backgroundColor: bgColor }]}>
         <Text style={[styles.textChoice,{color: fontColor}]}>{text}</Text>
-      </View>
+      </TouchableOpacity>
     </GestureDetector>
->>>>>>> 7d90cc5b3ad5bbfce7fcf82ba3452af60c6f28fb
   )
 }
 
