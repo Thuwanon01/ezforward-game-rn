@@ -1,5 +1,5 @@
 import * as Speech from 'expo-speech'
-import { StyleSheet, Text, View } from 'react-native'
+import { StyleSheet, Text, TouchableOpacity } from 'react-native'
 import { Gesture, GestureDetector } from 'react-native-gesture-handler'
 
 interface Prop {
@@ -9,6 +9,8 @@ interface Prop {
   disabled?: boolean
 }
 
+
+
 export default function ChoiceBox({ text, status, onPress, disabled }: Prop) {
   const speak = () => {
     Speech.stop()
@@ -16,6 +18,8 @@ export default function ChoiceBox({ text, status, onPress, disabled }: Prop) {
     const lang = isThai ? 'th-TH' : 'en-US'
     Speech.speak(text, { language: lang })
   }
+
+
 
   // Single tap: แค่พูดออกเสียง
   const singleTap = Gesture.Tap()
@@ -45,18 +49,20 @@ export default function ChoiceBox({ text, status, onPress, disabled }: Prop) {
   let bgColor = "white" // สีพื้นหลังเริ่มต้น
   let fontColor = "black"
   if (isCorrect) {
-     bgColor = "#9DFF9F"
-     fontColor = "black"}
-  else if (status === "incorrect") { 
-    bgColor = "#FFB3B3" 
-    fontColor = "black"}
+    bgColor = "#9DFF9F"
+    fontColor = "black"
+  }
+  else if (status === "incorrect") {
+    bgColor = "#FFB3B3"
+    fontColor = "black"
+  }
   else if (disabled) { bgColor = "lightgrey" }
 
   return (
     <GestureDetector gesture={gesture}>
-      <View style={[styles.boxChoice, { backgroundColor: bgColor }]}>
-        <Text style={[styles.textChoice,{color: fontColor}]}>{text}</Text>
-      </View>
+      <TouchableOpacity style={[styles.boxChoice, { backgroundColor: bgColor }]}>
+        <Text style={[styles.textChoice, { color: fontColor }]}>{text}</Text>
+      </TouchableOpacity>
     </GestureDetector>
   )
 }

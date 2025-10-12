@@ -47,7 +47,7 @@ export default function ExplanationPanel({ correctAnswer, correctExplanation, in
           <Text className="text-green-500 text-2xl">{correctAnswer}</Text>
           {/* <Text className="text-white text-lg">{`  - ${correctExplanation}`}</Text> */}
           <Markdown style={styles}>{correctExplanation}</Markdown>
-          
+
           {gameState === "incorrect" &&
             <>
               <Text className="text-red-500 text-2xl">{incorrectAnswer}</Text>
@@ -64,11 +64,11 @@ export default function ExplanationPanel({ correctAnswer, correctExplanation, in
       </View>}
 
       {/* Icon and button  */}
-      {gameState === "wait"  && <View className="flex-row justify-between my-[16] mx-[100]">
+      {gameState === "wait" && <View className="flex-row justify-between my-[16] mx-[100]">
         <IconButton iconImage='eliminateIcon' isDisable={helperStatus['eliminate']} onPress={() => setOpenHelper({ 'eliminate': true, 'double': false, 'change': false })} />
         <IconButton iconImage='doubleIcon' isDisable={helperStatus['double']} onPress={() => setOpenHelper({ 'eliminate': false, 'double': true, 'change': false })} />
         <IconButton iconImage='changeIcon' isDisable={helperStatus['change']} onPress={() => setOpenHelper({ 'eliminate': false, 'double': false, 'change': true })} />
-        
+
       </View>}
       {gameState === "incorrect" && <View className="flex-row justify-center my-[16] mx-[40]">
         <TextButton text='Try Again' onPress={onPress} />
@@ -94,17 +94,17 @@ export default function ExplanationPanel({ correctAnswer, correctExplanation, in
 
 const styles = StyleSheet.create({
   body: {
-    
+
     color: 'white'
-  }, 
-   code_inline: {
+  },
+  code_inline: {
     borderWidth: 1,
     borderColor: '#CCCCCC',
     backgroundColor: '#3e3e3cff',
     padding: 8,
     borderRadius: 4,
-    lineHeight: 40, 
-    
-   }
+    lineHeight: 40,
+
+  }
 })
 

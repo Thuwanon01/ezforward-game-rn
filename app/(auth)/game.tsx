@@ -5,6 +5,7 @@ import HeaderPanel from '@/components/lab/HeaderPanel';
 import QuestionBox from '@/components/lab/QuestionBox';
 import { useAuth } from '@/contexts/AuthContext';
 import useRepositories from '@/hooks/useRepositories';
+import { playSound } from '@/utils/sound';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import { Text, View } from 'react-native';
@@ -36,6 +37,7 @@ export default function GamePage() {
 
   const auth = useAuth()
   const repos = useRepositories(auth.accessToken).current
+
 
   useEffect(() => {
     fetchData();
@@ -93,10 +95,12 @@ export default function GamePage() {
       setGameState('correct');
       setStatus('correct');
       setScore(score + 1);
+      playSound('yessound.mp3')
     } else {
       setGameState('incorrect');
       setStatus('incorrect');
       setScore(0);
+      playSound('alarm.mp3')
     }
 
     // TODO: Too hard to read
