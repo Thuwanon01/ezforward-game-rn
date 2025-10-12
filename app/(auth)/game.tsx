@@ -94,7 +94,7 @@ export default function GamePage() {
       setGameState('incorrect');
       setStatus('incorrect');
       setScore(0);
-      playSound('wrongsound.mp3')
+      playSound('alarm.mp3')
     }
     const incorrectChoiceId = newChoices.find(choice => choice.is_selected && !answerData.choices.find(ansChoice => ansChoice.id === choice.id)?.is_correct)?.id
     setCorrectAnswer(answerData.choices.find(choice => choice.is_correct)?.text || "");
