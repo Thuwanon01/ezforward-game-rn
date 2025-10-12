@@ -45,11 +45,11 @@ export default function ChoiceBox({ text, status, onPress, disabled }: Prop) {
   let bgColor = "white" // สีพื้นหลังเริ่มต้น
   let fontColor = "black"
   if (isCorrect) {
-     bgColor = "green"
-     fontColor = "white"}
+     bgColor = "#9DFF9F"
+     fontColor = "black"}
   else if (status === "incorrect") { 
-    bgColor = "red" 
-    fontColor = "white"}
+    bgColor = "#FFB3B3" 
+    fontColor = "black"}
   else if (disabled) { bgColor = "lightgrey" }
 
   return (
