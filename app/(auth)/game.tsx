@@ -5,6 +5,7 @@ import HeaderPanel from '@/components/lab/HeaderPanel';
 import QuestionBox from '@/components/lab/QuestionBox';
 import { useAuth } from '@/contexts/AuthContext';
 import useRepositories from '@/hooks/useRepositories';
+import { playSound } from '@/utils/sound';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import { Text, View } from 'react-native';
@@ -32,6 +33,7 @@ export default function GamePage() {
 
   const auth = useAuth()
   const repos = useRepositories(auth.accessToken).current
+
 
   useEffect(() => {
     fetchData();
@@ -87,10 +89,12 @@ export default function GamePage() {
       setGameState('correct');
       setStatus('correct');
       setScore(score + 1);
+      playSound('yessound.mp3')
     } else {
       setGameState('incorrect');
       setStatus('incorrect');
       setScore(0);
+      playSound('wrongsound.mp3')
     }
     const incorrectChoiceId = newChoices.find(choice => choice.is_selected && !answerData.choices.find(ansChoice => ansChoice.id === choice.id)?.is_correct)?.id
     setCorrectAnswer(answerData.choices.find(choice => choice.is_correct)?.text || "");
@@ -112,7 +116,7 @@ export default function GamePage() {
 
 
   return (
-    
+
     <View className='flex-1'>
 
       {/* for test components */}
@@ -151,6 +155,6 @@ export default function GamePage() {
         gameState={gameState} />
 
     </View>
-    
+
   )
 }
