@@ -5,4 +5,4 @@ eas deploy
 
 
 Dashboard       https://expo.dev/projects/4954432f-f144-4b40-8022-0bcae52af3cc/hosting/deployments
-Deployment URL  https://ezram-rn--29xbkisypo.expo.app
+Deployment URL  https://ezram-rn--1ub49f7oco.expo.app
