@@ -5,6 +5,7 @@ import HeaderPanel from '@/components/lab/HeaderPanel';
 import QuestionBox from '@/components/lab/QuestionBox';
 import { useAuth } from '@/contexts/AuthContext';
 import useRepositories from '@/hooks/useRepositories';
+import { Audio } from 'expo-av';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import { Text, View } from 'react-native';
@@ -27,11 +28,41 @@ export default function GamePage() {
   const [gameState, setGameState] = useState<'wait' | 'correct' | 'incorrect'>('wait');
   const [score, setScore] = useState(0);
   const timerRef = useRef<number | null>(null);
+  const [soundCorrect, setCorrectSound] = useState<Audio.Sound | undefined>()
+  const [soundInCorrect, setInCorrectSound] = useState<Audio.Sound | undefined>()
 
   const router = useRouter();
 
   const auth = useAuth()
   const repos = useRepositories(auth.accessToken).current
+
+  async function playCorrectSound () {
+    console.log('Loading Sound')
+    try {
+      const { sound } = await Audio.Sound.createAsync(
+        require('../../assets/sounds/yessound.mp3')
+      )
+      setCorrectSound(soundCorrect)
+
+      sound.playAsync()
+    } catch (error) {
+      console.error("Error playing sound:", error)
+    }
+  }
+    async function playInCorrectSound () {
+    console.log('Loading Sound')
+    try {
+      const { sound } = await Audio.Sound.createAsync(
+        require('../../assets/sounds/wrongsound.mp3')
+      )
+      setInCorrectSound(soundInCorrect)
+
+      sound.playAsync()
+    } catch (error) {
+      console.error("Error playing sound:", error)
+    }
+  }
+  
 
   useEffect(() => {
     fetchData();
@@ -87,10 +118,12 @@ export default function GamePage() {
       setGameState('correct');
       setStatus('correct');
       setScore(score + 1);
+      playCorrectSound()
     } else {
       setGameState('incorrect');
       setStatus('incorrect');
       setScore(0);
+      playInCorrectSound ()
     }
     const incorrectChoiceId = newChoices.find(choice => choice.is_selected && !answerData.choices.find(ansChoice => ansChoice.id === choice.id)?.is_correct)?.id
     setCorrectAnswer(answerData.choices.find(choice => choice.is_correct)?.text || "");

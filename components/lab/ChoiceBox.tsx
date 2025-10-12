@@ -9,6 +9,8 @@ interface Prop {
   disabled?: boolean
 }
 
+  
+
 export default function ChoiceBox({ text, status, onPress, disabled }: Prop) {
   const speak = () => {
     Speech.stop()
@@ -16,7 +18,9 @@ export default function ChoiceBox({ text, status, onPress, disabled }: Prop) {
     const lang = isThai ? 'th-TH' : 'en-US'
     Speech.speak(text, { language: lang })
   }
+  
 
+  
   // Single tap: แค่พูดออกเสียง
   const singleTap = Gesture.Tap()
     .onEnd(() => {
@@ -46,10 +50,12 @@ export default function ChoiceBox({ text, status, onPress, disabled }: Prop) {
   let fontColor = "black"
   if (isCorrect) {
      bgColor = "green"
-     fontColor = "white"}
+     fontColor = "white"
+    }
   else if (status === "incorrect") { 
     bgColor = "red" 
-    fontColor = "white"}
+    fontColor = "white"
+  }
   else if (disabled) { bgColor = "lightgrey" }
 
   return (
