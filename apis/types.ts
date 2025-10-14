@@ -51,3 +51,10 @@ export interface QuizAnswerResponse {
     explanation: string;
     choices: QuizChoiceWithAnswer[];
 }
+
+export interface Subject {
+    gid: string;
+    name: string;
+    topics: { name: string; gid: string }[];
+    levels: { name: string; gid: string }[];
+}
