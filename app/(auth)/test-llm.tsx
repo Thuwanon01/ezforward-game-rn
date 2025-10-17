@@ -7,7 +7,7 @@ import { Input, InputField } from '@/components/ui/input';
 import { useAuth } from '@/contexts/AuthContext';
 import useRepositories from '@/hooks/useRepositories';
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 export default function Page() {
     const [text, setText] = useState('')
@@ -21,12 +21,11 @@ export default function Page() {
 
     const sendToLLM = async () => {
         const response = await repos.llm.generateText(text)
-        setRes(response)
+        setRes(response.result)
     }
 
     useEffect(() => {
         console.log("useEffect jaaaaa")
-        sendToLLM()
     }, [])
 
     return (
@@ -47,8 +46,9 @@ export default function Page() {
             </Button>
 
             <Divider />
-            <Text style={styles.text}>{res}</Text>
-
+            <ScrollView>
+                <Text style={styles.text}>{res}</Text>
+            </ScrollView>
             <View className='flex-1'></View>
 
             <Input
