@@ -14,7 +14,11 @@ import { ScrollView } from 'react-native-gesture-handler';
 
 
 export default function GamePage() {
-  const [helperStatus, setHelperStatus] = useState({ "eliminate": false, "double": false, "change": false })
+  const [helperStatus, setHelperStatus] = useState({
+    "eliminate": false,
+    "double": false,
+    "change": false
+  })
   const [explanationStatus, setExplanationStatus] = useState(false)
   const [correctAnswer, setCorrectAnswer] = useState("")
   const [correctExplanation, setCorrectExplanation] = useState("")
@@ -74,9 +78,11 @@ export default function GamePage() {
     setCorrectExplanation("");
     setIncorrectExplanation("");
   }
+
   const handleSubmitAnswer = async (choiceId: any, index: any) => {
     if (!question) return;
-    const answerData = await repos.gamev2.fetchSubmitAnswer(question.id as string, choiceId, 0, 0, [], []);
+    const answerData = await repos.gamev2.fetchSubmitAnswer(
+      question.id as string, choiceId, 0, 0, [], []);
     console.log('Submitted answer data:', answerData);
     setExplanationStatus(true)
     setAnswer(answerData);
@@ -96,16 +102,26 @@ export default function GamePage() {
       setScore(0);
       playSound('alarm.mp3')
     }
-    const incorrectChoiceId = newChoices.find(choice => choice.is_selected && !answerData.choices.find(ansChoice => ansChoice.id === choice.id)?.is_correct)?.id
+
+    // TODO: Too hard to read
+    const incorrectChoiceId = newChoices.find(
+      choice => choice.is_selected && !answerData.choices.find(
+        ansChoice => ansChoice.id === choice.id)?.is_correct)?.id
     setCorrectAnswer(answerData.choices.find(choice => choice.is_correct)?.text || "");
     setCorrectExplanation(answerData.choices.find(choice => choice.is_correct)?.explanation || "");
-    setIncorrectAnswer(newChoices.find(choice => choice.is_selected && !answerData.choices.find(ansChoice => ansChoice.id === choice.id)?.is_correct)?.text || "");
-    setIncorrectExplanation(answerData.choices.find(choice => choice.id === incorrectChoiceId)?.explanation || "");
+    setIncorrectAnswer(newChoices.find(
+      choice => choice.is_selected && !answerData.choices.find(
+        ansChoice => ansChoice.id === choice.id)?.is_correct)?.text || "");
+    setIncorrectExplanation(answerData.choices.find(
+      choice => choice.id === incorrectChoiceId)?.explanation || "");
     setExplanation(answerData.explanation);
   }
+
   const handleSelectChoice = (choiceId: number) => {
     if (answer?.choices.find(choice => choice.id === choiceId)?.is_correct) return ("correct")
-    else if (choices.find(choice => choice.id === choiceId)?.is_selected && !answer?.choices.find(choice => choice.id === choiceId)?.is_correct) return ("incorrect")
+    else if (choices.find(
+      choice => choice.id === choiceId)?.is_selected && !answer?.choices.find(
+        choice => choice.id === choiceId)?.is_correct) return ("incorrect")
     else { return ("wait") }
   }
 
@@ -114,29 +130,41 @@ export default function GamePage() {
     router.push("/login");
   }
 
-
   return (
-
     <View className='flex-1'>
-
       {/* for test components */}
       <ScrollView className='flex-1'>
-        <HeaderPanel title={'GameMunMun'} onPressBack={logOutHandler} onPressMenu={() => { }} ></HeaderPanel>
+        <HeaderPanel
+          title={'GameMunMun'}
+          onPressBack={logOutHandler}
+          onPressMenu={() => { }} >
+        </HeaderPanel>
+
         <View className='flex-row justify-end'>
           <View className='flex-row mx-6 mt-4 bg-[#FCC61D] px-3 py-1 rounded-[20]'>
-            {gameState === "incorrect" ? <Text className='text-xl font-bold'>Game Over : {score}</Text> : <Text className='text-xl font-bold'>{score}</Text>}
-
+            {gameState === "incorrect"
+              ? <Text className='text-xl font-bold'>Game Over : {score}</Text>
+              : <Text className='text-xl font-bold'>{score}</Text>}
           </View>
         </View>
 
+        {/* Question */}
         <QuestionBox
           question={question?.text || 'Loading question...'}
           status={status}
           onPressQuestion={handleQuestionPress}
         />
+
+
+        {/* Choices */}
         <View >
           {choices.map((choice, index) => (
-            <ChoiceBox key={index} text={choice.text} status={handleSelectChoice(choice.id)} onPress={() => { handleSubmitAnswer(choice.id, index) }} disabled={gameState !== 'wait'} />
+            <ChoiceBox
+              key={index}
+              text={choice.text}
+              status={handleSelectChoice(choice.id)}
+              onPress={() => { handleSubmitAnswer(choice.id, index) }}
+              disabled={gameState !== 'wait'} />
           ))}
         </View>
 
