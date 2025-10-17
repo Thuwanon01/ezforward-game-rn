@@ -10,7 +10,7 @@ This is an [Expo](https://expo.dev) project created with [`create-expo-app`](htt
    npm install
    ```
 
-2. Set API base URL (uses default if omitted)
+2. Create `.env` file and Set API base URL in `.env` file (see `.env.uat` for example) 
 
    ```bash
    EXPO_PUBLIC_API_BASE_URL="https://your-api.example.com"
