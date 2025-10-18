@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { useEffect, useState } from "react";
 import {
@@ -22,17 +21,6 @@ import Markdown from "react-native-markdown-display";
 import HelpModalPage from "./HelpModalPage";
 import IconButton from "./IconButton";
 import TextButton from "./TextButton";
-=======
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { HandThumbDownIcon, HandThumbUpIcon, MagnifyingGlassIcon, PaperAirplaneIcon } from "react-native-heroicons/solid";
-import Markdown from 'react-native-markdown-display';
-import HelpModalPage from './HelpModalPage';
-import IconButton from './IconButton';
-import TextButton from './TextButton';
-
->>>>>>> 868ced6278439961ce5389c5f4aed76f390631c4
 
 // Import Hook สำหรับ Repository และ Auth (จำเป็น)
 import { useAuth } from "@/contexts/AuthContext";
