@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { useEffect, useState } from "react";
 import {
@@ -21,6 +22,17 @@ import Markdown from "react-native-markdown-display";
 import HelpModalPage from "./HelpModalPage";
 import IconButton from "./IconButton";
 import TextButton from "./TextButton";
+=======
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, FlatList, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { HandThumbDownIcon, HandThumbUpIcon, MagnifyingGlassIcon, PaperAirplaneIcon } from "react-native-heroicons/solid";
+import Markdown from 'react-native-markdown-display';
+import HelpModalPage from './HelpModalPage';
+import IconButton from './IconButton';
+import TextButton from './TextButton';
+
+>>>>>>> 868ced6278439961ce5389c5f4aed76f390631c4
 
 // Import Hook สำหรับ Repository และ Auth (จำเป็น)
 import { useAuth } from "@/contexts/AuthContext";
@@ -214,10 +226,16 @@ export default function ExplanationPanel({
 
   return (
     //All box of footer
+<<<<<<< HEAD
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <View className="bg-[#27548A] rounded-t-xl">
+=======
+    <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"}>
+      <ScrollView className='bg-[#27548A] rounded-t-xl'>
+
+>>>>>>> 868ced6278439961ce5389c5f4aed76f390631c4
         {/* Condition to show pop-up arrow */}
         {explanationStatus && (
           <View className="flex-row justify-center mt-[12]">
@@ -352,6 +370,7 @@ export default function ExplanationPanel({
         )}
 
         {/* Modal page */}
+<<<<<<< HEAD
         <HelpModalPage
           title="Eliminate"
           subtitle="Eliminate 2 wrong answers"
@@ -383,6 +402,15 @@ export default function ExplanationPanel({
           imageName="change"
         ></HelpModalPage>
       </View>
+=======
+        <HelpModalPage title='Eliminate' subtitle='Eliminate 2 wrong answers' isVisible={openHelper['eliminate']}
+          onPressPlay={() => { }} onClose={() => setOpenHelper({ 'eliminate': false, 'double': false, 'change': false })} imageName='eliminate' ></HelpModalPage>
+        <HelpModalPage title='Double Chance' subtitle='Get 2 choices to answer' isVisible={openHelper['double']}
+          onPressPlay={() => { }} onClose={() => setOpenHelper({ 'eliminate': false, 'double': false, 'change': false })} imageName='double' ></HelpModalPage>
+        <HelpModalPage title='Change Question' subtitle='Change to a new question' isVisible={openHelper['change']}
+          onPressPlay={() => { }} onClose={() => setOpenHelper({ 'eliminate': false, 'double': false, 'change': false })} imageName='change' ></HelpModalPage>
+      </ScrollView>
+>>>>>>> 868ced6278439961ce5389c5f4aed76f390631c4
     </KeyboardAvoidingView>
   );
 }
