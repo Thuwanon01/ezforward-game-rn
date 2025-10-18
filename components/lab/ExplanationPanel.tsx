@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, FlatList, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { HandThumbDownIcon, HandThumbUpIcon, MagnifyingGlassIcon, PaperAirplaneIcon } from "react-native-heroicons/solid";
 import Markdown from 'react-native-markdown-display';
 import HelpModalPage from './HelpModalPage';
@@ -97,7 +97,7 @@ export default function ExplanationPanel({ correctAnswer, correctExplanation, in
 
       // ดึงข้อความตอบกลับจาก response
       // !! สำคัญ: ปรับแก้ .text ให้ตรงกับ key ที่ Backend ส่งกลับมา !!
-      const botResponseText = response.text;
+      const botResponseText = response.result;
       // --- สิ้นสุดการยิง API จริง ---
 
       const botMessage: ChatMessage = { id: Date.now() + 1, sender: 'bot', text: botResponseText };
@@ -159,7 +159,7 @@ export default function ExplanationPanel({ correctAnswer, correctExplanation, in
   return (
     //All box of footer
     <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"}>
-      <View className='bg-[#27548A] rounded-t-xl'>
+      <ScrollView className='bg-[#27548A] rounded-t-xl'>
 
         {/* Condition to show pop-up arrow */}
         {explanationStatus && <View className="flex-row justify-center mt-[12]">
@@ -248,7 +248,7 @@ export default function ExplanationPanel({ correctAnswer, correctExplanation, in
           onPressPlay={() => { }} onClose={() => setOpenHelper({ 'eliminate': false, 'double': false, 'change': false })} imageName='double' ></HelpModalPage>
         <HelpModalPage title='Change Question' subtitle='Change to a new question' isVisible={openHelper['change']}
           onPressPlay={() => { }} onClose={() => setOpenHelper({ 'eliminate': false, 'double': false, 'change': false })} imageName='change' ></HelpModalPage>
-      </View>
+      </ScrollView>
     </KeyboardAvoidingView>
   )
 }
