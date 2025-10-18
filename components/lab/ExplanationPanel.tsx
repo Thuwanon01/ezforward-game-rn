@@ -9,20 +9,22 @@ import TextButton from './TextButton';
 
 
 // Import Hook สำหรับ Repository และ Auth (จำเป็น)
-import { useAuth } from '@/contexts/AuthContext';
-import useRepositories from '@/hooks/useRepositories';
-
+import { NewQuizChoice, QuizResponse } from "@/apis/types";
+import { useAuth } from "@/contexts/AuthContext";
+import useRepositories from "@/hooks/useRepositories";
 
 interface Props {
-  correctAnswer: string
-  correctExplanation: string
-  incorrectAnswer: string
-  incorrectExplanation: string
-  explanation: string
-  helperStatus: { "eliminate": boolean, "double": boolean, "change": boolean }
-  explanationStatus: boolean
-  onPressNext: () => void
-  gameState?: 'wait' | 'correct' | 'incorrect'
+  correctAnswer: string;
+  correctExplanation: string;
+  incorrectAnswer: string;
+  incorrectExplanation: string;
+  explanation: string;
+  helperStatus: { eliminate: boolean; double: boolean; change: boolean };
+  explanationStatus: boolean;
+  onPressNext: () => void;
+  gameState?: "wait" | "correct" | "incorrect";
+  question?: QuizResponse | null;
+  selectedChoice?: NewQuizChoice | null;
 }
 
 // ---เพิ่ม Interface สำหรับ Chat และ Feedback ---
@@ -40,10 +42,25 @@ interface Feedback {
 }
 type FeedbackState = 'like' | 'dislike';
 
-export default function ExplanationPanel({ correctAnswer, correctExplanation, incorrectAnswer,
-  incorrectExplanation, explanation, helperStatus, explanationStatus, onPressNext: onPress, gameState }: Props) {
-  const [openExplanation, setOpenExplanation] = useState(false)
-  const [openHelper, setOpenHelper] = useState({ 'eliminate': false, 'double': false, 'change': false })
+export default function ExplanationPanel({
+  correctAnswer,
+  correctExplanation,
+  incorrectAnswer,
+  incorrectExplanation,
+  explanation,
+  helperStatus,
+  explanationStatus,
+  onPressNext: onPress,
+  gameState,
+  question,
+  selectedChoice,
+}: Props) {
+  const [openExplanation, setOpenExplanation] = useState(false);
+  const [openHelper, setOpenHelper] = useState({
+    eliminate: false,
+    double: false,
+    change: false,
+  });
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isChatLoading, setIsChatLoading] = useState(false);
@@ -55,6 +72,22 @@ export default function ExplanationPanel({ correctAnswer, correctExplanation, in
 
   // (useEffect สำหรับโหลดข้อมูล)
   useEffect(() => {
+    const clearChatData = async () => {
+      console.log("New question detected, clearing chat history...");
+      // เคลียร์ State ของ chat
+      setChatHistory([]);
+      setFeedback(null);
+      setInputValue("");
+
+      // เคลียร์ข้อมูลใน AsyncStorage
+      try {
+        await AsyncStorage.removeItem("chatHistory");
+        await AsyncStorage.removeItem("explanationFeedback");
+      } catch (error) {
+        console.error("Failed to clear data from storage", error);
+      }
+    };
+
     const loadData = async () => {
       try {
         const savedChat = await AsyncStorage.getItem('chatHistory');
@@ -65,12 +98,13 @@ export default function ExplanationPanel({ correctAnswer, correctExplanation, in
         if (savedFeedback) {
           setFeedback(savedFeedback);
         }
+        clearChatData();
       } catch (error) {
         console.error("Failed to load data from storage", error);
       }
     };
     loadData();
-  }, []);
+  }, [explanation, correctAnswer]);
 
 
   // --- เพิ่ม useEffect ใหม่สำหรับเคลียร์ข้อมูล ---
@@ -99,9 +133,28 @@ export default function ExplanationPanel({ correctAnswer, correctExplanation, in
   }, [explanation, correctAnswer]);
 
   const toggleExplanation = () => {
-    openExplanation ? setOpenExplanation(false) : setOpenExplanation(true)
-  }
-  console.log(openExplanation)
+    setOpenExplanation(!openExplanation);
+  };
+
+  // Helper function to build context prompt with question and selected choice
+  const buildContextPrompt = (userMessage: string): string => {
+    let context = "";
+
+    // Add question context
+    if (question) {
+      context += `Question: ${question.text}\n\n`;
+    }
+
+    // Add selected choice context
+    if (selectedChoice) {
+      context += `Your selected choice: ${selectedChoice.text}\n\n`;
+    }
+
+    // Add user's question
+    context += `User's question: ${userMessage}`;
+
+    return context;
+  };
 
   // ---handleSendMessage ให้ใช้ Repository---
   const handleSendMessage = async () => {
@@ -117,9 +170,13 @@ export default function ExplanationPanel({ correctAnswer, correctExplanation, in
     try {
       await AsyncStorage.setItem('chatHistory', JSON.stringify(updatedChatHistory));
 
+      // --- Build context prompt with question and selected choice ---
+      const contextPrompt = buildContextPrompt(inputValue);
+      console.log("Context prompt being sent to LLM:", contextPrompt);
+
       // --- ยิง API จริง ---
-      // เรียกใช้ generateText จาก LLMRepository
-      const response = await repos.llm.generateText(userMessage.text);
+      // เรียกใช้ generateText จาก LLMRepository with context
+      const response = await repos.llm.generateText(contextPrompt);
 
       // ดึงข้อความตอบกลับจาก response
       // !! สำคัญ: ปรับแก้ .text ให้ตรงกับ key ที่ Backend ส่งกลับมา !!
@@ -184,99 +241,191 @@ export default function ExplanationPanel({ correctAnswer, correctExplanation, in
 
   return (
     //All box of footer
-    <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"}>
-      <ScrollView>
-        <View className='bg-[#27548A] rounded-t-xl'>
-
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
+      <View className="bg-[#27548A] rounded-t-xl">
+        <ScrollView>
           {/* Condition to show pop-up arrow */}
-          {explanationStatus && <View className="flex-row justify-center mt-[12]">
-
-            {openExplanation ? <IconButton iconImage='downArrow' onPress={toggleExplanation} isDisable={false} /> : <IconButton iconImage='upArrow' onPress={toggleExplanation} isDisable={false} />}
-
-          </View>}
+          {explanationStatus && (
+            <View className="flex-row justify-center mt-[12]">
+              {openExplanation ? (
+                <IconButton
+                  iconImage="downArrow"
+                  onPress={toggleExplanation}
+                  isDisable={false}
+                />
+              ) : (
+                <IconButton
+                  iconImage="upArrow"
+                  onPress={toggleExplanation}
+                  isDisable={false}
+                />
+              )}
+            </View>
+          )}
 
           {/* Text explanation */}
-          {explanationStatus && openExplanation && <View className="mx-[40]">
-            <View>
-              <Text className="text-green-500 text-2xl">{correctAnswer}</Text>
-              {/* <Text className="text-white text-lg">{`  - ${correctExplanation}`}</Text> */}
-              <Markdown style={styles}>{correctExplanation}</Markdown>
+          {explanationStatus && openExplanation && (
+            <View className="mx-[40]">
+              <View>
+                <Text className="text-green-500 text-2xl">{correctAnswer}</Text>
+                {/* <Text className="text-white text-lg">{`  - ${correctExplanation}`}</Text> */}
+                <Markdown style={styles}>{correctExplanation}</Markdown>
 
-              {gameState === "incorrect" &&
-                <>
-                  <Text className="text-red-500 text-2xl">{incorrectAnswer}</Text>
-                  {/* <Text className="text-white text-lg">{`  - ${incorrectExplanation}`}</Text> */}
-                  <Markdown style={styles} >{incorrectExplanation}</Markdown>
-                </>
+                {gameState === "incorrect" && (
+                  <>
+                    <Text className="text-red-500 text-2xl">
+                      {incorrectAnswer}
+                    </Text>
+                    {/* <Text className="text-white text-lg">{`  - ${incorrectExplanation}`}</Text> */}
+                    <Markdown style={styles}>{incorrectExplanation}</Markdown>
+                  </>
+                )}
 
-              }
-
-              {/* --- เพิ่ม UI ส่วนใหม่เข้ามาที่นี่ --- */}
-              <View className="mt-6 border-t border-gray-500 pt-4">
-                <FlatList
-                  data={chatHistory}
-                  renderItem={renderChatItem}
-                  keyExtractor={(item) => item.id.toString()}
-                  className="max-h-48 mb-2"
-                />
-
-                {isChatLoading && <ActivityIndicator color="white" className="my-2" />}
-
-                <View className="flex-row items-center bg-gray-700 rounded-full p-2">
-                  <MagnifyingGlassIcon color="white" size={24} style={{ marginLeft: 8 }} />
-                  <TextInput
-                    className="flex-1 text-white text-lg px-3"
-                    placeholder="Ask something..."
-                    placeholderTextColor="#9ca3af"
-                    value={inputValue}
-                    onChangeText={setInputValue}
-                    editable={!isChatLoading}
+                {/* --- เพิ่ม UI ส่วนใหม่เข้ามาที่นี่ --- */}
+                <View className="mt-6 border-t border-gray-500 pt-4">
+                  <FlatList
+                    data={chatHistory}
+                    renderItem={renderChatItem}
+                    keyExtractor={(item) => item.id.toString()}
+                    className="max-h-48 mb-2"
                   />
-                  <TouchableOpacity onPress={handleSendMessage} disabled={isChatLoading} className="p-2 bg-blue-600 rounded-full">
-                    <PaperAirplaneIcon color="white" size={24} />
-                  </TouchableOpacity>
-                </View>
 
-                <View className="flex-row items-center justify-end mt-4 space-x-4">
-                  <TouchableOpacity onPress={() => handleFeedback('like')}>
-                    <HandThumbUpIcon color={feedback === 'like' ? '#22c55e' : 'white'} size={28} />
-                  </TouchableOpacity>
-                  <TouchableOpacity onPress={() => handleFeedback('dislike')}>
-                    <HandThumbDownIcon color={feedback === 'dislike' ? '#ef4444' : 'white'} size={28} />
-                  </TouchableOpacity>
-                </View>
+                  {isChatLoading && (
+                    <ActivityIndicator color="white" className="my-2" />
+                  )}
 
-                <View className='h-[8]'></View>
-                {/* <Text className="text-white font-bold ">{explanation}</Text> */}
-                <Markdown style={styles}>{explanation}</Markdown>
+                  <View className="flex-row items-center bg-gray-700 rounded-full p-2">
+                    <MagnifyingGlassIcon
+                      color="white"
+                      size={24}
+                      style={{ marginLeft: 8 }}
+                    />
+                    <TextInput
+                      className="flex-1 text-white text-lg px-3"
+                      placeholder="Ask something..."
+                      placeholderTextColor="#9ca3af"
+                      value={inputValue}
+                      onChangeText={setInputValue}
+                      editable={!isChatLoading}
+                      onSubmitEditing={handleSendMessage}
+                      returnKeyType="send"
+                    />
+                    <TouchableOpacity
+                      onPress={handleSendMessage}
+                      disabled={isChatLoading}
+                      className="p-2 bg-blue-600 rounded-full"
+                    >
+                      <PaperAirplaneIcon color="white" size={24} />
+                    </TouchableOpacity>
+                  </View>
+
+                  <View className="flex-row items-center justify-end mt-4 space-x-4">
+                    <TouchableOpacity onPress={() => handleFeedback("like")}>
+                      <HandThumbUpIcon
+                        color={feedback === "like" ? "#22c55e" : "white"}
+                        size={28}
+                      />
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => handleFeedback("dislike")}>
+                      <HandThumbDownIcon
+                        color={feedback === "dislike" ? "#ef4444" : "white"}
+                        size={28}
+                      />
+                    </TouchableOpacity>
+                  </View>
+
+                  <View className="h-[8]"></View>
+                  {/* <Text className="text-white font-bold ">{explanation}</Text> */}
+                  <Markdown style={styles}>{explanation}</Markdown>
+                </View>
               </View>
             </View>
-          </View>}
+          )}
 
           {/* Icon and button  */}
-          {gameState === "wait" && <View className="flex-row justify-between my-[16] mx-[100]">
-            <IconButton iconImage='eliminateIcon' isDisable={helperStatus['eliminate']} onPress={() => setOpenHelper({ 'eliminate': true, 'double': false, 'change': false })} />
-            <IconButton iconImage='doubleIcon' isDisable={helperStatus['double']} onPress={() => setOpenHelper({ 'eliminate': false, 'double': true, 'change': false })} />
-            <IconButton iconImage='changeIcon' isDisable={helperStatus['change']} onPress={() => setOpenHelper({ 'eliminate': false, 'double': false, 'change': true })} />
-
-          </View>}
-          {gameState === "incorrect" && <View className="flex-row justify-center my-[16] mx-[40]">
-            <TextButton text='Try Again' onPress={onPress} />
-          </View>}
-          {gameState === "correct" && <View className="flex-row justify-end my-[16] mx-[40]">
-            <TextButton text='Next' onPress={onPress} />
-          </View>}
-
+          {gameState === "wait" && (
+            <View className="flex-row justify-between my-[16] mx-[100]">
+              <IconButton
+                iconImage="eliminateIcon"
+                isDisable={helperStatus["eliminate"]}
+                onPress={() =>
+                  setOpenHelper({
+                    eliminate: true,
+                    double: false,
+                    change: false,
+                  })
+                }
+              />
+              <IconButton
+                iconImage="doubleIcon"
+                isDisable={helperStatus["double"]}
+                onPress={() =>
+                  setOpenHelper({
+                    eliminate: false,
+                    double: true,
+                    change: false,
+                  })
+                }
+              />
+              <IconButton
+                iconImage="changeIcon"
+                isDisable={helperStatus["change"]}
+                onPress={() =>
+                  setOpenHelper({
+                    eliminate: false,
+                    double: false,
+                    change: true,
+                  })
+                }
+              />
+            </View>
+          )}
+          {gameState === "incorrect" && (
+            <View className="flex-row justify-center my-[16] mx-[40]">
+              <TextButton text="Try Again" onPress={onPress} />
+            </View>
+          )}
+          {gameState === "correct" && (
+            <View className="flex-row justify-end my-[16] mx-[40]">
+              <TextButton text="Next" onPress={onPress} />
+            </View>
+          )}
 
           {/* Modal page */}
-          <HelpModalPage title='Eliminate' subtitle='Eliminate 2 wrong answers' isVisible={openHelper['eliminate']}
-            onPressPlay={() => { }} onClose={() => setOpenHelper({ 'eliminate': false, 'double': false, 'change': false })} imageName='eliminate' ></HelpModalPage>
-          <HelpModalPage title='Double Chance' subtitle='Get 2 choices to answer' isVisible={openHelper['double']}
-            onPressPlay={() => { }} onClose={() => setOpenHelper({ 'eliminate': false, 'double': false, 'change': false })} imageName='double' ></HelpModalPage>
-          <HelpModalPage title='Change Question' subtitle='Change to a new question' isVisible={openHelper['change']}
-            onPressPlay={() => { }} onClose={() => setOpenHelper({ 'eliminate': false, 'double': false, 'change': false })} imageName='change' ></HelpModalPage>
-        </View>
-      </ScrollView>
+          <HelpModalPage
+            title="Eliminate"
+            subtitle="Eliminate 2 wrong answers"
+            isVisible={openHelper["eliminate"]}
+            onPressPlay={() => { }}
+            onClose={() =>
+              setOpenHelper({ eliminate: false, double: false, change: false })
+            }
+            imageName="eliminate"
+          ></HelpModalPage>
+          <HelpModalPage
+            title="Double Chance"
+            subtitle="Get 2 choices to answer"
+            isVisible={openHelper["double"]}
+            onPressPlay={() => { }}
+            onClose={() =>
+              setOpenHelper({ eliminate: false, double: false, change: false })
+            }
+            imageName="double"
+          ></HelpModalPage>
+          <HelpModalPage
+            title="Change Question"
+            subtitle="Change to a new question"
+            isVisible={openHelper["change"]}
+            onPressPlay={() => { }}
+            onClose={() =>
+              setOpenHelper({ eliminate: false, double: false, change: false })
+            }
+            imageName="change"
+          ></HelpModalPage>
+        </ScrollView>
+      </View>
     </KeyboardAvoidingView>
   )
 }
