@@ -1,15 +1,18 @@
-import { NewQuizChoice, QuizAnswerResponse } from "@/apis/types";
-import ChoiceBox from "@/components/lab/ChoiceBox";
-import ExplanationPanel from "@/components/lab/ExplanationPanel";
-import HeaderPanel from "@/components/lab/HeaderPanel";
-import QuestionBox from "@/components/lab/QuestionBox";
-import { useAuth } from "@/contexts/AuthContext";
-import useRepositories from "@/hooks/useRepositories";
-import { playSound } from "@/utils/sound";
-import { useRouter } from "expo-router";
-import React, { useEffect, useRef, useState } from "react";
-import { Text, View } from "react-native";
-import { ScrollView } from "react-native-gesture-handler";
+import { NewQuizChoice, QuizAnswerResponse, QuizQuestionResponse } from '@/apis/types';
+import ChoiceBox from '@/components/lab/ChoiceBox';
+import ExplanationPanel from '@/components/lab/ExplanationPanel';
+import HeaderPanel from '@/components/lab/HeaderPanel';
+import QuestionBox from '@/components/lab/QuestionBox';
+import { useAuth } from '@/contexts/AuthContext';
+import useRepositories from '@/hooks/useRepositories';
+import { playSound } from '@/utils/sound';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useRouter } from 'expo-router';
+import React, { useEffect, useRef, useState } from 'react';
+import { Text, View } from 'react-native';
+import { ScrollView } from 'react-native-gesture-handler';
+
+
 
 export default function GamePage() {
   const [helperStatus, setHelperStatus] = useState({
@@ -24,7 +27,7 @@ export default function GamePage() {
   const [incorrectExplanation, setIncorrectExplanation] = useState("")
   const [explanation, setExplanation] = useState("")
   const [status, setStatus] = useState('wait');
-  const [question, setQuestion] = useState<QuizResponse | null>(null);
+  const [question, setQuestion] = useState<QuizQuestionResponse | null>(null);
   const [choices, setChoices] = useState<NewQuizChoice[]>([]);
   const [answer, setAnswer] = useState<QuizAnswerResponse | null>(null);
   const [gameState, setGameState] = useState<"wait" | "correct" | "incorrect">(
@@ -70,17 +73,27 @@ export default function GamePage() {
 
   const fetchData = async () => {
     // const questionData = await fetchRandomQuestion();
-    const questionData = await repos.gamev2.fetchSuggestedQuestion();
+    const selectedSubject = await AsyncStorage.getItem('selectedSubject');
+    const myLevelStr = await AsyncStorage.getItem('myLevel');
+    const selectedTopicStr = await AsyncStorage.getItem('selectedTopic');
+
+    // const myLevel = myLevelStr ? myLevelStr.split(',') : [];
+    // const selectedTopic = selectedTopicStr ? selectedTopicStr.split(',') : [];  
+
+    const questionData = await repos.gamev2.fetchSuggestedQuestion(selectedSubject as string,
+      myLevelStr as string,
+      selectedTopicStr as string);
     console.log('Fetched question data:', questionData);
-    setQuestion(questionData);
-    setChoices(questionData.choicelist.map(choice => ({ ...choice, is_selected: false })));
+    setQuestion(questionData.question);
+    setChoices(questionData.question.choicelist.map(choice => ({ ...choice, is_selected: false })));
+    setCurrentQuestionIndex(questionData.progress.current);
     setStatus('wait'); // เริ่มต้นด้วยสถานะ wait
     setGameState('wait');
     setExplanationStatus(false);
     setCorrectExplanation("");
     setIncorrectExplanation("");
 
-  };
+  }
 
   const handleSubmitAnswer = async (choiceId: any, index: any) => {
     if (!question) return;
@@ -163,7 +176,7 @@ export default function GamePage() {
   const logOutHandler = async () => {
     await auth.logout();
     router.push("/login");
-  }
+  };
 
   const settingHandler = () => {
     router.push("/subject");
@@ -230,8 +243,10 @@ export default function GamePage() {
         explanationStatus={explanationStatus}
         onPressNext={nextHandler}
         gameState={gameState}
-        questionIndex={currentQuestionIndex} />
-
+        questionIndex={currentQuestionIndex}
+        question={question}
+        selectedChoice={selectedChoice}
+      />
     </View>
   );
 }
