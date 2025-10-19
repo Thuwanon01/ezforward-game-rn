@@ -9,8 +9,6 @@ interface Prop {
   disabled?: boolean
 }
 
-
-
 export default function ChoiceBox({ text, status, onPress, disabled }: Prop) {
   const speak = () => {
     Speech.stop()
@@ -18,8 +16,6 @@ export default function ChoiceBox({ text, status, onPress, disabled }: Prop) {
     const lang = isThai ? 'th-TH' : 'en-US'
     Speech.speak(text, { language: lang })
   }
-
-
 
   // Single tap: แค่พูดออกเสียง
   const singleTap = Gesture.Tap()

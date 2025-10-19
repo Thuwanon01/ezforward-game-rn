@@ -1,6 +1,7 @@
 import { AuthRepository } from "@/apis/AuthRepository";
 import { GameRepository } from "@/apis/GameRepository";
 import { GameV2Repository } from "@/apis/GameV2Repository";
+import { LLMRepository } from "@/apis/LLMRepository";
 import { useRef } from "react";
 
 function getBaseURL () {
@@ -15,6 +16,7 @@ export default function useRepositories (accessToken: string) {
         auth: new AuthRepository(baseURL, accessToken),
         game: new GameRepository(baseURL, accessToken),
         gamev2: new GameV2Repository(baseURL, accessToken),
+        llm: new LLMRepository(baseURL, accessToken)
     })
 
     return repositories
