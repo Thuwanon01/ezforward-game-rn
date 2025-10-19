@@ -1,4 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -21,7 +22,7 @@ import IconButton from "./IconButton";
 import TextButton from "./TextButton";
 
 // Import Hook สำหรับ Repository และ Auth (จำเป็น)
-import { NewQuizChoice, QuizResponse } from "@/apis/types";
+import { NewQuizChoice, QuizQuestionResponse } from "@/apis/types";
 import { useAuth } from "@/contexts/AuthContext";
 import useRepositories from "@/hooks/useRepositories";
 
@@ -35,8 +36,10 @@ interface Props {
   explanationStatus: boolean;
   onPressNext: () => void;
   gameState?: "wait" | "correct" | "incorrect";
-  question?: QuizResponse | null;
+  question?: QuizQuestionResponse | null;
   selectedChoice?: NewQuizChoice | null;
+  score?: number;
+  questionIndex: number;
 }
 
 // ---เพิ่ม Interface สำหรับ Chat และ Feedback ---
@@ -66,6 +69,8 @@ export default function ExplanationPanel({
   gameState,
   question,
   selectedChoice,
+  score,
+  questionIndex,
 }: Props) {
   const [openExplanation, setOpenExplanation] = useState(false);
   const [openHelper, setOpenHelper] = useState({
@@ -73,6 +78,7 @@ export default function ExplanationPanel({
     double: false,
     change: false,
   });
+  const router = useRouter();
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [isChatLoading, setIsChatLoading] = useState(false);
@@ -100,6 +106,8 @@ export default function ExplanationPanel({
       }
     };
 
+    clearChatData();
+
     const loadData = async () => {
       try {
         const savedChat = await AsyncStorage.getItem("chatHistory");
@@ -118,31 +126,6 @@ export default function ExplanationPanel({
       }
     };
     loadData();
-  }, [explanation, correctAnswer]);
-
-  // --- เพิ่ม useEffect ใหม่สำหรับเคลียร์ข้อมูล ---
-  // useEffect นี้จะทำงาน "ทุกครั้งที่คำถามเปลี่ยนไป"
-  useEffect(() => {
-    const clearChatData = async () => {
-      console.log("New question detected, clearing chat history...");
-      // เคลียร์ State ของ chat
-      setChatHistory([]);
-      setFeedback(null);
-      setInputValue("");
-
-      // เคลียร์ข้อมูลใน AsyncStorage
-      try {
-        await AsyncStorage.removeItem("chatHistory");
-        await AsyncStorage.removeItem("explanationFeedback");
-      } catch (error) {
-        console.error("Failed to clear data from storage", error);
-      }
-    };
-
-    clearChatData();
-
-    // ใส่ props ที่ใช้ระบุคำถามปัจจุบันใน dependency array
-    // เพื่อให้ useEffect นี้ทำงานเมื่อ props เหล่านี้เปลี่ยนค่า (เมื่อไปข้อใหม่)
   }, [explanation, correctAnswer]);
 
   const toggleExplanation = () => {
@@ -386,12 +369,8 @@ export default function ExplanationPanel({
               />
             </View>
           )}
-          {gameState === "incorrect" && (
-            <View className="flex-row justify-center my-[16] mx-[40]">
-              <TextButton text="Try Again" onPress={onPress} />
-            </View>
-          )}
-          {gameState === "correct" && (
+
+          {gameState !== "wait" && questionIndex <= 10 && (
             <View className="flex-row justify-end my-[16] mx-[40]">
               <TextButton text="Next" onPress={onPress} />
             </View>
