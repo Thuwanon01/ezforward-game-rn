@@ -250,6 +250,7 @@ export default function GamePage() {
           gameState={gameState}
           question={question}
           selectedChoice={selectedChoice}
+          questionIndex={currentQuestionIndex}
         />
       </View>
     </View>
