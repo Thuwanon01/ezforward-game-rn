@@ -248,6 +248,7 @@ export default function GamePage() {
           explanationStatus={explanationStatus}
           onPressNext={fetchData}
           gameState={gameState}
+          questionIndex={currentQuestionIndex}
           question={question}
           selectedChoice={selectedChoice}
         />
