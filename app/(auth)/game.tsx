@@ -246,7 +246,7 @@ export default function GamePage() {
           explanation={explanation}
           helperStatus={helperStatus}
           explanationStatus={explanationStatus}
-          onPressNext={fetchData}
+          onPressNext={nextHandler}
           gameState={gameState}
           question={question}
           selectedChoice={selectedChoice}
