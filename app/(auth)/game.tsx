@@ -246,11 +246,12 @@ export default function GamePage() {
           explanation={explanation}
           helperStatus={helperStatus}
           explanationStatus={explanationStatus}
-          onPressNext={fetchData}
+          onPressNext={nextHandler}
           gameState={gameState}
           questionIndex={currentQuestionIndex}
           question={question}
           selectedChoice={selectedChoice}
+          questionIndex={currentQuestionIndex}
         />
       </View>
     </View>
