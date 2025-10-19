@@ -6,6 +6,7 @@ import QuestionBox from '@/components/lab/QuestionBox';
 import { useAuth } from '@/contexts/AuthContext';
 import useRepositories from '@/hooks/useRepositories';
 import { playSound } from '@/utils/sound';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import { Text, View } from 'react-native';
@@ -68,7 +69,16 @@ export default function GamePage() {
 
   const fetchData = async () => {
     // const questionData = await fetchRandomQuestion();
-    const questionData = await repos.gamev2.fetchSuggestedQuestion();
+    const selectedSubject = await AsyncStorage.getItem('selectedSubject');
+    const myLevelStr = await AsyncStorage.getItem('myLevel');
+    const selectedTopicStr = await AsyncStorage.getItem('selectedTopic');
+
+    // const myLevel = myLevelStr ? myLevelStr.split(',') : [];
+    // const selectedTopic = selectedTopicStr ? selectedTopicStr.split(',') : [];  
+
+    const questionData = await repos.gamev2.fetchSuggestedQuestion(selectedSubject as string,
+      myLevelStr as string,
+      selectedTopicStr as string);
     console.log('Fetched question data:', questionData);
     setQuestion(questionData);
     setChoices(questionData.choicelist.map(choice => ({ ...choice, is_selected: false })));
