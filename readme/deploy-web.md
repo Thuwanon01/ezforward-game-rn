@@ -1,6 +1,7 @@
 ```bash
 npx expo export --platform web
 eas deploy
+eas deploy --prod
 ```
 
 
