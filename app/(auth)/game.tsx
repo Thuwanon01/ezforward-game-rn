@@ -1,4 +1,8 @@
-import { NewQuizChoice, QuizAnswerResponse, QuizResponse } from "@/apis/types";
+import {
+  NewQuizChoice,
+  QuizAnswerResponse,
+  QuizQuestionResponse,
+} from "@/apis/types";
 import ChoiceBox from "@/components/lab/ChoiceBox";
 import ExplanationPanel from "@/components/lab/ExplanationPanel";
 import HeaderPanel from "@/components/lab/HeaderPanel";
@@ -6,6 +10,7 @@ import QuestionBox from "@/components/lab/QuestionBox";
 import { useAuth } from "@/contexts/AuthContext";
 import useRepositories from "@/hooks/useRepositories";
 import { playSound } from "@/utils/sound";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import { Text, View } from "react-native";
@@ -24,7 +29,7 @@ export default function GamePage() {
   const [incorrectExplanation, setIncorrectExplanation] = useState("");
   const [explanation, setExplanation] = useState("");
   const [status, setStatus] = useState("wait");
-  const [question, setQuestion] = useState<QuizResponse | null>(null);
+  const [question, setQuestion] = useState<QuizQuestionResponse | null>(null);
   const [choices, setChoices] = useState<NewQuizChoice[]>([]);
   const [answer, setAnswer] = useState<QuizAnswerResponse | null>(null);
   const [gameState, setGameState] = useState<"wait" | "correct" | "incorrect">(
@@ -35,6 +40,7 @@ export default function GamePage() {
     null
   );
   const timerRef = useRef<number | null>(null);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(1);
 
   const router = useRouter();
 
@@ -69,15 +75,27 @@ export default function GamePage() {
 
   const fetchData = async () => {
     // const questionData = await fetchRandomQuestion();
-    const questionData = await repos.gamev2.fetchSuggestedQuestion();
+    const selectedSubject = await AsyncStorage.getItem("selectedSubject");
+    const myLevelStr = await AsyncStorage.getItem("myLevel");
+    const selectedTopicStr = await AsyncStorage.getItem("selectedTopic");
+
+    // const myLevel = myLevelStr ? myLevelStr.split(',') : [];
+    // const selectedTopic = selectedTopicStr ? selectedTopicStr.split(',') : [];
+
+    const questionData = await repos.gamev2.fetchSuggestedQuestion(
+      selectedSubject as string,
+      myLevelStr as string,
+      selectedTopicStr as string
+    );
     console.log("Fetched question data:", questionData);
-    setQuestion(questionData);
+    setQuestion(questionData.question);
     setChoices(
-      questionData.choicelist.map((choice) => ({
+      questionData.question.choicelist.map((choice) => ({
         ...choice,
         is_selected: false,
       }))
     );
+    setCurrentQuestionIndex(questionData.progress.current);
     setStatus("wait"); // เริ่มต้นด้วยสถานะ wait
     setGameState("wait");
     setExplanationStatus(false);
@@ -117,7 +135,6 @@ export default function GamePage() {
     } else {
       setGameState("incorrect");
       setStatus("incorrect");
-      setScore(0);
       playSound("alarm.mp3");
     }
 
@@ -167,23 +184,31 @@ export default function GamePage() {
     router.push("/login");
   };
 
+  const settingHandler = () => {
+    router.push("/subject");
+  };
+
+  const nextHandler = () => {
+    fetchData();
+    if (currentQuestionIndex >= 10) {
+      setScore(0);
+      router.push("/success");
+    }
+  };
+
   return (
-    <View className="flex-1">
+    <View className="flex-1 flex-col justify-between">
       {/* for test components */}
       <ScrollView className="flex-1">
         <HeaderPanel
           title={"GameMunMun"}
           onPressBack={logOutHandler}
-          onPressMenu={() => {}}
+          onPressMenu={settingHandler}
         ></HeaderPanel>
 
         <View className="flex-row justify-end">
           <View className="flex-row mx-6 mt-4 bg-[#FCC61D] px-3 py-1 rounded-[20]">
-            {gameState === "incorrect" ? (
-              <Text className="text-xl font-bold">Game Over : {score}</Text>
-            ) : (
-              <Text className="text-xl font-bold">{score}</Text>
-            )}
+            <Text className="text-xl font-bold">{score}</Text>
           </View>
         </View>
 
@@ -192,6 +217,7 @@ export default function GamePage() {
           question={question?.text || "Loading question..."}
           status={status}
           onPressQuestion={handleQuestionPress}
+          questionIndex={currentQuestionIndex}
         />
 
         {/* Choices */}
@@ -211,19 +237,21 @@ export default function GamePage() {
       </ScrollView>
 
       {/* Components for use */}
-      <ExplanationPanel
-        correctAnswer={correctAnswer}
-        correctExplanation={correctExplanation}
-        incorrectAnswer={incorrectAnswer}
-        incorrectExplanation={incorrectExplanation}
-        explanation={explanation}
-        helperStatus={helperStatus}
-        explanationStatus={explanationStatus}
-        onPressNext={fetchData}
-        gameState={gameState}
-        question={question}
-        selectedChoice={selectedChoice}
-      />
+      <View className="flex-shrink-0">
+        <ExplanationPanel
+          correctAnswer={correctAnswer}
+          correctExplanation={correctExplanation}
+          incorrectAnswer={incorrectAnswer}
+          incorrectExplanation={incorrectExplanation}
+          explanation={explanation}
+          helperStatus={helperStatus}
+          explanationStatus={explanationStatus}
+          onPressNext={fetchData}
+          gameState={gameState}
+          question={question}
+          selectedChoice={selectedChoice}
+        />
+      </View>
     </View>
   );
 }

@@ -1,15 +1,28 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { HandThumbDownIcon, HandThumbUpIcon, MagnifyingGlassIcon, PaperAirplaneIcon } from "react-native-heroicons/solid";
-import Markdown from 'react-native-markdown-display';
-import HelpModalPage from './HelpModalPage';
-import IconButton from './IconButton';
-import TextButton from './TextButton';
-
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import {
+  MagnifyingGlassIcon,
+  PaperAirplaneIcon,
+} from "react-native-heroicons/solid";
+import Markdown from "react-native-markdown-display";
+import HelpModalPage from "./HelpModalPage";
+import IconButton from "./IconButton";
+import TextButton from "./TextButton";
 
 // Import Hook สำหรับ Repository และ Auth (จำเป็น)
-import { NewQuizChoice, QuizResponse } from "@/apis/types";
+import { NewQuizChoice, QuizQuestionResponse } from "@/apis/types";
 import { useAuth } from "@/contexts/AuthContext";
 import useRepositories from "@/hooks/useRepositories";
 
@@ -23,14 +36,16 @@ interface Props {
   explanationStatus: boolean;
   onPressNext: () => void;
   gameState?: "wait" | "correct" | "incorrect";
-  question?: QuizResponse | null;
+  question?: QuizQuestionResponse | null;
   selectedChoice?: NewQuizChoice | null;
+  score?: number;
+  questionIndex: number;
 }
 
 // ---เพิ่ม Interface สำหรับ Chat และ Feedback ---
 interface ChatMessage {
   id: number;
-  sender: 'user' | 'bot';
+  sender: "user" | "bot";
   text: string;
 }
 
@@ -40,7 +55,7 @@ interface Feedback {
   userId: number;
   type: FeedbackState;
 }
-type FeedbackState = 'like' | 'dislike';
+type FeedbackState = "like" | "dislike";
 
 export default function ExplanationPanel({
   correctAnswer,
@@ -54,6 +69,8 @@ export default function ExplanationPanel({
   gameState,
   question,
   selectedChoice,
+  score,
+  questionIndex,
 }: Props) {
   const [openExplanation, setOpenExplanation] = useState(false);
   const [openHelper, setOpenHelper] = useState({
@@ -61,8 +78,9 @@ export default function ExplanationPanel({
     double: false,
     change: false,
   });
+  const router = useRouter();
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
-  const [inputValue, setInputValue] = useState('');
+  const [inputValue, setInputValue] = useState("");
   const [isChatLoading, setIsChatLoading] = useState(false);
   const [feedback, setFeedback] = useState<FeedbackState | null>(null);
 
@@ -88,10 +106,14 @@ export default function ExplanationPanel({
       }
     };
 
+    clearChatData();
+
     const loadData = async () => {
       try {
-        const savedChat = await AsyncStorage.getItem('chatHistory');
-        const savedFeedback = await AsyncStorage.getItem('explanationFeedback') as FeedbackState;
+        const savedChat = await AsyncStorage.getItem("chatHistory");
+        const savedFeedback = (await AsyncStorage.getItem(
+          "explanationFeedback"
+        )) as FeedbackState;
         if (savedChat) {
           setChatHistory(JSON.parse(savedChat));
         }
@@ -104,32 +126,6 @@ export default function ExplanationPanel({
       }
     };
     loadData();
-  }, [explanation, correctAnswer]);
-
-
-  // --- เพิ่ม useEffect ใหม่สำหรับเคลียร์ข้อมูล ---
-  // useEffect นี้จะทำงาน "ทุกครั้งที่คำถามเปลี่ยนไป"
-  useEffect(() => {
-    const clearChatData = async () => {
-      console.log("New question detected, clearing chat history...");
-      // เคลียร์ State ของ chat
-      setChatHistory([]);
-      setFeedback(null);
-      setInputValue('');
-
-      // เคลียร์ข้อมูลใน AsyncStorage
-      try {
-        await AsyncStorage.removeItem('chatHistory');
-        await AsyncStorage.removeItem('explanationFeedback');
-      } catch (error) {
-        console.error("Failed to clear data from storage", error);
-      }
-    };
-
-    clearChatData();
-
-    // ใส่ props ที่ใช้ระบุคำถามปัจจุบันใน dependency array
-    // เพื่อให้ useEffect นี้ทำงานเมื่อ props เหล่านี้เปลี่ยนค่า (เมื่อไปข้อใหม่)
   }, [explanation, correctAnswer]);
 
   const toggleExplanation = () => {
@@ -160,15 +156,22 @@ export default function ExplanationPanel({
   const handleSendMessage = async () => {
     if (!inputValue.trim()) return;
 
-    const userMessage: ChatMessage = { id: Date.now(), sender: 'user', text: inputValue };
+    const userMessage: ChatMessage = {
+      id: Date.now(),
+      sender: "user",
+      text: inputValue,
+    };
     const updatedChatHistory = [...chatHistory, userMessage];
 
     setChatHistory(updatedChatHistory);
-    setInputValue('');
+    setInputValue("");
     setIsChatLoading(true);
 
     try {
-      await AsyncStorage.setItem('chatHistory', JSON.stringify(updatedChatHistory));
+      await AsyncStorage.setItem(
+        "chatHistory",
+        JSON.stringify(updatedChatHistory)
+      );
 
       // --- Build context prompt with question and selected choice ---
       const contextPrompt = buildContextPrompt(inputValue);
@@ -183,69 +186,52 @@ export default function ExplanationPanel({
       const botResponseText = response.result;
       // --- สิ้นสุดการยิง API จริง ---
 
-      const botMessage: ChatMessage = { id: Date.now() + 1, sender: 'bot', text: botResponseText };
+      const botMessage: ChatMessage = {
+        id: Date.now() + 1,
+        sender: "bot",
+        text: botResponseText,
+      };
       const finalChatHistory = [...updatedChatHistory, botMessage];
 
       setChatHistory(finalChatHistory);
-      await AsyncStorage.setItem('chatHistory', JSON.stringify(finalChatHistory));
-
+      await AsyncStorage.setItem(
+        "chatHistory",
+        JSON.stringify(finalChatHistory)
+      );
     } catch (error) {
       console.error("Failed to send message:", error);
-      const errorMessage: ChatMessage = { id: Date.now() + 1, sender: 'bot', text: "ขออภัย, เกิดข้อผิดพลาดในการเชื่อมต่อ" };
-      setChatHistory(prevHistory => [...prevHistory, errorMessage]);
+      const errorMessage: ChatMessage = {
+        id: Date.now() + 1,
+        sender: "bot",
+        text: "ขออภัย, เกิดข้อผิดพลาดในการเชื่อมต่อ",
+      };
+      setChatHistory((prevHistory) => [...prevHistory, errorMessage]);
     } finally {
       setIsChatLoading(false);
     }
   };
 
-
-  const handleFeedback = async (newFeedback: 'like' | 'dislike') => {
-    const updatedFeedback = feedback === newFeedback ? null : newFeedback;
-    setFeedback(updatedFeedback);
-
-    try {
-      await AsyncStorage.setItem('explanationFeedback', updatedFeedback || '');
-      console.log("Feedback saved:", updatedFeedback);
-      // --- ยิง API เพื่อส่ง Report (ไม่รอคำตอบ) ---
-      if (updatedFeedback) {
-        // Use a type assertion to avoid TypeScript error if sendFeedback doesn't exist on the LLM repository type.
-        const llmRepo: any = repos.llm;
-
-        // Build payload and include userId only when auth.user is available
-        const payload: any = { type: updatedFeedback };
-        if (auth && auth.user && typeof auth.user.id !== 'undefined' && auth.user !== null) {
-          payload.userId = auth.user.id;
-        }
-
-        if (typeof llmRepo?.sendFeedback === 'function') {
-          await llmRepo.sendFeedback(payload);
-        } else if (typeof llmRepo?.reportFeedback === 'function') {
-          // fallback if the repository exposes a differently named method
-          await llmRepo.reportFeedback(payload);
-        } else {
-          console.warn('LLM repository has no sendFeedback/reportFeedback method; skipping remote report.');
-        }
-      }
-    } catch (error) {
-      console.error("Failed to save feedback:", error);
-    }
-  };
-
   // --- ฟังก์ชันสำหรับ Render Chat ---
   const renderChatItem = ({ item }: { item: ChatMessage }) => (
-    <View className={`p-3 rounded-lg my-1 max-w-[85%] ${item.sender === 'bot' ? 'bg-gray-700 self-start' : 'bg-blue-600 self-end'
-      }`}>
+    <View
+      className={`p-3 rounded-lg my-1 max-w-[85%] ${
+        item.sender === "bot"
+          ? "bg-gray-700 self-start"
+          : "bg-blue-600 self-end"
+      }`}
+    >
       <Text className="text-white text-base">{item.text}</Text>
     </View>
   );
 
   return (
     //All box of footer
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-    >
-      <View className="bg-[#27548A] rounded-t-xl">
-        <ScrollView>
+
+    <ScrollView className="max-h-[800px]">
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      >
+        <View className="bg-[#27548A] rounded-t-xl">
           {/* Condition to show pop-up arrow */}
           {explanationStatus && (
             <View className="flex-row justify-center mt-[12]">
@@ -285,12 +271,13 @@ export default function ExplanationPanel({
 
                 {/* --- เพิ่ม UI ส่วนใหม่เข้ามาที่นี่ --- */}
                 <View className="mt-6 border-t border-gray-500 pt-4">
-                  <FlatList
+                  {/* <FlatList
                     data={chatHistory}
                     renderItem={renderChatItem}
                     keyExtractor={(item) => item.id.toString()}
                     className="max-h-48 mb-2"
-                  />
+                  /> */}
+                  {chatHistory.map((item) => renderChatItem({ item }))}
 
                   {isChatLoading && (
                     <ActivityIndicator color="white" className="my-2" />
@@ -303,7 +290,7 @@ export default function ExplanationPanel({
                       style={{ marginLeft: 8 }}
                     />
                     <TextInput
-                      className="flex-1 text-white text-lg px-3"
+                      className="text-white text-lg px-3"
                       placeholder="Ask something..."
                       placeholderTextColor="#9ca3af"
                       value={inputValue}
@@ -321,7 +308,7 @@ export default function ExplanationPanel({
                     </TouchableOpacity>
                   </View>
 
-                  <View className="flex-row items-center justify-end mt-4 space-x-4">
+                  {/* <View className="flex-row items-center justify-end mt-4 space-x-4">
                     <TouchableOpacity onPress={() => handleFeedback("like")}>
                       <HandThumbUpIcon
                         color={feedback === "like" ? "#22c55e" : "white"}
@@ -334,7 +321,7 @@ export default function ExplanationPanel({
                         size={28}
                       />
                     </TouchableOpacity>
-                  </View>
+                  </View> */}
 
                   <View className="h-[8]"></View>
                   {/* <Text className="text-white font-bold ">{explanation}</Text> */}
@@ -382,12 +369,8 @@ export default function ExplanationPanel({
               />
             </View>
           )}
-          {gameState === "incorrect" && (
-            <View className="flex-row justify-center my-[16] mx-[40]">
-              <TextButton text="Try Again" onPress={onPress} />
-            </View>
-          )}
-          {gameState === "correct" && (
+
+          {gameState !== "wait" && questionIndex <= 10 && (
             <View className="flex-row justify-end my-[16] mx-[40]">
               <TextButton text="Next" onPress={onPress} />
             </View>
@@ -398,7 +381,7 @@ export default function ExplanationPanel({
             title="Eliminate"
             subtitle="Eliminate 2 wrong answers"
             isVisible={openHelper["eliminate"]}
-            onPressPlay={() => { }}
+            onPressPlay={() => {}}
             onClose={() =>
               setOpenHelper({ eliminate: false, double: false, change: false })
             }
@@ -408,7 +391,7 @@ export default function ExplanationPanel({
             title="Double Chance"
             subtitle="Get 2 choices to answer"
             isVisible={openHelper["double"]}
-            onPressPlay={() => { }}
+            onPressPlay={() => {}}
             onClose={() =>
               setOpenHelper({ eliminate: false, double: false, change: false })
             }
@@ -418,33 +401,28 @@ export default function ExplanationPanel({
             title="Change Question"
             subtitle="Change to a new question"
             isVisible={openHelper["change"]}
-            onPressPlay={() => { }}
+            onPressPlay={() => {}}
             onClose={() =>
               setOpenHelper({ eliminate: false, double: false, change: false })
             }
             imageName="change"
           ></HelpModalPage>
-        </ScrollView>
-      </View>
-    </KeyboardAvoidingView>
-  )
+        </View>
+      </KeyboardAvoidingView>
+    </ScrollView>
+  );
 }
-
-
 
 const styles = StyleSheet.create({
   body: {
-
-    color: 'white'
+    color: "white",
   },
   code_inline: {
     borderWidth: 1,
-    borderColor: '#CCCCCC',
-    backgroundColor: '#3e3e3cff',
+    borderColor: "#CCCCCC",
+    backgroundColor: "#3e3e3cff",
     padding: 8,
     borderRadius: 4,
     lineHeight: 40,
-
-  }
-})
-
+  },
+});
