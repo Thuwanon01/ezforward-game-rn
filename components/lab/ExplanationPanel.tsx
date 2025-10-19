@@ -27,7 +27,7 @@ interface Props {
   question?: QuizQuestionResponse | null;
   selectedChoice?: NewQuizChoice | null;
   score?: number;
-  questionIndex?: number;
+  questionIndex: number;
 }
 
 // ---เพิ่ม Interface สำหรับ Chat และ Feedback ---
@@ -364,12 +364,8 @@ export default function ExplanationPanel({
               />
             </View>
           )}
-          {gameState === "incorrect" && (
-            <View className="flex-row justify-center my-[16] mx-[40]">
-              <TextButton text="Try Again" onPress={onPress} />
-            </View>
-          )}
-          {gameState === "correct" && (
+
+          {gameState !== "wait" && questionIndex <= 10 && (
             <View className="flex-row justify-end my-[16] mx-[40]">
               <TextButton text="Next" onPress={onPress} />
             </View>
