@@ -12,6 +12,22 @@ export interface NewQuizChoice {
 
 // Interface for random quiz question
 export interface QuizResponse {
+
+    question: QuizQuestionResponse;
+    learning_plan_id: number;
+    progress: {
+        current: number;
+        total: number;
+    }
+
+
+    // id: number | string;
+    // text: string;
+    // type: string;
+    // choicelist: NewQuizChoice[];
+}
+
+export interface QuizQuestionResponse {
     id: number | string;
     text: string;
     type: string;

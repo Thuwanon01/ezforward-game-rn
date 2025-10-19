@@ -1,30 +1,33 @@
-import { NewQuizChoice, QuizAnswerResponse, QuizResponse } from "@/apis/types";
-import ChoiceBox from "@/components/lab/ChoiceBox";
-import ExplanationPanel from "@/components/lab/ExplanationPanel";
-import HeaderPanel from "@/components/lab/HeaderPanel";
-import QuestionBox from "@/components/lab/QuestionBox";
-import { useAuth } from "@/contexts/AuthContext";
-import useRepositories from "@/hooks/useRepositories";
-import { playSound } from "@/utils/sound";
-import { useRouter } from "expo-router";
-import React, { useEffect, useRef, useState } from "react";
-import { Text, View } from "react-native";
-import { ScrollView } from "react-native-gesture-handler";
+import { NewQuizChoice, QuizAnswerResponse, QuizQuestionResponse } from '@/apis/types';
+import ChoiceBox from '@/components/lab/ChoiceBox';
+import ExplanationPanel from '@/components/lab/ExplanationPanel';
+import HeaderPanel from '@/components/lab/HeaderPanel';
+import QuestionBox from '@/components/lab/QuestionBox';
+import { useAuth } from '@/contexts/AuthContext';
+import useRepositories from '@/hooks/useRepositories';
+import { playSound } from '@/utils/sound';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useRouter } from 'expo-router';
+import React, { useEffect, useRef, useState } from 'react';
+import { Text, View } from 'react-native';
+import { ScrollView } from 'react-native-gesture-handler';
+
+
 
 export default function GamePage() {
   const [helperStatus, setHelperStatus] = useState({
-    eliminate: false,
-    double: false,
-    change: false,
-  });
-  const [explanationStatus, setExplanationStatus] = useState(false);
-  const [correctAnswer, setCorrectAnswer] = useState("");
-  const [correctExplanation, setCorrectExplanation] = useState("");
-  const [incorrectAnswer, setIncorrectAnswer] = useState("");
-  const [incorrectExplanation, setIncorrectExplanation] = useState("");
-  const [explanation, setExplanation] = useState("");
-  const [status, setStatus] = useState("wait");
-  const [question, setQuestion] = useState<QuizResponse | null>(null);
+    "eliminate": false,
+    "double": false,
+    "change": false
+  })
+  const [explanationStatus, setExplanationStatus] = useState(false)
+  const [correctAnswer, setCorrectAnswer] = useState("")
+  const [correctExplanation, setCorrectExplanation] = useState("")
+  const [incorrectAnswer, setIncorrectAnswer] = useState("")
+  const [incorrectExplanation, setIncorrectExplanation] = useState("")
+  const [explanation, setExplanation] = useState("")
+  const [status, setStatus] = useState('wait');
+  const [question, setQuestion] = useState<QuizQuestionResponse | null>(null);
   const [choices, setChoices] = useState<NewQuizChoice[]>([]);
   const [answer, setAnswer] = useState<QuizAnswerResponse | null>(null);
   const [gameState, setGameState] = useState<"wait" | "correct" | "incorrect">(
@@ -35,6 +38,7 @@ export default function GamePage() {
     null
   );
   const timerRef = useRef<number | null>(null);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(1);
 
   const router = useRouter();
 
@@ -69,21 +73,27 @@ export default function GamePage() {
 
   const fetchData = async () => {
     // const questionData = await fetchRandomQuestion();
-    const questionData = await repos.gamev2.fetchSuggestedQuestion();
-    console.log("Fetched question data:", questionData);
-    setQuestion(questionData);
-    setChoices(
-      questionData.choicelist.map((choice) => ({
-        ...choice,
-        is_selected: false,
-      }))
-    );
-    setStatus("wait"); // เริ่มต้นด้วยสถานะ wait
-    setGameState("wait");
+    const selectedSubject = await AsyncStorage.getItem('selectedSubject');
+    const myLevelStr = await AsyncStorage.getItem('myLevel');
+    const selectedTopicStr = await AsyncStorage.getItem('selectedTopic');
+
+    // const myLevel = myLevelStr ? myLevelStr.split(',') : [];
+    // const selectedTopic = selectedTopicStr ? selectedTopicStr.split(',') : [];  
+
+    const questionData = await repos.gamev2.fetchSuggestedQuestion(selectedSubject as string,
+      myLevelStr as string,
+      selectedTopicStr as string);
+    console.log('Fetched question data:', questionData);
+    setQuestion(questionData.question);
+    setChoices(questionData.question.choicelist.map(choice => ({ ...choice, is_selected: false })));
+    setCurrentQuestionIndex(questionData.progress.current);
+    setStatus('wait'); // เริ่มต้นด้วยสถานะ wait
+    setGameState('wait');
     setExplanationStatus(false);
     setCorrectExplanation("");
     setIncorrectExplanation("");
-  };
+
+  }
 
   const handleSubmitAnswer = async (choiceId: any, index: any) => {
     if (!question) return;
@@ -115,10 +125,9 @@ export default function GamePage() {
       setScore(score + 1);
       playSound("yessound.mp3");
     } else {
-      setGameState("incorrect");
-      setStatus("incorrect");
-      setScore(0);
-      playSound("alarm.mp3");
+      setGameState('incorrect');
+      setStatus('incorrect');
+      playSound('alarm.mp3')
     }
 
     // TODO: Too hard to read
@@ -147,7 +156,9 @@ export default function GamePage() {
         ?.explanation || ""
     );
     setExplanation(answerData.explanation);
-  };
+
+
+  }
 
   const handleSelectChoice = (choiceId: number) => {
     if (answer?.choices.find((choice) => choice.id === choiceId)?.is_correct)
@@ -167,6 +178,19 @@ export default function GamePage() {
     router.push("/login");
   };
 
+  const settingHandler = () => {
+    router.push("/subject");
+  }
+
+  const nextHandler = () => {
+    fetchData();
+    if (currentQuestionIndex >= 10) {
+      setScore(0);
+      router.push("/success");
+    }
+
+  }
+
   return (
     <View className="flex-1">
       {/* for test components */}
@@ -174,16 +198,13 @@ export default function GamePage() {
         <HeaderPanel
           title={"GameMunMun"}
           onPressBack={logOutHandler}
-          onPressMenu={() => {}}
-        ></HeaderPanel>
+          onPressMenu={settingHandler} >
+        </HeaderPanel>
 
-        <View className="flex-row justify-end">
-          <View className="flex-row mx-6 mt-4 bg-[#FCC61D] px-3 py-1 rounded-[20]">
-            {gameState === "incorrect" ? (
-              <Text className="text-xl font-bold">Game Over : {score}</Text>
-            ) : (
-              <Text className="text-xl font-bold">{score}</Text>
-            )}
+        <View className='flex-row justify-end'>
+          <View className='flex-row mx-6 mt-4 bg-[#FCC61D] px-3 py-1 rounded-[20]'>
+
+            <Text className='text-xl font-bold'>{score}</Text>
           </View>
         </View>
 
@@ -192,6 +213,7 @@ export default function GamePage() {
           question={question?.text || "Loading question..."}
           status={status}
           onPressQuestion={handleQuestionPress}
+          questionIndex={currentQuestionIndex}
         />
 
         {/* Choices */}
@@ -219,8 +241,9 @@ export default function GamePage() {
         explanation={explanation}
         helperStatus={helperStatus}
         explanationStatus={explanationStatus}
-        onPressNext={fetchData}
+        onPressNext={nextHandler}
         gameState={gameState}
+        questionIndex={currentQuestionIndex}
         question={question}
         selectedChoice={selectedChoice}
       />
