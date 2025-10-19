@@ -168,7 +168,7 @@ export default function GamePage() {
   };
 
   return (
-    <View className="flex-1">
+    <View className="flex-1 flex-col justify-between">
       {/* for test components */}
       <ScrollView className="flex-1">
         <HeaderPanel
@@ -211,19 +211,21 @@ export default function GamePage() {
       </ScrollView>
 
       {/* Components for use */}
-      <ExplanationPanel
-        correctAnswer={correctAnswer}
-        correctExplanation={correctExplanation}
-        incorrectAnswer={incorrectAnswer}
-        incorrectExplanation={incorrectExplanation}
-        explanation={explanation}
-        helperStatus={helperStatus}
-        explanationStatus={explanationStatus}
-        onPressNext={fetchData}
-        gameState={gameState}
-        question={question}
-        selectedChoice={selectedChoice}
-      />
+      <View className="flex-shrink-0">
+        <ExplanationPanel
+          correctAnswer={correctAnswer}
+          correctExplanation={correctExplanation}
+          incorrectAnswer={incorrectAnswer}
+          incorrectExplanation={incorrectExplanation}
+          explanation={explanation}
+          helperStatus={helperStatus}
+          explanationStatus={explanationStatus}
+          onPressNext={fetchData}
+          gameState={gameState}
+          question={question}
+          selectedChoice={selectedChoice}
+        />
+      </View>
     </View>
   );
 }
