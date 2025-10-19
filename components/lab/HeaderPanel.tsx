@@ -11,7 +11,7 @@ export default function HeaderPanel({ title, onPressBack, onPressMenu }: Props) 
     return (
         <View className='w-full h-12 flex-row justify-between items-center px-4 border-b border-gray-300 bg-[#27548A]'>
             <TouchableOpacity >
-                <Ionicons name="menu" size={24} color="white" onPress={onPressMenu} />
+                <Ionicons name="construct" size={24} color="white" onPress={onPressMenu} />
             </TouchableOpacity>
             <Text className='text-stone-50'>{title}</Text>
             <TouchableOpacity>

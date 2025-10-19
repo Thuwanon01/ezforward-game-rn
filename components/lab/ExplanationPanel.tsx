@@ -1,3 +1,4 @@
+import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Markdown from 'react-native-markdown-display';
@@ -15,15 +16,19 @@ interface Props {
   explanationStatus: boolean
   onPressNext: () => void
   gameState?: 'wait' | 'correct' | 'incorrect'
+  score?: number
+  questionIndex?: number
 }
 
 
 
 export default function ExplanationPanel({ correctAnswer, correctExplanation, incorrectAnswer,
-  incorrectExplanation, explanation, helperStatus, explanationStatus, onPressNext: onPress, gameState }: Props) {
+  incorrectExplanation, explanation, helperStatus, explanationStatus,
+  onPressNext: onPress, gameState, score, questionIndex }: Props) {
   const [openExplanation, setOpenExplanation] = useState(false)
   const [openHelper, setOpenHelper] = useState({ 'eliminate': false, 'double': false, 'change': false })
 
+  const router = useRouter();
 
   const toggleExplanation = () => {
     openExplanation ? setOpenExplanation(false) : setOpenExplanation(true)
@@ -70,12 +75,15 @@ export default function ExplanationPanel({ correctAnswer, correctExplanation, in
         <IconButton iconImage='changeIcon' isDisable={helperStatus['change']} onPress={() => setOpenHelper({ 'eliminate': false, 'double': false, 'change': true })} />
 
       </View>}
-      {gameState === "incorrect" && <View className="flex-row justify-center my-[16] mx-[40]">
+      {/* {gameState === "incorrect" && <View className="flex-row justify-center my-[16] mx-[40]">
         <TextButton text='Try Again' onPress={onPress} />
-      </View>}
-      {gameState === "correct" && <View className="flex-row justify-end my-[16] mx-[40]">
+      </View>} */}
+      {gameState !== "wait" && (questionIndex ?? 0) <= 10 && <View className="flex-row justify-end my-[16] mx-[40]">
         <TextButton text='Next' onPress={onPress} />
       </View>}
+      {/* {gameState !== "wait" && (questionIndex ?? 0) >= 10 && <View className="flex-row justify-center my-[16] mx-[40]">
+        <TextButton text='Continue' onPress={() => { router.push("/success") }} />
+      </View>} */}
 
 
       {/* Modal page */}

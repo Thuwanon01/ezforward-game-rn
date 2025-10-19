@@ -40,7 +40,8 @@ export class GameV2Repository extends BaseRepository {
     const data: any = await this.sfetch(
       `/api/learning-plans/suggested-question/?subject=${selectedSubject}&levels=${myLevelStr}&topics=${selectedTopicStr}`
     );
-    return data.question;
+    // return data.question;
+    return data
   }
 
   async fetchSubjects(): Promise<Subject[]> {

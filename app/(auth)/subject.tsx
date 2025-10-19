@@ -1,7 +1,6 @@
 import { Subject } from '@/apis/types';
 import { Button, ButtonText } from '@/components/ui/button';
 import { ChevronDownIcon } from '@/components/ui/icon';
-import { Input, InputField } from '@/components/ui/input';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import {
@@ -164,7 +163,9 @@ export default function SelectSubjectPage() {
                             </Button>)}
                 </View>
             </View>
-            <View className='mt-4 justify-center items-center'>
+
+            {/* เลือกจำนวนข้อสอบ */}
+            {/* <View className='mt-4 justify-center items-center'>
                 <Text className='text-2xl font-bold text-center text-gray-800'>
                     Number of questions
                 </Text>
@@ -185,7 +186,7 @@ export default function SelectSubjectPage() {
 
                     />
                 </Input>
-            </View>
+            </View> */}
 
             <Button
                 variant="solid"

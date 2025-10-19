@@ -14,7 +14,8 @@ const imagesSource = {
 
 // component QuestionBox จะรับ props 2 ตัวคือ question (ข้อความคำถาม) และ status (สถานะของรูปภาพ)
 
-export default function QuestionBox({ question, status, onPressQuestion }: { question: string, status: string, onPressQuestion: () => void }) {
+export default function QuestionBox({ question, status, onPressQuestion, questionIndex }:
+  { question: string, status: string, onPressQuestion: () => void, questionIndex?: number }) {
 
   // ใช้ useEffect เฝ้ามอง status ที่รับค่าเข้ามา
   useEffect(() => {
@@ -36,6 +37,11 @@ export default function QuestionBox({ question, status, onPressQuestion }: { que
     <TouchableOpacity className='QuestionBox' style={styles.container} onPress={onPressQuestion}>
       <View style={styles.parentBox}>
         {/* เอา TouchableOpacity มาครอบ Text แล้วผูกกับ onPressQuestion */}
+        <View style={{ position: 'absolute', top: 10, left: 10 }}>
+          <Text style={{ fontSize: 16, fontWeight: '500', color: '#183B4E' }}>
+            {questionIndex !== undefined ? `Question ${questionIndex}` : ''}
+          </Text>
+        </View>
         <Text style={styles.questionText}>{question}</Text>
         <View>
           <Image
