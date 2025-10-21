@@ -231,6 +231,8 @@ export default function GamePage() {
                 handleSubmitAnswer(choice.id, index);
               }}
               disabled={gameState !== "wait"}
+              correctExplanation={correctExplanation}
+              incorrectExplanation={incorrectExplanation}
             />
           ))}
         </View>
