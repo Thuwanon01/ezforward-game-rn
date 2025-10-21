@@ -1,15 +1,18 @@
-import * as Speech from 'expo-speech'
-import { StyleSheet, Text, TouchableOpacity } from 'react-native'
-import { Gesture, GestureDetector } from 'react-native-gesture-handler'
+import * as Speech from 'expo-speech';
+import { StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import Markdown from "react-native-markdown-display";
 
 interface Prop {
   text: string
   status: 'correct' | 'incorrect' | undefined | 'wait'
   onPress?: () => void
   disabled?: boolean
+  correctExplanation?: string
+  incorrectExplanation?: string
 }
 
-export default function ChoiceBox({ text, status, onPress, disabled }: Prop) {
+export default function ChoiceBox({ text, status, onPress, disabled, correctExplanation, incorrectExplanation }: Prop) {
   const speak = () => {
     Speech.stop()
     const isThai = /[\u0E00-\u0E7F]/.test(text) // regex เช็คอักษรไทย
@@ -58,6 +61,11 @@ export default function ChoiceBox({ text, status, onPress, disabled }: Prop) {
     <GestureDetector gesture={gesture}>
       <TouchableOpacity style={[styles.boxChoice, { backgroundColor: bgColor }]}>
         <Text style={[styles.textChoice, { color: fontColor }]}>{text}</Text>
+        {status === "correct" ?
+          <Markdown style={markdownStyles}>{correctExplanation}</Markdown>
+          : status === "incorrect" ? (
+            <Markdown style={markdownStyles}>{incorrectExplanation}</Markdown>
+          ) : null}
       </TouchableOpacity>
     </GestureDetector>
   )
@@ -77,3 +85,17 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 })
+
+const markdownStyles = StyleSheet.create({
+  body: {
+    color: "black",
+  },
+  code_inline: {
+    borderWidth: 1,
+    borderColor: "#FCC61D",
+    backgroundColor: "#FCC61D",
+    padding: 8,
+    borderRadius: 4,
+    lineHeight: 40,
+  },
+});

@@ -214,11 +214,10 @@ export default function ExplanationPanel({
   // --- ฟังก์ชันสำหรับ Render Chat ---
   const renderChatItem = ({ item }: { item: ChatMessage }) => (
     <View
-      className={`p-3 rounded-lg my-1 max-w-[85%] ${
-        item.sender === "bot"
+      className={`p-3 rounded-lg my-1 max-w-[85%] ${item.sender === "bot"
           ? "bg-gray-700 self-start"
           : "bg-blue-600 self-end"
-      }`}
+        }`}
     >
       <Text className="text-white text-base">{item.text}</Text>
     </View>
@@ -255,19 +254,17 @@ export default function ExplanationPanel({
           {explanationStatus && openExplanation && (
             <View className="mx-[40]">
               <View>
-                <Text className="text-green-500 text-2xl">{correctAnswer}</Text>
-                {/* <Text className="text-white text-lg">{`  - ${correctExplanation}`}</Text> */}
+                {/* <Text className="text-green-500 text-2xl">{correctAnswer}</Text>
                 <Markdown style={styles}>{correctExplanation}</Markdown>
-
                 {gameState === "incorrect" && (
                   <>
                     <Text className="text-red-500 text-2xl">
                       {incorrectAnswer}
                     </Text>
-                    {/* <Text className="text-white text-lg">{`  - ${incorrectExplanation}`}</Text> */}
+                    
                     <Markdown style={styles}>{incorrectExplanation}</Markdown>
                   </>
-                )}
+                )} */}
 
                 {/* --- เพิ่ม UI ส่วนใหม่เข้ามาที่นี่ --- */}
                 <View className="mt-6 border-t border-gray-500 pt-4">
@@ -381,7 +378,7 @@ export default function ExplanationPanel({
             title="Eliminate"
             subtitle="Eliminate 2 wrong answers"
             isVisible={openHelper["eliminate"]}
-            onPressPlay={() => {}}
+            onPressPlay={() => { }}
             onClose={() =>
               setOpenHelper({ eliminate: false, double: false, change: false })
             }
@@ -391,7 +388,7 @@ export default function ExplanationPanel({
             title="Double Chance"
             subtitle="Get 2 choices to answer"
             isVisible={openHelper["double"]}
-            onPressPlay={() => {}}
+            onPressPlay={() => { }}
             onClose={() =>
               setOpenHelper({ eliminate: false, double: false, change: false })
             }
@@ -401,7 +398,7 @@ export default function ExplanationPanel({
             title="Change Question"
             subtitle="Change to a new question"
             isVisible={openHelper["change"]}
-            onPressPlay={() => {}}
+            onPressPlay={() => { }}
             onClose={() =>
               setOpenHelper({ eliminate: false, double: false, change: false })
             }
