@@ -53,7 +53,7 @@ const PREMADE_MESSAGES_STORAGE_KEY = "premadeMessages";
 const DEFAULT_PREMADE_MESSAGES = [
   "ช่วยอธิบายพร้อมยกตัวอย่าง",
   "อธิบายให้เด็ก 5 ขวบเข้าใจ",
-  "มช่วยอธิบายแบบสั้น ๆ",
+  "ช่วยอธิบายแบบสั้น ๆ",
 ];
 
 export default function ExplanationPanel({
