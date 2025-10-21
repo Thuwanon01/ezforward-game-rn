@@ -51,9 +51,9 @@ type FeedbackState = "like" | "dislike" | null;
 
 const PREMADE_MESSAGES_STORAGE_KEY = "premadeMessages";
 const DEFAULT_PREMADE_MESSAGES = [
-  "ช่วยอธิบายเรื่องนี้เพิ่มเติมหน่อย",
-  "คำตอบนี้หมายความว่าอย่างไร?",
-  "มีตัวอย่างอื่นอีกไหม?",
+  "ช่วยอธิบายพร้อมยกตัวอย่าง",
+  "อธิบายให้เด็ก 5 ขวบเข้าใจ",
+  "มช่วยอธิบายแบบสั้น ๆ",
 ];
 
 export default function ExplanationPanel({
