@@ -190,10 +190,10 @@ export default function GamePage() {
 
   const nextHandler = () => {
     fetchData();
-    if (currentQuestionIndex >= 10) {
-      setScore(0);
-      router.push("/success");
-    }
+    // if (currentQuestionIndex >= 10) {
+    //   setScore(0);
+    //   router.push("/success");
+    // }
   };
 
   return (
