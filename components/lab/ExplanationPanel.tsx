@@ -1,25 +1,13 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
-import {
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import {
-  MagnifyingGlassIcon,
-  PaperAirplaneIcon,
-} from "react-native-heroicons/solid";
-import Markdown from "react-native-markdown-display";
-import HelpModalPage from "./HelpModalPage";
-import IconButton from "./IconButton";
-import TextButton from "./TextButton";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useRouter } from 'expo-router';
+import React, { useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, FlatList, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { HandThumbDownIcon, HandThumbUpIcon, PaperAirplaneIcon, PlusCircleIcon } from "react-native-heroicons/solid";
+import Markdown from 'react-native-markdown-display';
+import HelpModalPage from './HelpModalPage';
+import IconButton from './IconButton';
+import PremadeMessagesModal from './PremadeMessagesModal';
+import TextButton from './TextButton';
 
 // Import Hook สำหรับ Repository และ Auth (จำเป็น)
 import { NewQuizChoice, QuizQuestionResponse } from "@/apis/types";
@@ -42,7 +30,6 @@ interface Props {
   questionIndex: number;
 }
 
-// ---เพิ่ม Interface สำหรับ Chat และ Feedback ---
 interface ChatMessage {
   id: number;
   sender: "user" | "bot";
@@ -55,7 +42,14 @@ interface Feedback {
   userId: number;
   type: FeedbackState;
 }
-type FeedbackState = "like" | "dislike";
+type FeedbackState = 'like' | 'dislike' | null;
+
+const PREMADE_MESSAGES_STORAGE_KEY = "premadeMessages";
+const DEFAULT_PREMADE_MESSAGES = [
+  "ช่วยอธิบายพร้อมยกตัวอย่าง",
+  "อธิบายให้เด็ก 5 ขวบเข้าใจ",
+  "ช่วยอธิบายแบบสั้น ๆ",
+];
 
 export default function ExplanationPanel({
   correctAnswer,
@@ -83,12 +77,16 @@ export default function ExplanationPanel({
   const [inputValue, setInputValue] = useState("");
   const [isChatLoading, setIsChatLoading] = useState(false);
   const [feedback, setFeedback] = useState<FeedbackState | null>(null);
+  const [isPremadeModalVisible, setIsPremadeModalVisible] = useState(false);
+  const [premadeMessages, setPremadeMessages] = useState<string[]>([]);
 
-  // เรียกใช้ Repository ผ่าน Hook
+
+
   const auth = useAuth();
   const repos = useRepositories(auth.accessToken).current;
+  const flatListRef = useRef<FlatList>(null);
 
-  // (useEffect สำหรับโหลดข้อมูล)
+  // useEffect สำหรับ "โหลดข้อมูล" (ทำงานครั้งเดียว)
   useEffect(() => {
     const clearChatData = async () => {
       console.log("New question detected, clearing chat history...");
@@ -106,55 +104,86 @@ export default function ExplanationPanel({
       }
     };
 
-    clearChatData();
-
     const loadData = async () => {
       try {
-        const savedChat = await AsyncStorage.getItem("chatHistory");
-        const savedFeedback = (await AsyncStorage.getItem(
-          "explanationFeedback"
-        )) as FeedbackState;
+        const savedPremadeMessages = await AsyncStorage.getItem(
+          PREMADE_MESSAGES_STORAGE_KEY
+        );
+        if (savedPremadeMessages) {
+          setPremadeMessages(JSON.parse(savedPremadeMessages));
+        } else {
+          setPremadeMessages(DEFAULT_PREMADE_MESSAGES);
+        }
+
+
+        const savedChat = await AsyncStorage.getItem('chatHistory');
+        const savedFeedback = await AsyncStorage.getItem('explanationFeedback') as FeedbackState;
         if (savedChat) {
           setChatHistory(JSON.parse(savedChat));
         }
         if (savedFeedback) {
           setFeedback(savedFeedback);
         }
-        clearChatData();
       } catch (error) {
         console.error("Failed to load data from storage", error);
       }
     };
     loadData();
+  }, []); // '[]' ทำงานแค่ครั้งเดียว
+
+
+  // --- เพิ่ม useEffect ใหม่สำหรับเคลียร์ข้อมูล ---
+  // useEffect นี้จะทำงาน "ทุกครั้งที่คำถามเปลี่ยนไป"
+  useEffect(() => {
+    const clearChatData = async () => {
+      console.log("New question detected, clearing chat history...");
+      // เคลียร์ State ของ chat
+      setChatHistory([]);
+      setFeedback(null);
+      setInputValue('');
+
+      // เคลียร์ข้อมูลใน AsyncStorage
+      try {
+        await AsyncStorage.removeItem('chatHistory');
+        await AsyncStorage.removeItem('explanationFeedback');
+      } catch (error) {
+        console.error("Failed to clear data from storage", error);
+      }
+    };
+
+    clearChatData();
+
+    // ใส่ props ที่ใช้ระบุคำถามปัจจุบันใน dependency array
+    // เพื่อให้ useEffect นี้ทำงานเมื่อ props เหล่านี้เปลี่ยนค่า (เมื่อไปข้อใหม่)
   }, [explanation, correctAnswer]);
 
   const toggleExplanation = () => {
     setOpenExplanation(!openExplanation);
   };
 
-  // Helper function to build context prompt with question and selected choice
+
   const buildContextPrompt = (userMessage: string): string => {
     let context = "";
-
-    // Add question context
     if (question) {
       context += `Question: ${question.text}\n\n`;
     }
-
-    // Add selected choice context
     if (selectedChoice) {
       context += `Your selected choice: ${selectedChoice.text}\n\n`;
     }
-
-    // Add user's question
+    if (explanationStatus && openExplanation) {
+      context += `Correct Answer: ${correctAnswer}\nExplanation: ${correctExplanation}\n`;
+      if (gameState === 'incorrect') {
+        context += `Incorrect Answer: ${incorrectAnswer}\nExplanation: ${incorrectExplanation}\n`;
+      }
+      context += `Overall Explanation: ${explanation}\n\n`;
+    }
     context += `User's question: ${userMessage}`;
-
     return context;
   };
 
-  // ---handleSendMessage ให้ใช้ Repository---
+
   const handleSendMessage = async () => {
-    if (!inputValue.trim()) return;
+    if (!inputValue.trim() || isChatLoading) return;
 
     const userMessage: ChatMessage = {
       id: Date.now(),
@@ -167,24 +196,18 @@ export default function ExplanationPanel({
     setInputValue("");
     setIsChatLoading(true);
 
+
     try {
       await AsyncStorage.setItem(
         "chatHistory",
         JSON.stringify(updatedChatHistory)
       );
 
-      // --- Build context prompt with question and selected choice ---
       const contextPrompt = buildContextPrompt(inputValue);
       console.log("Context prompt being sent to LLM:", contextPrompt);
 
-      // --- ยิง API จริง ---
-      // เรียกใช้ generateText จาก LLMRepository with context
       const response = await repos.llm.generateText(contextPrompt);
-
-      // ดึงข้อความตอบกลับจาก response
-      // !! สำคัญ: ปรับแก้ .text ให้ตรงกับ key ที่ Backend ส่งกลับมา !!
       const botResponseText = response.result;
-      // --- สิ้นสุดการยิง API จริง ---
 
       const botMessage: ChatMessage = {
         id: Date.now() + 1,
@@ -194,10 +217,10 @@ export default function ExplanationPanel({
       const finalChatHistory = [...updatedChatHistory, botMessage];
 
       setChatHistory(finalChatHistory);
-      await AsyncStorage.setItem(
-        "chatHistory",
-        JSON.stringify(finalChatHistory)
-      );
+
+
+      await AsyncStorage.setItem('chatHistory', JSON.stringify(finalChatHistory));
+
     } catch (error) {
       console.error("Failed to send message:", error);
       const errorMessage: ChatMessage = {
@@ -211,12 +234,59 @@ export default function ExplanationPanel({
     }
   };
 
-  // --- ฟังก์ชันสำหรับ Render Chat ---
+
+  const handleFeedback = async (newFeedback: 'like' | 'dislike') => {
+
+
+    const updatedFeedback = feedback === newFeedback ? null : newFeedback;
+    setFeedback(updatedFeedback);
+
+    try {
+      await AsyncStorage.setItem('explanationFeedback', updatedFeedback || '');
+      console.log("Feedback saved:", updatedFeedback);
+      if (updatedFeedback) {
+        const llmRepo: any = repos.llm;
+        const payload: any = { type: updatedFeedback };
+        if (auth && auth.user && typeof auth.user.id !== 'undefined' && auth.user !== null) {
+          payload.userId = auth.user.id;
+        }
+
+        if (typeof llmRepo?.sendFeedback === 'function') {
+          await llmRepo.sendFeedback(payload);
+        } else if (typeof llmRepo?.reportFeedback === 'function') {
+          await llmRepo.reportFeedback(payload);
+        } else {
+          console.warn('LLM repository has no sendFeedback/reportFeedback method; skipping remote report.');
+        }
+      }
+    } catch (error) {
+      console.error("Failed to save feedback:", error);
+    }
+  };
+
+  // (ฟังก์ชัน Premade Message)
+  const handleUpdatePremadeMessages = async (newMessages: string[]) => {
+    setPremadeMessages(newMessages);
+    try {
+      await AsyncStorage.setItem(
+        PREMADE_MESSAGES_STORAGE_KEY,
+        JSON.stringify(newMessages)
+      );
+    } catch (error) {
+      console.error("Failed to save premade messages:", error);
+    }
+  };
+
+  const handleSelectPremadeMessage = (message: string) => {
+    setInputValue(message);
+    setIsPremadeModalVisible(false);
+  };
+
   const renderChatItem = ({ item }: { item: ChatMessage }) => (
     <View
       className={`p-3 rounded-lg my-1 max-w-[85%] ${item.sender === "bot"
-          ? "bg-gray-700 self-start"
-          : "bg-blue-600 self-end"
+        ? "bg-gray-700 self-start"
+        : "bg-blue-600 self-end"
         }`}
     >
       <Text className="text-white text-base">{item.text}</Text>
@@ -234,39 +304,19 @@ export default function ExplanationPanel({
           {/* Condition to show pop-up arrow */}
           {explanationStatus && (
             <View className="flex-row justify-center mt-[12]">
-              {openExplanation ? (
-                <IconButton
-                  iconImage="downArrow"
-                  onPress={toggleExplanation}
-                  isDisable={false}
-                />
-              ) : (
-                <IconButton
-                  iconImage="upArrow"
-                  onPress={toggleExplanation}
-                  isDisable={false}
-                />
-              )}
+              <IconButton
+                iconImage={openExplanation ? "downArrow" : "upArrow"}
+                onPress={toggleExplanation}
+                isDisable={false}
+              />
             </View>
           )}
 
-          {/* Text explanation */}
+          {/* ... ส่วนแสดงคำอธิบาย ... */}
           {explanationStatus && openExplanation && (
             <View className="mx-[40]">
               <View>
-                {/* <Text className="text-green-500 text-2xl">{correctAnswer}</Text>
-                <Markdown style={styles}>{correctExplanation}</Markdown>
-                {gameState === "incorrect" && (
-                  <>
-                    <Text className="text-red-500 text-2xl">
-                      {incorrectAnswer}
-                    </Text>
-                    
-                    <Markdown style={styles}>{incorrectExplanation}</Markdown>
-                  </>
-                )} */}
-
-                {/* --- เพิ่ม UI ส่วนใหม่เข้ามาที่นี่ --- */}
+                {/* --- ส่วน UI แชทที่อัปเดตแล้ว --- */}
                 <View className="mt-6 border-t border-gray-500 pt-4">
                   {/* <FlatList
                     data={chatHistory}
@@ -280,88 +330,95 @@ export default function ExplanationPanel({
                     <ActivityIndicator color="white" className="my-2" />
                   )}
 
-                  <View className="flex-row items-center bg-gray-700 rounded-full p-2">
-                    <MagnifyingGlassIcon
-                      color="white"
-                      size={24}
-                      style={{ marginLeft: 8 }}
-                    />
+                  {/* Chat Input Bar */}
+                  <View className="flex-row items-end bg-gray-700 rounded-2xl p-2">
+                    <TouchableOpacity
+                      onPress={() => setIsPremadeModalVisible(true)}
+                      className="p-2"
+                    >
+                      <PlusCircleIcon color="white" size={28} />
+                    </TouchableOpacity>
                     <TextInput
-                      className="text-white text-lg px-3"
+                      className="flex-1 text-white text-lg px-2"
+                      style={{ maxHeight: 120 }}
                       placeholder="Ask something..."
                       placeholderTextColor="#9ca3af"
                       value={inputValue}
                       onChangeText={setInputValue}
                       editable={!isChatLoading}
-                      onSubmitEditing={handleSendMessage}
-                      returnKeyType="send"
+                      multiline
                     />
                     <TouchableOpacity
                       onPress={handleSendMessage}
-                      disabled={isChatLoading}
+                      disabled={isChatLoading || !inputValue.trim()}
                       className="p-2 bg-blue-600 rounded-full"
                     >
                       <PaperAirplaneIcon color="white" size={24} />
                     </TouchableOpacity>
                   </View>
 
-                  {/* <View className="flex-row items-center justify-end mt-4 space-x-4">
-                    <TouchableOpacity onPress={() => handleFeedback("like")}>
+                  {/* Feedback Buttons */}
+                  <View className="flex-row items-center justify-end mt-4 space-x-4">
+                    <TouchableOpacity
+                      onPress={() => handleFeedback("like")}
+
+                    >
                       <HandThumbUpIcon
-                        color={feedback === "like" ? "#22c55e" : "white"}
+
+                        color={
+                          feedback === "like"
+                            ? "#22c55e"
+                            : "white"
+                        }
                         size={28}
                       />
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={() => handleFeedback("dislike")}>
+                    <TouchableOpacity
+                      onPress={() => handleFeedback("dislike")}
+
+                    >
                       <HandThumbDownIcon
-                        color={feedback === "dislike" ? "#ef4444" : "white"}
+
+                        color={
+                          feedback === "dislike"
+                            ? "#ef4444"
+                            : "white"
+                        }
                         size={28}
                       />
                     </TouchableOpacity>
-                  </View> */}
+                  </View>
 
                   <View className="h-[8]"></View>
-                  {/* <Text className="text-white font-bold ">{explanation}</Text> */}
                   <Markdown style={styles}>{explanation}</Markdown>
                 </View>
               </View>
             </View>
           )}
 
-          {/* Icon and button  */}
+          {/* ... ปุ่มตัวช่วยและปุ่ม Next/Try Again ... */}
           {gameState === "wait" && (
             <View className="flex-row justify-between my-[16] mx-[100]">
+              {/* ... ปุ่มตัวช่วย 3 ปุ่ม ... */}
               <IconButton
                 iconImage="eliminateIcon"
                 isDisable={helperStatus["eliminate"]}
                 onPress={() =>
-                  setOpenHelper({
-                    eliminate: true,
-                    double: false,
-                    change: false,
-                  })
+                  setOpenHelper({ eliminate: true, double: false, change: false })
                 }
               />
               <IconButton
                 iconImage="doubleIcon"
                 isDisable={helperStatus["double"]}
                 onPress={() =>
-                  setOpenHelper({
-                    eliminate: false,
-                    double: true,
-                    change: false,
-                  })
+                  setOpenHelper({ eliminate: false, double: true, change: false })
                 }
               />
               <IconButton
                 iconImage="changeIcon"
                 isDisable={helperStatus["change"]}
                 onPress={() =>
-                  setOpenHelper({
-                    eliminate: false,
-                    double: false,
-                    change: true,
-                  })
+                  setOpenHelper({ eliminate: false, double: false, change: true })
                 }
               />
             </View>
@@ -372,8 +429,7 @@ export default function ExplanationPanel({
               <TextButton text="Next" onPress={onPress} />
             </View>
           )}
-
-          {/* Modal page */}
+          {/* ย้าย Modals มาไว้ที่นี่ (นอก ScrollView แต่ใน KAV) */}
           <HelpModalPage
             title="Eliminate"
             subtitle="Eliminate 2 wrong answers"
@@ -383,7 +439,7 @@ export default function ExplanationPanel({
               setOpenHelper({ eliminate: false, double: false, change: false })
             }
             imageName="eliminate"
-          ></HelpModalPage>
+          />
           <HelpModalPage
             title="Double Chance"
             subtitle="Get 2 choices to answer"
@@ -393,7 +449,7 @@ export default function ExplanationPanel({
               setOpenHelper({ eliminate: false, double: false, change: false })
             }
             imageName="double"
-          ></HelpModalPage>
+          />
           <HelpModalPage
             title="Change Question"
             subtitle="Change to a new question"
@@ -403,16 +459,23 @@ export default function ExplanationPanel({
               setOpenHelper({ eliminate: false, double: false, change: false })
             }
             imageName="change"
-          ></HelpModalPage>
+          />
+          <PremadeMessagesModal
+            isVisible={isPremadeModalVisible}
+            onClose={() => setIsPremadeModalVisible(false)}
+            messages={premadeMessages}
+            onUpdateMessages={handleUpdatePremadeMessages}
+            onSelect={handleSelectPremadeMessage}
+          />
         </View>
       </KeyboardAvoidingView>
-    </ScrollView>
-  );
+    </ScrollView >
+  )
 }
 
 const styles = StyleSheet.create({
   body: {
-    color: "white",
+    color: 'white'
   },
   code_inline: {
     borderWidth: 1,
@@ -421,5 +484,5 @@ const styles = StyleSheet.create({
     padding: 8,
     borderRadius: 4,
     lineHeight: 40,
-  },
-});
+  }
+})
