@@ -45,7 +45,9 @@ export class GameV2Repository extends BaseRepository {
     return data
   }
 
-  async fetchAnswerSummary({ answered_date__gte, answered_date__lte }: { answered_date__gte?: string; answered_date__lte?: string }): Promise<any> {
+  async fetchAnswerSummary({
+    answered_date__gte, answered_date__lte }:
+    { answered_date__gte?: string; answered_date__lte?: string }): Promise<any> {
     const data = await this.sfetch(
       '/api/answers/history/summary',
       {
