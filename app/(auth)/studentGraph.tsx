@@ -1,3 +1,4 @@
+import { bottomLayerTopicNode, Student, StudentKnowledgeGraph, topLayerTopicNode } from '@/apis/types';
 import {
     Avatar,
     AvatarFallbackText
@@ -12,6 +13,7 @@ import useRepositories from '@/hooks/useRepositories';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import React, { useEffect } from 'react';
 import { View } from 'react-native';
+import { ScrollView } from 'react-native-gesture-handler';
 import { List } from 'react-native-paper';
 
 const topics = [
@@ -64,6 +66,10 @@ export default function studentGraph() {
     const [totalPlayedQuestions, setTotalPlayedQuestions] = React.useState(0);
     const [totalCorrectAnswers, setTotalCorrectAnswers] = React.useState(0);
     const [totalIncorrectAnswers, setTotalIncorrectAnswers] = React.useState(0);
+    const [studentDB, setStudentDB] = React.useState<Student>({ name: '', db_id: '' });
+    const [studentKnowledgeGraph, setStudentKnowledgeGraph] = React.useState<StudentKnowledgeGraph[]>([]);
+    const [topLayerNodes, setTopLayerNodes] = React.useState<topLayerTopicNode[]>([]);
+    const [bottomLayerNodes, setBottomLayerNodes] = React.useState<bottomLayerTopicNode[]>([]);
 
     const [expanded, setExpanded] = React.useState<Record<string, boolean>>({});
 
@@ -73,8 +79,12 @@ export default function studentGraph() {
     useEffect(() => {
         // Fetch student graph data here if needed
         fetchAnswerSummary();
+        fetchStudentGraph();
+
 
     }, []);
+
+
 
     const fetchAnswerSummary = async () => {
         const summary = await repos.gamev2.fetchAnswerSummary({
@@ -87,9 +97,16 @@ export default function studentGraph() {
         setTotalIncorrectAnswers(summary.incorrect);
 
     }
+    const fetchStudentGraph = async () => {
+        const graph = await repos.gamev2.fetchStudentGraph();
+        console.log("student graph", graph);
+        setStudentDB(graph.student);
+        setStudentKnowledgeGraph(graph.student_knowledge_graph);
+
+    }
 
     return (
-        <View className="flex-1 bg-gray-100">
+        <ScrollView className="flex-1 bg-gray-100">
             {/* Card Avatar whose info */}
             <Card className="p-6 rounded-xl mx-8 mt-4">
                 <Box className="flex-row">
@@ -98,9 +115,9 @@ export default function studentGraph() {
                     </Avatar>
                     <VStack className='mb-4'>
                         <Heading size="md" className="">
-                            Bing
+                            {studentDB.name}
                         </Heading>
-                        <Text size="xs">Student Id: 22-bing</Text>
+                        <Text size="xs">Student Id: {studentDB.db_id}</Text>
                     </VStack>
                 </Box>
             </Card>
@@ -139,32 +156,67 @@ export default function studentGraph() {
             </Card>
 
             {/* Card list student graph */}
+
             <Card className="p-6 rounded-xl mx-8 mt-4 mb-8">
                 <Box>
                     <Heading size="md" className="mb-4">
                         Learning Topics
                     </Heading>
+
+
                     <View>
                         <List.Section>
-                            {topics.map(topic => (
+                            {studentKnowledgeGraph.map(topic => (
                                 <List.Accordion
-                                    key={topic.id}
-                                    title={topic.title}
-                                    expanded={expanded[topic.id]}
-                                    onPress={() => toggle(topic.id)}
-                                >
-                                    {topic.children.map(sub => (
-                                        <List.Accordion
-                                            key={sub.id}
-                                            title={sub.title}
-                                            expanded={expanded[sub.id]}
-                                            onPress={() => toggle(sub.id)}
-                                            style={{ marginLeft: 12 }}
+                                    key={topic.graph_id}
+                                    // title={topic.topic}
+                                    // title={`(${topic.score}) ${topic.topic}`}
+                                    title={
+                                        <Text
+
                                         >
-                                            {sub.items.map((item, i) => (
-                                                <List.Item key={i} title={item} />
-                                            ))}
-                                        </List.Accordion>
+                                            ({topic.score}) {topic.topic}
+                                        </Text>}
+
+                                    expanded={expanded[topic.graph_id]}
+                                    onPress={() => toggle(topic.graph_id)}
+
+                                >
+                                    {(topic.child).map(sub => (
+                                        sub.child ? (
+                                            <List.Accordion
+                                                key={sub.graph_id}
+
+                                                title={
+                                                    <Text>
+                                                        ({sub.score}) {sub.topic}
+                                                    </Text>
+                                                }
+                                                expanded={expanded[sub.graph_id]}
+                                                onPress={() => toggle(sub.graph_id)}
+                                                style={{ marginLeft: 12 }}
+                                            >
+                                                {sub.child.map((item, i) => (
+                                                    <List.Item
+                                                        key={i}
+
+                                                        title={
+                                                            <Text>
+                                                                ({item.score}) {item.knowledge}
+                                                            </Text>
+                                                        }
+                                                        style={{ marginLeft: 24 }}
+                                                    />
+                                                ))}
+                                            </List.Accordion>
+                                        ) : (
+                                            <List.Item
+                                                key={sub.graph_id}
+                                                // title={sub.knowledge}
+                                                title={`(${sub.score}) ${sub.knowledge}`}
+                                                style={{ marginLeft: 12 }}
+                                            />
+                                        )
                                     ))}
                                 </List.Accordion>
                             ))}
@@ -172,7 +224,8 @@ export default function studentGraph() {
                     </View>
                 </Box>
             </Card>
-        </View>
+
+        </ScrollView>
 
 
     )

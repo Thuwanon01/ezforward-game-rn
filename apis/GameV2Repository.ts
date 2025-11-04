@@ -61,6 +61,17 @@ export class GameV2Repository extends BaseRepository {
     return data;
   }
 
+  async fetchStudentGraph(): Promise<any> {
+    const data = await this.sfetch(
+      '/api/knowledge-graph',
+      {
+        method: 'GET',
+        params: { subject: 'RAM1111' }
+      }
+    )
+    return data;
+  }
+
   async fetchSubjects(): Promise<Subject[]> {
     return [
       {

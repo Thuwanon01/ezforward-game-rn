@@ -48,6 +48,7 @@
     "react-aria": "^3.43.2",
     "react-dom": "19.1.0",
     "react-native": "0.81.4",
+    "react-native-auto-size-text": "^1.1.1",
     "react-native-element-dropdown": "^2.12.4",
     "react-native-gesture-handler": "~2.28.0",
     "react-native-heroicons": "^4.0.0",
