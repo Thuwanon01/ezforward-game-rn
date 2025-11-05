@@ -6,11 +6,13 @@ import {
 import { Box } from '@/components/ui/box';
 import { Card } from '@/components/ui/card';
 import { Heading } from '@/components/ui/heading';
+import { Pressable } from '@/components/ui/pressable';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 import { useAuth } from '@/contexts/AuthContext';
 import useRepositories from '@/hooks/useRepositories';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { router } from 'expo-router';
 import React, { useEffect } from 'react';
 import { View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
@@ -37,6 +39,11 @@ export default function studentGraph() {
         fetchStudentGraph();
     }, []);
 
+    const handleBackPress = () => {
+        // Handle back button press
+        router.push("/game");
+    }
+
     const fetchAnswerSummary = async () => {
         const summary = await repos.gamev2.fetchAnswerSummary({
             answered_date__gte: "2025-09-01",
@@ -56,6 +63,14 @@ export default function studentGraph() {
 
     return (
         <ScrollView className="flex-1 bg-gray-100">
+            {/* Header with back button */}
+            <Box className="flex-row items-center justify-between px-4 py-3 bg-white shadow">
+                <Pressable onPress={handleBackPress} className="p-2">
+                    <Ionicons name="arrow-back" size={24} color="black" />
+                </Pressable>
+                <Heading size="lg">Student Knowledge Graph</Heading>
+                <View className="w-8" /> {/* Placeholder for alignment */}
+            </Box>
             {/* Card Avatar whose info */}
             <Card className="p-6 rounded-xl mx-8 mt-4">
                 <Box className="flex-row">
@@ -68,6 +83,7 @@ export default function studentGraph() {
                         </Heading>
                         <Text size="xs">Student Id: {studentDB.db_id}</Text>
                     </VStack>
+
                 </Box>
             </Card>
 
