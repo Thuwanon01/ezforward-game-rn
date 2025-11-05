@@ -70,7 +70,7 @@ export default function GamePage() {
       // เมื่อเข้าสู่สถานะ 'reading' แล้ว ให้ตั้ง Timer ใหม่เพื่อนับ 5 วินาที
       timerRef.current = setTimeout(() => {
         setStatus("wait"); // กลับเป็น wait หลังครบ 5 วิ
-      }, 5000);
+      }, 8500);
     }, 10);
   };
 
