@@ -74,3 +74,43 @@ export interface Subject {
     topics: { name: string; gid: string }[];
     levels: { name: string; gid: string }[];
 }
+
+// Top-level payload
+export interface StudentGraphPayload {
+    student: Student;
+    student_knowledge_graph: StudentKnowledgeGraph[]; // forest of topic trees
+}
+
+// Basic student info
+export interface Student {
+    name: string;
+    db_id: string;
+}
+
+export interface StudentKnowledgeGraph {
+    graph_id: string;
+    topic: string;
+    score: number;
+    child: topLayerTopicNode[];
+}
+
+export interface topLayerTopicNode {
+    knowledge: string;
+
+    graph_id: string;
+    topic: string;
+    score: number;
+    child: bottomLayerTopicNode[];
+}
+
+export interface bottomLayerTopicNode {
+    graph_id: string;
+    knowledge: string;
+    score: number;
+}
+
+
+
+
+
+

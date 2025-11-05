@@ -41,6 +41,7 @@ export default function GamePage() {
   );
   const timerRef = useRef<number | null>(null);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(1);
+  const [openMenu, setOpenMenu] = useState(false);
 
   const router = useRouter();
 
@@ -185,7 +186,9 @@ export default function GamePage() {
   };
 
   const settingHandler = () => {
-    router.push("/subject");
+
+    setOpenMenu(!openMenu);
+    // router.push("/subject");
   };
 
   const nextHandler = () => {
@@ -204,6 +207,7 @@ export default function GamePage() {
           title={"GameMunMun"}
           onPressBack={logOutHandler}
           onPressMenu={settingHandler}
+          openMenu={openMenu}
         ></HeaderPanel>
 
         <View className="flex-row justify-end">
