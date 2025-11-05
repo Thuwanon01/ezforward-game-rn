@@ -18,6 +18,7 @@ import { List } from 'react-native-paper';
 
 export default function studentGraph() {
 
+
     const auth = useAuth()
     const repos = useRepositories(auth.accessToken).current;
 
