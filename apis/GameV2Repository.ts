@@ -61,6 +61,26 @@ export class GameV2Repository extends BaseRepository {
     return data;
   }
 
+  async fetchAnswerHistory({
+    answered_date__gte, answered_date__lte, start_date, end_date
+  }: {
+    answered_date__gte?: string; answered_date__lte?: string; start_date?: string; end_date?: string;
+  }): Promise<any> {
+    const data = await this.sfetch(
+      '/api/answers/history',
+      {
+        method: 'GET',
+        params: {
+          answered_date__gte,
+          answered_date__lte,
+          start_date,
+          end_date,
+        }
+      }
+    )
+    return data;
+  }
+
   async fetchStudentGraph(): Promise<any> {
     const data = await this.sfetch(
       '/api/knowledge-graph',
