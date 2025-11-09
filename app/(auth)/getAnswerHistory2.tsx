@@ -12,8 +12,8 @@ export default function getAnswerHistory() {
     const onPress = async () => {
 
         const summary = await repos.gamev2.fetchAnswerHistory({
-            answered_date__gte: "2025-10-01",
-            answered_date__lte: "2025-11-31"
+            start_date: "2025-10-01",
+            end_date: "2025-11-31"
         })
         console.log(summary)
         alert('ok, check console')

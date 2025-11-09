@@ -53,8 +53,8 @@ export class GameV2Repository extends BaseRepository {
       {
         method: 'GET',
         params: {
-          answered_date__gte: answered_date__gte,
-          answered_date__lte: answered_date__lte
+          answered_at__gte: answered_date__gte,
+          answered_at__lte: answered_date__lte
         }
       }
     )
@@ -62,17 +62,15 @@ export class GameV2Repository extends BaseRepository {
   }
 
   async fetchAnswerHistory({
-    answered_date__gte, answered_date__lte, start_date, end_date
+    start_date, end_date
   }: {
-    answered_date__gte?: string; answered_date__lte?: string; start_date?: string; end_date?: string;
+    start_date?: string; end_date?: string;
   }): Promise<any> {
     const data = await this.sfetch(
       '/api/answers/history',
       {
         method: 'GET',
         params: {
-          answered_date__gte,
-          answered_date__lte,
           start_date,
           end_date,
         }

@@ -138,26 +138,7 @@ export default function AnswerHistoryScreen() {
     const [quickRange, setQuickRange] = useState<QuickRange>('today');
 
     const auth = useAuth();
-    const reposHook = useRepositories(auth.accessToken);
-
-    /* ---------- Robust repo readiness (object or ref.current) ---------- */
-    const [repos, setRepos] = useState<any | null>(
-        (reposHook as any)?.current ?? reposHook ?? null,
-    );
-    useEffect(() => {
-        const maybeRefCurrent = (reposHook as any)?.current;
-        if (maybeRefCurrent !== undefined) {
-            const id = setInterval(() => {
-                if ((reposHook as any)?.current) {
-                    setRepos((reposHook as any).current);
-                    clearInterval(id);
-                }
-            }, 150);
-            return () => clearInterval(id);
-        } else {
-            setRepos(reposHook ?? null);
-        }
-    }, [reposHook]);
+    const repos = useRepositories(auth.accessToken).current;
 
     /* ---------- Auto-fix swapped dates ---------- */
     useEffect(() => {
@@ -197,20 +178,18 @@ export default function AnswerHistoryScreen() {
                 // history: YYYY-MM-DD
                 const startYmd = startDate ? toYmd(startDate) : undefined;
                 const endYmd = endDate ? toYmd(endDate) : undefined;
+                const nextEndYmd = endDate ? toYmd(addDays(endDate, 1)) : undefined; // รวมวันสุดท้าย
 
                 const gameV2Repo = repos.gamev2;
 
                 const [summaryData, historyData] = await Promise.all([
                     gameV2Repo.fetchAnswerSummary({
-                        answered_date__gte: apiStartDateISO,
-                        answered_date__lte: apiEndDateISO,
+                        answered_date__gte: startYmd,
+                        answered_date__lte: endYmd,
                     }),
                     gameV2Repo.fetchAnswerHistory({
-                        // ส่งทั้งสองชุด เพื่อ compatibility
-                        answered_date__gte: apiStartDateISO,
-                        answered_date__lte: apiEndDateISO,
                         start_date: startYmd,
-                        end_date: endYmd,
+                        end_date: nextEndYmd,
                     }),
                 ]);
 
@@ -256,7 +235,7 @@ export default function AnswerHistoryScreen() {
 
         fetchDataAndProcess();
         return () => { aborted = true; };
-    }, [Boolean(repos && repos.gamev2), startDate, endDate]);
+    }, [startDate, endDate]);
 
     /* ---------- Quick range actions ---------- */
     const applyQuickRange = (key: QuickRange) => {
