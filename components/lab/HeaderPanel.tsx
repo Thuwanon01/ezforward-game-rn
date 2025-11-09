@@ -13,6 +13,9 @@ export default function HeaderPanel({ title, onPressBack, onPressMenu, openMenu 
     const goToStudentGraph = () => {
         router.push('/studentGraph');
     }
+    const goToAnswerHistory = () => {
+        router.push('/AnswerHistory');
+    }
     const goToSettings = () => {
         router.push('/subject');
     }
@@ -73,6 +76,15 @@ export default function HeaderPanel({ title, onPressBack, onPressMenu, openMenu 
                                             goToStudentGraph();
                                         }}>
                                         <Text style={styles.itemText}>📈 Student Graph</Text>
+                                    </Pressable>
+
+                                    <Pressable
+                                        style={styles.item}
+                                        onPress={() => {
+                                            onClose();
+                                            goToAnswerHistory();
+                                        }}>
+                                        <Text style={styles.itemText}>📈 Answer History</Text>
                                     </Pressable>
 
                                     <Pressable

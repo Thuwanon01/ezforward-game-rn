@@ -7,6 +7,7 @@ import {
     LayoutAnimation,
     Modal,
     Platform,
+    Pressable,
     SafeAreaView,
     Text,
     TouchableOpacity,
@@ -15,8 +16,11 @@ import {
 } from 'react-native';
 
 import AnswerHistoryItem from '@/components/lab/AnswerHistoryItem';
+import { Box } from '@/components/ui/box/index.web';
+import { Heading } from '@/components/ui/heading/index.web';
 import { useAuth } from '@/contexts/AuthContext';
 import useRepositories from '@/hooks/useRepositories';
+import { router } from 'expo-router';
 
 /* ---------- Types ---------- */
 interface Choice {
@@ -54,6 +58,11 @@ interface StudentAnswer {
 /* ---------- Android layout animation ---------- */
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
+}
+
+const handleBackPress = () => {
+    // Handle back button press
+    router.push("/game");
 }
 
 /* ---------- Helpers ---------- */
@@ -370,10 +379,17 @@ export default function AnswerHistoryScreen() {
     return (
         <SafeAreaView className="flex-1 bg-gray-100">
             {/* Header & Filters */}
-            <View className="border-b border-gray-200 bg-white p-4">
-                <Text className="mb-3 text-xl font-bold text-gray-800">Answer History</Text>
+            <View className="border-b border-gray-100 bg-white p-0">
+                <Box className="flex-row items-center justify-between px-4 py-3 bg-white shadow">
+                    <Pressable onPress={handleBackPress} className="p-2">
+                        <Ionicons name="arrow-back" size={24} color="black" />
+                    </Pressable>
+                    <Heading size="lg">Answer History</Heading>
+                    <View className="w-8" />
+                    {/* Placeholder for alignment */}
+                </Box>
 
-                <View className="flex-row items-center gap-2">
+                <View className="flex-row items-center gap-2 mt-4 px-4 pb-3">
                     <TouchableOpacity onPress={showStartDatePicker} className="flex-1 flex-row items-center justify-center gap-2 rounded-lg border border-gray-300 bg-gray-100 px-3 py-2.5">
                         <Ionicons name="calendar-outline" size={18} color="#4b5563" />
                         <Text className="text-sm text-gray-700">
