@@ -62,17 +62,18 @@ export class GameV2Repository extends BaseRepository {
   }
 
   async fetchAnswerHistory({
-    start_date, end_date
+    start_date, end_date, page
   }: {
-    start_date?: string; end_date?: string;
+    start_date?: string; end_date?: string; page?: string
   }): Promise<any> {
     const data = await this.sfetch(
-      '/api/answers/history',
+      '/api/answers/history/',
       {
         method: 'GET',
         params: {
           start_date,
           end_date,
+          page,
         }
       }
     )

@@ -16,6 +16,7 @@ import {
 } from 'react-native';
 
 import AnswerHistoryItem from '@/components/lab/AnswerHistoryItem';
+import AnswerHistoryPagination from '@/components/lab/AnswerHistoryPagination';
 import { Box } from '@/components/ui/box/index.web';
 import { Heading } from '@/components/ui/heading/index.web';
 import { useAuth } from '@/contexts/AuthContext';
@@ -61,84 +62,111 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 }
 
 const handleBackPress = () => {
-    // Handle back button press
-    router.push("/game");
-}
+    router.push('/game');
+};
 
 /* ---------- Helpers ---------- */
+
+const isValidDate = (d: any): d is Date =>
+    d instanceof Date && !Number.isNaN(d.getTime());
+
 const formatDateLabel = (date: Date | null, short = false): string => {
-    if (!date) return '';
+    if (!date || !isValidDate(date)) return '';
     const options: Intl.DateTimeFormatOptions = short
         ? { month: 'short', day: 'numeric' }
         : { year: 'numeric', month: 'long', day: 'numeric' };
     return date.toLocaleDateString('th-TH', options);
 };
-const getStartOfDay = (d: Date): Date => {
-    const x = new Date(d);
-    x.setHours(0, 0, 0, 0);
-    return x;
-};
-const getEndOfDay = (d: Date): Date => {
-    const x = new Date(d);
-    x.setHours(23, 59, 59, 999);
-    return x;
-};
-// normalize a local-day boundary to UTC ISO without shifting the represented local day
-const toUtcBoundary = (d: Date, isEnd = false) => {
-    const local = new Date(d);
-    if (isEnd) local.setHours(23, 59, 59, 999);
-    else local.setHours(0, 0, 0, 0);
-    const utc = new Date(local.getTime() - local.getTimezoneOffset() * 60000);
-    return utc.toISOString();
-};
-// YYYY-MM-DD (สำหรับ backend /api/answers/history)
-const toYmd = (d: Date) => {
+
+// YYYY-MM-DD สำหรับ backend
+const toYmd = (d?: Date | null): string | undefined => {
+    if (!d || !isValidDate(d)) return undefined;
     const pad = (n: number) => String(n).padStart(2, '0');
     return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 };
+
 // web date <-> string
-const toDateInputValue = (d: Date) => toYmd(d);
-const fromDateInputValue = (v: string) => {
-    const [y, m, d] = v.split('-').map(Number);
-    return new Date(y, m - 1, d);
+const toDateInputValue = (d?: Date | null): string => {
+    if (!d || !isValidDate(d)) return '';
+    return toYmd(d)!;
 };
-// safe JSON parse that accepts object/string
+
+const fromDateInputValue = (v: string): Date | null => {
+    if (!v) return null;
+    const parts = v.split('-');
+    if (parts.length !== 3) return null;
+    const [y, m, d] = parts.map(Number);
+    if (!y || !m || !d) return null;
+    const dt = new Date(y, m - 1, d);
+    return isValidDate(dt) ? dt : null;
+};
+
+// safe JSON parse
 const safeParse = <T,>(v: any): T | undefined => {
     if (v == null) return undefined;
     if (typeof v === 'object') return v as T;
     if (typeof v === 'string') {
-        try { return JSON.parse(v) as T; } catch { return undefined; }
+        try {
+            return JSON.parse(v) as T;
+        } catch {
+            return undefined;
+        }
     }
     return undefined;
 };
 
 /* ---------- Quick Range ---------- */
 type QuickRange = 'custom' | 'today' | '7d' | '30d';
+
 const addDays = (d: Date, delta: number) => {
     const x = new Date(d);
     x.setDate(x.getDate() + delta);
     return x;
 };
+
+// ใช้แค่ “วัน” ไม่สนเวลา
 const getRange = (key: QuickRange): { start: Date; end: Date } => {
-    const t0 = getStartOfDay(new Date());
-    const t1 = getEndOfDay(new Date());
-    if (key === 'today') return { start: t0, end: t1 };
-    if (key === '7d') return { start: getStartOfDay(addDays(t0, -6)), end: t1 };   // รวมวันนี้
-    if (key === '30d') return { start: getStartOfDay(addDays(t0, -29)), end: t1 }; // รวมวันนี้
-    return { start: t0, end: t1 };
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    if (key === 'today') {
+        return { start: today, end: today };
+    }
+
+    if (key === '7d') {
+        const start = addDays(today, -6); // รวมวันนี้
+        return { start, end: today };
+    }
+
+    if (key === '30d') {
+        const start = addDays(today, -29); // รวมวันนี้
+        return { start, end: today };
+    }
+
+    return { start: today, end: today };
 };
 
 export default function AnswerHistoryScreen() {
-    const todayStart = useMemo(() => getStartOfDay(new Date()), []);
-    const todayEnd = useMemo(() => getEndOfDay(new Date()), []);
+    // default = today
+    const todayStart = useMemo(() => {
+        const now = new Date();
+        return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    }, []);
+
+    const todayEnd = useMemo(() => {
+        const now = new Date();
+        return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    }, []);
 
     const [startDate, setStartDate] = useState<Date | null>(todayStart);
     const [endDate, setEndDate] = useState<Date | null>(todayEnd);
+
     const [answers, setAnswers] = useState<StudentAnswer[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [expandedAnswerId, setExpandedAnswerId] = useState<number | null>(null);
     const [showPicker, setShowPicker] = useState<null | 'start' | 'end'>(null);
+
     const [totalAnswers, setTotalAnswers] = useState(0);
     const [correctAnswers, setCorrectAnswers] = useState(0);
     const [incorrectAnswers, setIncorrectAnswers] = useState(0);
@@ -146,19 +174,30 @@ export default function AnswerHistoryScreen() {
 
     const [quickRange, setQuickRange] = useState<QuickRange>('today');
 
+    // Pagination
+    const [page, setPage] = useState<number>(1);
+    const [initialTotalPages, setInitialTotalPages] = useState<number | null>(null);
+
+    const totalPages: number = initialTotalPages ?? 1;
+
     const auth = useAuth();
     const repos = useRepositories(auth.accessToken).current;
 
     /* ---------- Auto-fix swapped dates ---------- */
     useEffect(() => {
-        if (startDate && endDate && startDate > endDate) {
-            setEndDate(getEndOfDay(startDate));
+        if (
+            startDate &&
+            endDate &&
+            isValidDate(startDate) &&
+            isValidDate(endDate) &&
+            startDate > endDate
+        ) {
+            setEndDate(startDate);
         }
     }, [startDate, endDate]);
 
     /* ---------- Apply default quick range once ---------- */
     useEffect(() => {
-        // ensure state stays in sync at mount
         const { start, end } = getRange('today');
         setStartDate(start);
         setEndDate(end);
@@ -166,7 +205,13 @@ export default function AnswerHistoryScreen() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    /* ---------- Data fetch ---------- */
+    /* ---------- Reset pagination when date range changes ---------- */
+    useEffect(() => {
+        setPage(1);
+        setInitialTotalPages(null);
+    }, [startDate, endDate]);
+
+    /* ---------- Data fetch (summary + paginated history) ---------- */
     useEffect(() => {
         let aborted = false;
 
@@ -180,14 +225,8 @@ export default function AnswerHistoryScreen() {
             setError(null);
 
             try {
-                // summary: ISO UTC boundaries
-                const apiStartDateISO = startDate ? toUtcBoundary(startDate, false) : undefined;
-                const apiEndDateISO = endDate ? toUtcBoundary(endDate, true) : undefined;
-
-                // history: YYYY-MM-DD
-                const startYmd = startDate ? toYmd(startDate) : undefined;
-                const endYmd = endDate ? toYmd(endDate) : undefined;
-                const nextEndYmd = endDate ? toYmd(addDays(endDate, 1)) : undefined; // รวมวันสุดท้าย
+                const startYmd = toYmd(startDate);
+                const endYmd = toYmd(endDate);
 
                 const gameV2Repo = repos.gamev2;
 
@@ -198,7 +237,8 @@ export default function AnswerHistoryScreen() {
                     }),
                     gameV2Repo.fetchAnswerHistory({
                         start_date: startYmd,
-                        end_date: nextEndYmd,
+                        end_date: endYmd,
+                        page: String(page),
                     }),
                 ]);
 
@@ -215,10 +255,12 @@ export default function AnswerHistoryScreen() {
                 setIncorrectAnswers(incorrect);
                 setAccuracyRate(accuracy);
 
-                // ---- History (support multiple shapes)
+                // ---- History
                 const rawList: any[] = Array.isArray(historyData)
                     ? historyData
-                    : (historyData?.results ?? historyData?.users_studentanswer ?? []);
+                    : historyData?.results ??
+                    historyData?.users_studentanswer ??
+                    [];
 
                 const parsed = rawList.map((a: any) => {
                     const parsedQ = safeParse<QuestionData>(a.question);
@@ -231,6 +273,25 @@ export default function AnswerHistoryScreen() {
                 });
 
                 setAnswers(parsed);
+
+                // ---- Pagination meta
+                setInitialTotalPages((prev) => {
+                    if (prev !== null) return prev;
+
+                    const totalCount: number =
+                        (Array.isArray(historyData)
+                            ? historyData.length
+                            : historyData?.count) ?? rawList.length ?? 0;
+
+                    const pageSize: number =
+                        rawList.length > 0 ? rawList.length : 20;
+
+                    const computed =
+                        totalCount > 0 ? Math.ceil(totalCount / pageSize) : 1;
+
+                    console.log('[pagination] initial totalPages =', computed);
+                    return computed;
+                });
             } catch (err: any) {
                 if (!aborted) {
                     console.error('Failed fetch history:', err);
@@ -243,8 +304,10 @@ export default function AnswerHistoryScreen() {
         };
 
         fetchDataAndProcess();
-        return () => { aborted = true; };
-    }, [startDate, endDate]);
+        return () => {
+            aborted = true;
+        };
+    }, [startDate, endDate, page, repos]);
 
     /* ---------- Quick range actions ---------- */
     const applyQuickRange = (key: QuickRange) => {
@@ -260,21 +323,41 @@ export default function AnswerHistoryScreen() {
     const hideDatePicker = () => setShowPicker(null);
 
     const onDateChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
-        if (event.type === 'dismissed') { hideDatePicker(); return; }
+        if (event.type === 'dismissed') {
+            hideDatePicker();
+            return;
+        }
         if (event.type === 'set' && selectedDate) {
-            if (showPicker === 'start') setStartDate(getStartOfDay(selectedDate));
-            else if (showPicker === 'end') setEndDate(getEndOfDay(selectedDate));
-            setQuickRange('custom'); // ผู้ใช้แก้เอง → custom
+            const d = new Date(
+                selectedDate.getFullYear(),
+                selectedDate.getMonth(),
+                selectedDate.getDate(),
+            );
+            if (!isValidDate(d)) {
+                hideDatePicker();
+                return;
+            }
+
+            if (showPicker === 'start') {
+                setStartDate(d);
+            } else if (showPicker === 'end') {
+                setEndDate(d);
+            }
+
+            setQuickRange('custom');
             hideDatePicker();
         }
     };
 
+    // Clear → reset เป็น Today (ไม่ให้มี null / invalid)
     const clearDateFilter = () => {
-        setStartDate(null);
-        setEndDate(null);
-        setQuickRange('custom');
+        const { start, end } = getRange('today');
+        setStartDate(start);
+        setEndDate(end);
+        setQuickRange('today');
     };
 
+    /* ---------- Expand item ---------- */
     const handleToggleDetails = useCallback((id: number) => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
         setExpandedAnswerId((prev) => (prev === id ? null : id));
@@ -294,25 +377,36 @@ export default function AnswerHistoryScreen() {
     const renderDateTimePicker = () => {
         if (!showPicker) return null;
 
-        const value = (showPicker === 'start' ? startDate : endDate) || new Date();
-        const maximumDate = (showPicker === 'start' ? endDate : new Date()) || new Date();
-        const minimumDate = showPicker === 'end' && startDate ? startDate : undefined;
+        const value =
+            (showPicker === 'start' ? startDate : endDate) || new Date();
+        const maximumDate =
+            (showPicker === 'start' ? endDate : new Date()) || new Date();
+        const minimumDate =
+            showPicker === 'end' && startDate ? startDate : undefined;
 
         if (Platform.OS === 'web') {
             return (
-                <Modal visible transparent animationType="fade" onRequestClose={hideDatePicker}>
+                <Modal
+                    visible
+                    transparent
+                    animationType="fade"
+                    onRequestClose={hideDatePicker}
+                >
                     <View className="flex-1 items-center justify-center bg-black/50">
                         <View className="items-center rounded-xl bg-white p-5 shadow-md">
-                            {/* DOM input: NativeWind ไม่กินกับ DOM → ใช้ style ปกติ */}
                             <input
                                 type="date"
                                 value={toDateInputValue(value)}
-                                max={maximumDate ? toDateInputValue(maximumDate) : undefined}
+                                max={toDateInputValue(maximumDate)}
                                 min={minimumDate ? toDateInputValue(minimumDate) : undefined}
                                 onChange={(e) => {
                                     const picked = fromDateInputValue(e.currentTarget.value);
-                                    if (showPicker === 'start') setStartDate(getStartOfDay(picked));
-                                    else setEndDate(getEndOfDay(picked));
+                                    if (!picked) return;
+                                    if (showPicker === 'start') {
+                                        setStartDate(picked);
+                                    } else {
+                                        setEndDate(picked);
+                                    }
                                     setQuickRange('custom');
                                 }}
                                 style={{
@@ -324,7 +418,10 @@ export default function AnswerHistoryScreen() {
                                     outline: 'none',
                                 }}
                             />
-                            <TouchableOpacity onPress={hideDatePicker} className="mt-4 rounded-md bg-indigo-50 px-5 py-2">
+                            <TouchableOpacity
+                                onPress={hideDatePicker}
+                                className="mt-4 rounded-md bg-indigo-50 px-5 py-2"
+                            >
                                 <Text className="text-indigo-600">Close</Text>
                             </TouchableOpacity>
                         </View>
@@ -335,7 +432,7 @@ export default function AnswerHistoryScreen() {
 
         return (
             <DateTimePicker
-                value={value}
+                value={isValidDate(value) ? value : new Date()}
                 mode="date"
                 display={Platform.OS === 'ios' ? 'inline' : 'default'}
                 onChange={onDateChange}
@@ -350,7 +447,9 @@ export default function AnswerHistoryScreen() {
         return (
             <SafeAreaView className="flex-1 items-center justify-center bg-gray-100">
                 <ActivityIndicator size="large" color="#2563eb" />
-                <Text className="mt-1 text-gray-500">Preparing repositories...</Text>
+                <Text className="mt-1 text-gray-500">
+                    Preparing repositories...
+                </Text>
             </SafeAreaView>
         );
     }
@@ -368,8 +467,14 @@ export default function AnswerHistoryScreen() {
     if (error) {
         return (
             <SafeAreaView className="flex-1 items-center justify-center bg-gray-100 px-4">
-                <Ionicons name="alert-circle-outline" size={48} color="#ef4444" />
-                <Text className="mt-3 text-lg font-bold text-red-600">เกิดข้อผิดพลาด</Text>
+                <Ionicons
+                    name="alert-circle-outline"
+                    size={48}
+                    color="#ef4444"
+                />
+                <Text className="mt-3 text-lg font-bold text-red-600">
+                    เกิดข้อผิดพลาด
+                </Text>
                 <Text className="mt-1 text-center text-gray-600">{error}</Text>
             </SafeAreaView>
         );
@@ -386,38 +491,64 @@ export default function AnswerHistoryScreen() {
                     </Pressable>
                     <Heading size="lg">Answer History</Heading>
                     <View className="w-8" />
-                    {/* Placeholder for alignment */}
                 </Box>
 
-                <View className="flex-row items-center gap-2 mt-4 px-4 pb-3">
-                    <TouchableOpacity onPress={showStartDatePicker} className="flex-1 flex-row items-center justify-center gap-2 rounded-lg border border-gray-300 bg-gray-100 px-3 py-2.5">
-                        <Ionicons name="calendar-outline" size={18} color="#4b5563" />
+                <View className="mt-4 flex-row items-center gap-2 px-4 pb-3">
+                    <TouchableOpacity
+                        onPress={showStartDatePicker}
+                        className="flex-1 flex-row items-center justify-center gap-2 rounded-lg border border-gray-300 bg-gray-100 px-3 py-2.5"
+                    >
+                        <Ionicons
+                            name="calendar-outline"
+                            size={18}
+                            color="#4b5563"
+                        />
                         <Text className="text-sm text-gray-700">
-                            {startDate ? formatDateLabel(startDate, true) : 'Start Date'}
+                            {startDate
+                                ? formatDateLabel(startDate, true)
+                                : 'Start Date'}
                         </Text>
                     </TouchableOpacity>
 
-                    <TouchableOpacity onPress={showEndDatePicker} className="flex-1 flex-row items-center justify-center gap-2 rounded-lg border border-gray-300 bg-gray-100 px-3 py-2.5">
-                        <Ionicons name="calendar-outline" size={18} color="#4b5563" />
+                    <TouchableOpacity
+                        onPress={showEndDatePicker}
+                        className="flex-1 flex-row items-center justify-center gap-2 rounded-lg border border-gray-300 bg-gray-100 px-3 py-2.5"
+                    >
+                        <Ionicons
+                            name="calendar-outline"
+                            size={18}
+                            color="#4b5563"
+                        />
                         <Text className="text-sm text-gray-700">
-                            {endDate ? formatDateLabel(endDate, true) : 'End Date'}
+                            {endDate
+                                ? formatDateLabel(endDate, true)
+                                : 'End Date'}
                         </Text>
                     </TouchableOpacity>
 
                     {(startDate || endDate) && (
-                        <TouchableOpacity onPress={clearDateFilter} className="items-center justify-center p-2">
-                            <Ionicons name="close-circle" size={20} color="#6b7280" />
+                        <TouchableOpacity
+                            onPress={clearDateFilter}
+                            className="items-center justify-center p-2"
+                        >
+                            <Ionicons
+                                name="close-circle"
+                                size={20}
+                                color="#6b7280"
+                            />
                         </TouchableOpacity>
                     )}
                 </View>
 
                 {/* Quick Ranges */}
                 <View className="mt-3 flex-row items-center justify-center gap-2">
-                    {([
-                        { key: 'today', label: 'Today' },
-                        { key: '7d', label: '7 Days' },
-                        { key: '30d', label: '30 Days' },
-                    ] as { key: QuickRange; label: string }[]).map(({ key, label }) => {
+                    {(
+                        [
+                            { key: 'today', label: 'Today' },
+                            { key: '7d', label: '7 Days' },
+                            { key: '30d', label: '30 Days' },
+                        ] as { key: QuickRange; label: string }[]
+                    ).map(({ key, label }) => {
                         const active = quickRange === key;
                         return (
                             <TouchableOpacity
@@ -425,10 +556,18 @@ export default function AnswerHistoryScreen() {
                                 onPress={() => applyQuickRange(key)}
                                 className={[
                                     'rounded-full border px-3 py-1.5',
-                                    active ? 'border-indigo-600 bg-indigo-600' : 'border-gray-300 bg-white',
+                                    active
+                                        ? 'border-indigo-600 bg-indigo-600'
+                                        : 'border-gray-300 bg-white',
                                 ].join(' ')}
                             >
-                                <Text className={active ? 'font-semibold text-white' : 'text-gray-700'}>
+                                <Text
+                                    className={
+                                        active
+                                            ? 'font-semibold text-white'
+                                            : 'text-gray-700'
+                                    }
+                                >
                                     {label}
                                 </Text>
                             </TouchableOpacity>
@@ -449,21 +588,37 @@ export default function AnswerHistoryScreen() {
             <View className="space-y-3 border-b border-gray-200 bg-white p-4">
                 <View className="flex-row justify-between gap-2">
                     <View className="flex-1 items-center rounded-lg bg-gray-100 p-3">
-                        <Text className="text-sm font-medium text-gray-500">Total</Text>
-                        <Text className="text-2xl font-extrabold text-gray-800">{totalAnswers}</Text>
+                        <Text className="text-sm font-medium text-gray-500">
+                            Total
+                        </Text>
+                        <Text className="text-2xl font-extrabold text-gray-800">
+                            {totalAnswers}
+                        </Text>
                     </View>
                     <View className="flex-1 items-center rounded-lg bg-green-100 p-3">
-                        <Text className="text-sm font-medium text-green-700">Correct</Text>
-                        <Text className="text-2xl font-extrabold text-green-800">{correctAnswers}</Text>
+                        <Text className="text-sm font-medium text-green-700">
+                            Correct
+                        </Text>
+                        <Text className="text-2xl font-extrabold text-green-800">
+                            {correctAnswers}
+                        </Text>
                     </View>
                     <View className="flex-1 items-center rounded-lg bg-red-100 p-3">
-                        <Text className="text-sm font-medium text-red-700">Incorrect</Text>
-                        <Text className="text-2xl font-extrabold text-red-800">{incorrectAnswers}</Text>
+                        <Text className="text-sm font-medium text-red-700">
+                            Incorrect
+                        </Text>
+                        <Text className="text-2xl font-extrabold text-red-800">
+                            {incorrectAnswers}
+                        </Text>
                     </View>
                 </View>
                 <View className="flex-row items-center justify-between rounded-lg bg-blue-100 p-3">
-                    <Text className="text-sm font-medium text-blue-700">Accuracy Rate</Text>
-                    <Text className="text-lg font-extrabold text-blue-800">{accuracyRate}%</Text>
+                    <Text className="text-sm font-medium text-blue-700">
+                        Accuracy Rate
+                    </Text>
+                    <Text className="text-lg font-extrabold text-blue-800">
+                        {accuracyRate}%
+                    </Text>
                 </View>
             </View>
 
@@ -480,14 +635,28 @@ export default function AnswerHistoryScreen() {
                     data={answers}
                     renderItem={renderItem}
                     keyExtractor={(item) => String(item.id)}
-                    contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 16 }}
+                    contentContainerStyle={{
+                        paddingHorizontal: 16,
+                        paddingTop: 16,
+                        paddingBottom: 16,
+                    }}
                     ListEmptyComponent={
                         <View className="mt-10 items-center">
-                            <Text className="text-lg text-gray-500">No answers found for this period.</Text>
+                            <Text className="text-lg text-gray-500">
+                                No answers found for this period.
+                            </Text>
                         </View>
                     }
                 />
             )}
+
+            {/* Pagination bar (ใช้ component แยก) */}
+            <AnswerHistoryPagination
+                page={page}
+                totalPages={totalPages}
+                loading={loading}
+                onChangePage={setPage}
+            />
 
             {/* Date Picker */}
             {renderDateTimePicker()}
