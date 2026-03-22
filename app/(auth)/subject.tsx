@@ -21,6 +21,10 @@ import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Image, Text, View } from 'react-native';
 
+function isEnglishSubject(s: Subject): boolean {
+    return s.name.trim().toLowerCase() === 'english';
+}
+
 export default function SelectSubjectPage() {
     const auth = useAuth();
     const repos = useRepositories(auth.accessToken).current;
@@ -29,6 +33,19 @@ export default function SelectSubjectPage() {
     const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
     const [selectedTopic, setSelectedTopic] = useState<string[]>([]);
     const [questionQuantity, setQuestionQuantity] = useState(10);
+    const [subjectsReady, setSubjectsReady] = useState(false);
+
+    /** แสดงใน dropdown เฉพาะวิชา English (ชื่อตรงกับที่ API ส่ง) */
+    const englishSubjectsOnly = subjects.filter(isEnglishSubject);
+
+    const selectedSubjectLabel =
+        englishSubjectsOnly.find((s) => s.gid === selectedSubject)?.name ?? undefined;
+
+    const canPlay =
+        subjectsReady &&
+        selectedSubject != null &&
+        selectedTopic.length > 0 &&
+        myLevel.length > 0;
 
     const handleSubmitSelection = async (
         selectedSubject: string | null,
@@ -52,13 +69,26 @@ export default function SelectSubjectPage() {
 
 
     useEffect(() => {
+        let cancelled = false;
         const setup = async () => {
-            const subjects = await repos.gamev2.fetchSubjects()
-            console.log("Subjects", subjects)
-            setSubjects(subjects)
-        }
-        setup()
-    }, [])
+            try {
+                const list = await repos.gamev2.fetchSubjects();
+                if (cancelled) return;
+                console.log('Subjects', list);
+                setSubjects(list);
+                const english = list.filter(isEnglishSubject);
+                if (english.length > 0) {
+                    setSelectedSubject(english[0].gid);
+                }
+            } finally {
+                if (!cancelled) setSubjectsReady(true);
+            }
+        };
+        setup();
+        return () => {
+            cancelled = true;
+        };
+    }, []);
 
     return (
         <View className='flex-1  items-center bg-[#fffac9ff]'>
@@ -74,8 +104,14 @@ export default function SelectSubjectPage() {
                 </Text>
             </View>
 
-            {/* เลือกวิชา */}
-            <Select onValueChange={(value) => setSelectedSubject(value)}  >
+            {/* เลือกวิชา — controlled + auto English หลังโหลดจาก API (key ให้ label ตรงกับค่าเริ่มหลัง fetch) */}
+            <Select
+                key={selectedSubject ?? 'pending-subject'}
+                selectedValue={selectedSubject}
+                selectedLabel={selectedSubjectLabel}
+                onValueChange={(value) => setSelectedSubject(value)}
+                placeholder="Select Subject"
+            >
                 <SelectTrigger variant="outline" size="md">
                     <SelectInput placeholder="Select Subject" />
                     <SelectIcon className="mr-3" as={ChevronDownIcon} />
@@ -86,7 +122,7 @@ export default function SelectSubjectPage() {
                         <SelectDragIndicatorWrapper>
                             <SelectDragIndicator />
                         </SelectDragIndicatorWrapper>
-                        {subjects.map((subject) => (
+                        {englishSubjectsOnly.map((subject) => (
                             <SelectItem key={subject.gid} label={subject.name} value={subject.gid} />
                         ))}
                     </SelectContent>
@@ -97,7 +133,7 @@ export default function SelectSubjectPage() {
             <View>
                 {/* เลือกหัวข้อ */}
                 <View className='flex-row flex-wrap mt-4 justify-center'>
-                    {subjects.find(sub =>
+                    {englishSubjectsOnly.find(sub =>
                         sub.gid === selectedSubject)?.topics.map((topic) =>
                             <Button
                                 variant="solid"
@@ -132,7 +168,7 @@ export default function SelectSubjectPage() {
 
                 {/* เลือกระดับ */}
                 <View className='flex-row flex-wrap mt-4 justify-center'>
-                    {subjects.find(sub =>
+                    {englishSubjectsOnly.find(sub =>
                         sub.gid === selectedSubject)?.levels.map((level) =>
                             <Button
                                 variant="solid"
@@ -192,8 +228,15 @@ export default function SelectSubjectPage() {
                 variant="solid"
                 size="md"
                 action="primary hover=true"
-                className='mt-6 px-10 py-3 rounded-3xl bg-[#FCC61D]'
+                className={
+                    canPlay
+                        ? 'mt-6 px-10 py-3 rounded-3xl bg-[#FCC61D]'
+                        : 'mt-6 px-10 py-3 rounded-3xl bg-gray-400'
+                }
+                style={!canPlay ? { opacity: 1 } : undefined}
+                isDisabled={!canPlay}
                 onPress={() => {
+                    if (!canPlay || selectedSubject == null) return;
                     handleSubmitSelection(
                         selectedSubject,
                         questionQuantity,
@@ -203,7 +246,13 @@ export default function SelectSubjectPage() {
                     );
                     router.push('/game')
                 }}>
-                <ButtonText className='text-xl text-black'>Play</ButtonText>
+                <ButtonText
+                    className={
+                        canPlay ? 'text-xl text-black' : 'text-xl text-gray-200'
+                    }
+                >
+                    Play
+                </ButtonText>
             </Button>
         </View>
 
