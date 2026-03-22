@@ -55,7 +55,10 @@ export default function testComponent() {
                 explanation={explanation}
                 helperStatus={helperStatus}
                 explanationStatus={explanationStatus}
-                onPressNext={()=>{}} />
+                onPressNext={()=>{}}
+                questionIndex={1}
+                gameState="wait"
+            />
         </View>
     )
 }

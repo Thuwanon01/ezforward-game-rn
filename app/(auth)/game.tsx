@@ -1,7 +1,7 @@
 import {
-  NewQuizChoice,
-  QuizAnswerResponse,
-  QuizQuestionResponse,
+    NewQuizChoice,
+    QuizAnswerResponse,
+    QuizQuestionResponse,
 } from "@/apis/types";
 import ChoiceBox from "@/components/lab/ChoiceBox";
 import ExplanationPanel from "@/components/lab/ExplanationPanel";
@@ -16,12 +16,34 @@ import React, { useEffect, useRef, useState } from "react";
 import { Text, View } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 
+const HELPER_ELIMINATE = "eliminate";
+const HELPER_DOUBLE = "double";
+
+function pickTwoRandomChoiceIds(choiceIds: number[]): number[] {
+  if (choiceIds.length <= 2) {
+    return [...choiceIds];
+  }
+  const shuffled = [...choiceIds];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled.slice(0, 2);
+}
+
 export default function GamePage() {
   const [helperStatus, setHelperStatus] = useState({
     eliminate: false,
     double: false,
     change: false,
   });
+  /** Choice ids hidden after Eliminate helper (not sent as the user's answer). */
+  const [eliminatedChoiceIds, setEliminatedChoiceIds] = useState<number[]>([]);
+  /** Next answer submission should record Double lifeline (first attempt only). */
+  const [doubleSubmitPending, setDoubleSubmitPending] = useState(false);
+  /** After a wrong answer while double was used, allow one more pick on the same question. */
+  const [awaitingDoubleSecondPick, setAwaitingDoubleSecondPick] = useState(false);
+
   const [explanationStatus, setExplanationStatus] = useState(false);
   const [correctAnswer, setCorrectAnswer] = useState("");
   const [correctExplanation, setCorrectExplanation] = useState("");
@@ -52,36 +74,33 @@ export default function GamePage() {
     fetchData();
   }, []);
 
-  // สร้างฟังก์ชันที่จะส่งลงไปให้ QuestionBox
   const handleQuestionPress = () => {
     if (timerRef.current) {
       clearTimeout(timerRef.current);
     }
 
-    // ทำให้ state เปลี่ยนเสมอเพื่อ re-trigger speech
-    // โดยการเซ็ตเป็น 'wait' ก่อน เพื่อให้ useEffect ใน QuestionBox ทำงาน (ส่วน cleanup) และหยุดเสียงพูดปัจจุบัน
     setStatus("wait");
 
-    // ใช้ setTimeout เล็กน้อย (10ms) เพื่อให้ React อัปเดต UI เป็น 'wait' ก่อน
-    // แล้วค่อยสั่งให้เป็น 'reading' อีกครั้ง
     setTimeout(() => {
       setStatus("reading");
 
-      // เมื่อเข้าสู่สถานะ 'reading' แล้ว ให้ตั้ง Timer ใหม่เพื่อนับ 5 วินาที
       timerRef.current = setTimeout(() => {
-        setStatus("wait"); // กลับเป็น wait หลังครบ 5 วิ
+        setStatus("wait");
       }, 8500);
     }, 10);
   };
 
+  const resetHelpersForNewQuestion = () => {
+    setHelperStatus({ eliminate: false, double: false, change: false });
+    setEliminatedChoiceIds([]);
+    setDoubleSubmitPending(false);
+    setAwaitingDoubleSecondPick(false);
+  };
+
   const fetchData = async () => {
-    // const questionData = await fetchRandomQuestion();
     const selectedSubject = await AsyncStorage.getItem("selectedSubject");
     const myLevelStr = await AsyncStorage.getItem("myLevel");
     const selectedTopicStr = await AsyncStorage.getItem("selectedTopic");
-
-    // const myLevel = myLevelStr ? myLevelStr.split(',') : [];
-    // const selectedTopic = selectedTopicStr ? selectedTopicStr.split(',') : [];
 
     const questionData = await repos.gamev2.fetchSuggestedQuestion(
       selectedSubject as string,
@@ -97,72 +116,121 @@ export default function GamePage() {
       }))
     );
     setCurrentQuestionIndex(questionData.progress.current);
-    setStatus("wait"); // เริ่มต้นด้วยสถานะ wait
+    setStatus("wait");
     setGameState("wait");
     setExplanationStatus(false);
     setCorrectExplanation("");
     setIncorrectExplanation("");
+    setAnswer(null);
+    setSelectedChoice(null);
+    resetHelpersForNewQuestion();
+  };
+
+  const handleConfirmEliminate = () => {
+    if (!choices.length) return;
+    const ids = pickTwoRandomChoiceIds(choices.map((c) => c.id));
+    setEliminatedChoiceIds(ids);
+    setHelperStatus((h) => ({ ...h, eliminate: true }));
+  };
+
+  const handleConfirmDouble = () => {
+    setDoubleSubmitPending(true);
+    setHelperStatus((h) => ({ ...h, double: true }));
+  };
+
+  const handleConfirmChange = () => {
+    setHelperStatus((h) => ({ ...h, change: true }));
+    void fetchData();
   };
 
   const handleSubmitAnswer = async (choiceId: any, index: any) => {
     if (!question) return;
+
+    const useHelper: string[] = [];
+    if (doubleSubmitPending) {
+      useHelper.push(HELPER_DOUBLE);
+      setDoubleSubmitPending(false);
+    }
+    if (eliminatedChoiceIds.length > 0) {
+      useHelper.push(HELPER_ELIMINATE);
+    }
+
+    const choiceCutting = eliminatedChoiceIds.map(String);
+
     const answerData = await repos.gamev2.fetchSubmitAnswer(
       question.id as string,
       choiceId,
       0,
       0,
-      [],
-      []
+      useHelper,
+      choiceCutting
     );
     console.log("Submitted answer data:", answerData);
     setExplanationStatus(true);
     setAnswer(answerData);
 
-    // Update choices to mark the selected one
     const newChoices = [...choices];
     newChoices[index].is_selected = true;
     setChoices(newChoices);
 
-    // Track the selected choice for AI context
     setSelectedChoice(newChoices[index]);
 
-    if (
-      answerData.choices.find((choice) => choice.id === choiceId)?.is_correct
-    ) {
+    const selectedWithServer = answerData.choices.find(
+      (choice) => choice.id === choiceId
+    );
+    const isCorrect = !!selectedWithServer?.is_correct;
+
+    if (isCorrect) {
       setGameState("correct");
       setStatus("correct");
-      setScore(score + 1);
+      setScore((s) => s + 1);
       playSound("yessound.mp3");
     } else {
+      const usedDoubleThisRound =
+        useHelper.includes(HELPER_DOUBLE) || awaitingDoubleSecondPick;
+
+      if (usedDoubleThisRound && !awaitingDoubleSecondPick) {
+        setAwaitingDoubleSecondPick(true);
+        setExplanationStatus(false);
+        setAnswer(null);
+        setChoices((prev) =>
+          prev.map((c) => ({ ...c, is_selected: false }))
+        );
+        setGameState("wait");
+        setStatus("wait");
+        setCorrectAnswer("");
+        setIncorrectAnswer("");
+        setCorrectExplanation("");
+        setIncorrectExplanation("");
+        setExplanation("");
+        playSound("alarm.mp3");
+        return;
+      }
+
       setGameState("incorrect");
       setStatus("incorrect");
       playSound("alarm.mp3");
     }
 
-    // TODO: Too hard to read
-    const incorrectChoiceId = newChoices.find(
-      (choice) =>
-        choice.is_selected &&
-        !answerData.choices.find((ansChoice) => ansChoice.id === choice.id)
-          ?.is_correct
-    )?.id;
+    setAwaitingDoubleSecondPick(false);
+
+    const incorrectUserChoice = newChoices.find(
+      (c) => c.is_selected && !answerData.choices.find((ac) => ac.id === c.id)?.is_correct
+    );
+    const incorrectChoiceId = incorrectUserChoice?.id;
+
     setCorrectAnswer(
-      answerData.choices.find((choice) => choice.is_correct)?.text || ""
+      answerData.choices.find((c) => c.is_correct)?.text ?? ""
     );
     setCorrectExplanation(
-      answerData.choices.find((choice) => choice.is_correct)?.explanation || ""
+      answerData.choices.find((c) => c.is_correct)?.explanation ?? ""
     );
-    setIncorrectAnswer(
-      newChoices.find(
-        (choice) =>
-          choice.is_selected &&
-          !answerData.choices.find((ansChoice) => ansChoice.id === choice.id)
-            ?.is_correct
-      )?.text || ""
-    );
+    setIncorrectAnswer(incorrectUserChoice?.text ?? "");
     setIncorrectExplanation(
-      answerData.choices.find((choice) => choice.id === incorrectChoiceId)
-        ?.explanation || ""
+      incorrectChoiceId != null
+        ? answerData.choices.find((c) => c.id === incorrectChoiceId)?.explanation ??
+          ""
+        : ""
     );
     setExplanation(answerData.explanation);
   };
@@ -186,22 +254,19 @@ export default function GamePage() {
   };
 
   const settingHandler = () => {
-
     setOpenMenu(!openMenu);
-    // router.push("/subject");
   };
 
   const nextHandler = () => {
     fetchData();
-    // if (currentQuestionIndex >= 10) {
-    //   setScore(0);
-    //   router.push("/success");
-    // }
   };
 
+  const visibleChoices = choices.filter(
+    (c) => !eliminatedChoiceIds.includes(c.id)
+  );
+
   return (
-    <View className="flex-1 flex-col justify-between">
-      {/* for test components */}
+    <View className="flex-1 flex-col justify-between bg-[#fffac9]">
       <ScrollView className="flex-1">
         <HeaderPanel
           title={"GameMunMun"}
@@ -211,12 +276,11 @@ export default function GamePage() {
         ></HeaderPanel>
 
         <View className="flex-row justify-end">
-          <View className="flex-row mx-6 mt-4 bg-[#FCC61D] px-3 py-1 rounded-[20]">
-            <Text className="text-xl font-bold">{score}</Text>
+          <View className="flex-row mx-6 mt-4 bg-[#FCC61D] px-3 py-1 rounded-[20] border border-[#183B4E]/20">
+            <Text className="text-xl font-bold text-[#183B4E]">{score}</Text>
           </View>
         </View>
 
-        {/* Question */}
         <QuestionBox
           question={question?.text || "Loading question..."}
           status={status}
@@ -224,25 +288,26 @@ export default function GamePage() {
           questionIndex={currentQuestionIndex}
         />
 
-        {/* Choices */}
         <View>
-          {choices.map((choice, index) => (
-            <ChoiceBox
-              key={index}
-              text={choice.text}
-              status={handleSelectChoice(choice.id)}
-              onPress={() => {
-                handleSubmitAnswer(choice.id, index);
-              }}
-              disabled={gameState !== "wait"}
-              correctExplanation={correctExplanation}
-              incorrectExplanation={incorrectExplanation}
-            />
-          ))}
+          {visibleChoices.map((choice) => {
+            const index = choices.findIndex((c) => c.id === choice.id);
+            return (
+              <ChoiceBox
+                key={choice.id}
+                text={choice.text}
+                status={handleSelectChoice(choice.id)}
+                onPress={() => {
+                  handleSubmitAnswer(choice.id, index);
+                }}
+                disabled={gameState !== "wait"}
+                correctExplanation={correctExplanation}
+                incorrectExplanation={incorrectExplanation}
+              />
+            );
+          })}
         </View>
       </ScrollView>
 
-      {/* Components for use */}
       <View className="flex-shrink-0">
         <ExplanationPanel
           correctAnswer={correctAnswer}
@@ -257,6 +322,9 @@ export default function GamePage() {
           questionIndex={currentQuestionIndex}
           question={question}
           selectedChoice={selectedChoice}
+          onConfirmEliminate={handleConfirmEliminate}
+          onConfirmDouble={handleConfirmDouble}
+          onConfirmChange={handleConfirmChange}
         />
       </View>
     </View>

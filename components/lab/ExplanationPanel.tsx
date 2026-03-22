@@ -28,6 +28,9 @@ interface Props {
   selectedChoice?: NewQuizChoice | null;
   score?: number;
   questionIndex: number;
+  onConfirmEliminate?: () => void;
+  onConfirmDouble?: () => void;
+  onConfirmChange?: () => void;
 }
 
 interface ChatMessage {
@@ -65,7 +68,12 @@ export default function ExplanationPanel({
   selectedChoice,
   score,
   questionIndex,
+  onConfirmEliminate,
+  onConfirmDouble,
+  onConfirmChange,
 }: Props) {
+  const helpersLocked =
+    helperStatus.eliminate || helperStatus.double || helperStatus.change;
   const [openExplanation, setOpenExplanation] = useState(false);
   const [openHelper, setOpenHelper] = useState({
     eliminate: false,
@@ -402,21 +410,21 @@ export default function ExplanationPanel({
               {/* ... ปุ่มตัวช่วย 3 ปุ่ม ... */}
               <IconButton
                 iconImage="eliminateIcon"
-                isDisable={helperStatus["eliminate"]}
+                isDisable={helpersLocked}
                 onPress={() =>
                   setOpenHelper({ eliminate: true, double: false, change: false })
                 }
               />
               <IconButton
                 iconImage="doubleIcon"
-                isDisable={helperStatus["double"]}
+                isDisable={helpersLocked}
                 onPress={() =>
                   setOpenHelper({ eliminate: false, double: true, change: false })
                 }
               />
               <IconButton
                 iconImage="changeIcon"
-                isDisable={helperStatus["change"]}
+                isDisable={helpersLocked}
                 onPress={() =>
                   setOpenHelper({ eliminate: false, double: false, change: true })
                 }
@@ -434,7 +442,10 @@ export default function ExplanationPanel({
             title="Eliminate"
             subtitle="Eliminate 2 wrong answers"
             isVisible={openHelper["eliminate"]}
-            onPressPlay={() => { }}
+            onPressPlay={() => {
+              onConfirmEliminate?.();
+              setOpenHelper({ eliminate: false, double: false, change: false });
+            }}
             onClose={() =>
               setOpenHelper({ eliminate: false, double: false, change: false })
             }
@@ -444,7 +455,10 @@ export default function ExplanationPanel({
             title="Double Chance"
             subtitle="Get 2 choices to answer"
             isVisible={openHelper["double"]}
-            onPressPlay={() => { }}
+            onPressPlay={() => {
+              onConfirmDouble?.();
+              setOpenHelper({ eliminate: false, double: false, change: false });
+            }}
             onClose={() =>
               setOpenHelper({ eliminate: false, double: false, change: false })
             }
@@ -454,7 +468,10 @@ export default function ExplanationPanel({
             title="Change Question"
             subtitle="Change to a new question"
             isVisible={openHelper["change"]}
-            onPressPlay={() => { }}
+            onPressPlay={() => {
+              onConfirmChange?.();
+              setOpenHelper({ eliminate: false, double: false, change: false });
+            }}
             onClose={() =>
               setOpenHelper({ eliminate: false, double: false, change: false })
             }

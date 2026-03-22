@@ -38,8 +38,11 @@ export class GameV2Repository extends BaseRepository {
     selectedTopicStr: string
   ): Promise<QuizResponse> {
     const data: any = await this.sfetch(
-      `/api/learning-plans/suggested-question/?subject=
-      ${selectedSubject}&levels=${myLevelStr}&topics=${selectedTopicStr}`
+      `/api/learning-plans/suggested-question/?subject=${encodeURIComponent(
+        selectedSubject ?? ""
+      )}&levels=${encodeURIComponent(myLevelStr ?? "")}&topics=${encodeURIComponent(
+        selectedTopicStr ?? ""
+      )}`
     );
     // return data.question;
     return data
