@@ -136,7 +136,10 @@ export default function HelpModalPage({
                 className="flex-1 justify-center items-center bg-black/40"
                 onPress={onClose}
             >
-                <Pressable className="bg-[#FFFDE8] rounded-2xl p-5 items-center w-4/5 max-w-sm">
+                <Pressable
+                    className="bg-[#FFFDE8] rounded-2xl p-5 items-center w-4/5 max-w-sm"
+                    onPress={(e) => e.stopPropagation?.()}
+                >
                     {/* แสดง Icon จาก Map */}
                     {IconMap[imageName]}
 

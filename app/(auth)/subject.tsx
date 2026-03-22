@@ -21,44 +21,69 @@ import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Image, Text, View } from 'react-native';
 
+function isEnglishSubject(s: Subject): boolean {
+    return s.name.trim().toLowerCase() === 'english';
+}
+
 export default function SelectSubjectPage() {
     const auth = useAuth();
     const repos = useRepositories(auth.accessToken).current;
     const [subjects, setSubjects] = useState<Subject[]>([]);
-    const [myLevel, setMyLevel] = useState<string[]>([]);
+    /** Single level gid; tap again to clear and re-enable other levels. */
+    const [myLevel, setMyLevel] = useState<string | null>(null);
     const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
-    const [selectedTopic, setSelectedTopic] = useState<string[]>([]);
+    /** Single topic gid; tap again to clear and re-enable other topics. */
+    const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
     const [questionQuantity, setQuestionQuantity] = useState(10);
+    const [subjectsReady, setSubjectsReady] = useState(false);
+
+    /** แสดงใน dropdown เฉพาะวิชา English (ชื่อตรงกับที่ API ส่ง) */
+    const englishSubjectsOnly = subjects.filter(isEnglishSubject);
+
+    const selectedSubjectLabel =
+        englishSubjectsOnly.find((s) => s.gid === selectedSubject)?.name ?? undefined;
+
+    const canPlay =
+        subjectsReady &&
+        selectedSubject != null &&
+        selectedTopic != null &&
+        myLevel != null;
 
     const handleSubmitSelection = async (
         selectedSubject: string | null,
         questionQuantity: number,
-        myLevel: string[],
-        selectedTopic: string[],
+        levelGid: string | null,
+        topicGid: string | null,
     ) => {
-        console.log("handleSubmitSelection", selectedSubject, questionQuantity, myLevel, selectedTopic);
-        // const response = await repos.gamev2.fetchCustomQuiz({
-        //     subject: selectedSubject as string,
-        //     quiz_limit: questionQuantity,
-        //     quiz_level: myLevel,
-        //     quiz_topic: selectedTopic,
-        // });
+        console.log("handleSubmitSelection", selectedSubject, questionQuantity, levelGid, topicGid);
         await AsyncStorage.setItem('selectedSubject', selectedSubject as string);
         await AsyncStorage.setItem('questionQuantity', questionQuantity.toString());
-        await AsyncStorage.setItem('myLevel', myLevel.join(','));
-        await AsyncStorage.setItem('selectedTopic', selectedTopic.join(','));
-        // console.log("response from selection subject", response);
+        await AsyncStorage.setItem('myLevel', levelGid ?? '');
+        await AsyncStorage.setItem('selectedTopic', topicGid ?? '');
     }
 
 
     useEffect(() => {
+        let cancelled = false;
         const setup = async () => {
-            const subjects = await repos.gamev2.fetchSubjects()
-            console.log("Subjects", subjects)
-            setSubjects(subjects)
-        }
-        setup()
-    }, [])
+            try {
+                const list = await repos.gamev2.fetchSubjects();
+                if (cancelled) return;
+                console.log('Subjects', list);
+                setSubjects(list);
+                const english = list.filter(isEnglishSubject);
+                if (english.length > 0) {
+                    setSelectedSubject(english[0].gid);
+                }
+            } finally {
+                if (!cancelled) setSubjectsReady(true);
+            }
+        };
+        setup();
+        return () => {
+            cancelled = true;
+        };
+    }, []);
 
     return (
         <View className='flex-1  items-center bg-[#fffac9ff]'>
@@ -74,8 +99,14 @@ export default function SelectSubjectPage() {
                 </Text>
             </View>
 
-            {/* เลือกวิชา */}
-            <Select onValueChange={(value) => setSelectedSubject(value)}  >
+            {/* เลือกวิชา — controlled + auto English หลังโหลดจาก API (key ให้ label ตรงกับค่าเริ่มหลัง fetch) */}
+            <Select
+                key={selectedSubject ?? 'pending-subject'}
+                selectedValue={selectedSubject}
+                selectedLabel={selectedSubjectLabel}
+                onValueChange={(value) => setSelectedSubject(value)}
+                placeholder="Select Subject"
+            >
                 <SelectTrigger variant="outline" size="md">
                     <SelectInput placeholder="Select Subject" />
                     <SelectIcon className="mr-3" as={ChevronDownIcon} />
@@ -86,7 +117,7 @@ export default function SelectSubjectPage() {
                         <SelectDragIndicatorWrapper>
                             <SelectDragIndicator />
                         </SelectDragIndicatorWrapper>
-                        {subjects.map((subject) => (
+                        {englishSubjectsOnly.map((subject) => (
                             <SelectItem key={subject.gid} label={subject.name} value={subject.gid} />
                         ))}
                     </SelectContent>
@@ -97,70 +128,87 @@ export default function SelectSubjectPage() {
             <View>
                 {/* เลือกหัวข้อ */}
                 <View className='flex-row flex-wrap mt-4 justify-center'>
-                    {subjects.find(sub =>
-                        sub.gid === selectedSubject)?.topics.map((topic) =>
+                    {englishSubjectsOnly.find(sub =>
+                        sub.gid === selectedSubject)?.topics.map((topic) => {
+                            const isChosen = selectedTopic === topic.gid;
+                            const othersLocked =
+                                selectedTopic !== null && !isChosen;
+                            return (
                             <Button
+                                key={topic.gid}
                                 variant="solid"
                                 size="xs"
                                 action="primary"
+                                isDisabled={othersLocked}
                                 onPress={() => {
-                                    setSelectedTopic(prev => {
-                                        console.log(selectedTopic);
-                                        if (prev.includes(topic.gid)) {
-                                            return prev.filter(t => t !== topic.gid);
-                                        } else {
-                                            return [...prev, topic.gid];
-                                        }
-
-                                    })
+                                    if (othersLocked) return;
+                                    setSelectedTopic((prev) =>
+                                        prev === topic.gid ? null : topic.gid,
+                                    );
                                 }}
                                 className="mt-4 mx-2 rounded-2xl"
                                 style={{
-                                    backgroundColor: selectedTopic.includes(topic.gid)
-                                        ? '#FCC61D' : '#27548A', // Change color based on isPressed
                                     flexBasis: '35%',
+                                    backgroundColor: othersLocked
+                                        ? '#d1d5db'
+                                        : isChosen
+                                            ? '#FCC61D'
+                                            : '#27548A',
+                                    opacity: othersLocked ? 0.75 : 1,
                                 }}>
                                 <ButtonText
                                     className='text-white'
                                     style={{
-                                        color: selectedTopic.includes(topic.gid)
-                                            ? 'black' : 'white',
+                                        color: othersLocked
+                                            ? '#9ca3af'
+                                            : isChosen
+                                                ? 'black'
+                                                : 'white',
                                     }} >{topic.name}</ButtonText>
-                            </Button>)}
+                            </Button>);
+                        })}
                 </View>
 
 
                 {/* เลือกระดับ */}
                 <View className='flex-row flex-wrap mt-4 justify-center'>
-                    {subjects.find(sub =>
-                        sub.gid === selectedSubject)?.levels.map((level) =>
+                    {englishSubjectsOnly.find(sub =>
+                        sub.gid === selectedSubject)?.levels.map((level) => {
+                            const isChosen = myLevel === level.gid;
+                            const othersLocked = myLevel !== null && !isChosen;
+                            return (
                             <Button
+                                key={level.gid}
                                 variant="solid"
                                 size="xs"
                                 action="primary hover=true"
+                                isDisabled={othersLocked}
                                 onPress={() => {
-                                    setMyLevel(prev => {
-                                        console.log(myLevel);
-                                        if (prev.includes(level.gid)) {
-                                            return prev.filter(l => l !== level.gid);
-                                        } else {
-                                            return [...prev, level.gid];
-                                        }
-                                    })
+                                    if (othersLocked) return;
+                                    setMyLevel((prev) =>
+                                        prev === level.gid ? null : level.gid,
+                                    );
                                 }}
                                 className="mt-4 ml-2 rounded-2xl"
                                 style={{
-                                    backgroundColor: myLevel.includes(level.gid)
-                                        ? '#FCC61D' : '#27548A', // Change color based on isPressed
-
+                                    backgroundColor: othersLocked
+                                        ? '#d1d5db'
+                                        : isChosen
+                                            ? '#FCC61D'
+                                            : '#27548A',
+                                    opacity: othersLocked ? 0.75 : 1,
                                 }}>
                                 <ButtonText
                                     className='text-white'
                                     style={{
-                                        color: myLevel.includes(level.gid)
-                                            ? 'black' : 'white',
+                                        color: othersLocked
+                                            ? '#9ca3af'
+                                            : isChosen
+                                                ? 'black'
+                                                : 'white',
                                     }}>{level.name}</ButtonText>
-                            </Button>)}
+                            </Button>);
+                        })}
                 </View>
             </View>
 
@@ -192,18 +240,30 @@ export default function SelectSubjectPage() {
                 variant="solid"
                 size="md"
                 action="primary hover=true"
-                className='mt-6 px-10 py-3 rounded-3xl bg-[#FCC61D]'
+                className={
+                    canPlay
+                        ? 'mt-6 px-10 py-3 rounded-3xl bg-[#FCC61D]'
+                        : 'mt-6 px-10 py-3 rounded-3xl bg-gray-400'
+                }
+                style={!canPlay ? { opacity: 1 } : undefined}
+                isDisabled={!canPlay}
                 onPress={() => {
+                    if (!canPlay || selectedSubject == null) return;
                     handleSubmitSelection(
                         selectedSubject,
                         questionQuantity,
                         myLevel,
                         selectedTopic,
-
                     );
                     router.push('/game')
                 }}>
-                <ButtonText className='text-xl text-black'>Play</ButtonText>
+                <ButtonText
+                    className={
+                        canPlay ? 'text-xl text-black' : 'text-xl text-gray-200'
+                    }
+                >
+                    Play
+                </ButtonText>
             </Button>
         </View>
 

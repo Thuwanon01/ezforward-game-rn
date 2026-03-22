@@ -1,5 +1,5 @@
 import * as Speech from 'expo-speech';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 
@@ -17,24 +17,17 @@ const imagesSource = {
 export default function QuestionBox({ question, status, onPressQuestion, questionIndex }:
   { question: string, status: string, onPressQuestion: () => void, questionIndex?: number }) {
 
-  // ใช้ useEffect เฝ้ามอง status ที่รับค่าเข้ามา
-  useEffect(() => {
-    // ถ้า status รับค่ามาเป็น "reading" ให้เริ่มอ่านคำถาม
-    if (status === 'reading') {
-      // สั่งให้อ่านคำถามโดยใช้ expo-speech
-      const isThai = /[\u0E00-\u0E7F]/.test(question);
-      const lang = isThai ? 'th-TH' : 'en-US';
-
-      Speech.speak(question, { language: lang });
-    }
-    // Cleanup function: จะทำงานเมื่อ status เปลี่ยน หรือ component ถูกปิด
-    return () => {
-      Speech.stop();
-    };
-  }, [status]); // Effect นี้จะทำงานใหม่ทุกครั้งที่ prop 'status' เปลี่ยนค่า
+  /** Speak synchronously in the press handler so Web Speech stays in Chrome's user-gesture chain (Safari is more lenient). */
+  const handlePress = () => {
+    Speech.stop();
+    const isThai = /[\u0E00-\u0E7F]/.test(question);
+    const lang = isThai ? 'th-TH' : 'en-US';
+    Speech.speak(question, { language: lang });
+    onPressQuestion();
+  };
 
   return (
-    <TouchableOpacity className='QuestionBox' style={styles.container} onPress={onPressQuestion}>
+    <TouchableOpacity className='QuestionBox' style={styles.container} onPress={handlePress}>
       <View style={styles.parentBox}>
         {/* เอา TouchableOpacity มาครอบ Text แล้วผูกกับ onPressQuestion */}
         <View style={{ position: 'absolute', top: 10, left: 10 }}>

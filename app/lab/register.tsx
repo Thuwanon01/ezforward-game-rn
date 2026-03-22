@@ -1,16 +1,6 @@
-import { Stack } from "expo-router";
+import { Redirect } from "expo-router";
 
-import { GluestackUIProvider } from '@/components/ui/gluestack-ui-provider';
-import '@/global.css';
-
-export default function RootLayout() {
-  return (
-    <GluestackUIProvider>
-      <Stack>
-        <Stack.Screen name="lab/testComponent" options={{headerShown:false}}/>
-        <Stack.Screen name="lab/gameMunMun" options={{headerShown:false}}/>
-      </Stack>
-
-    </GluestackUIProvider>
-  )
+/** Legacy path; contact screen lives at `/lab/regis`. */
+export default function RegisterRedirect() {
+  return <Redirect href="/lab/regis" />;
 }

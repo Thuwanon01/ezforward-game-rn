@@ -28,6 +28,11 @@ interface Props {
   selectedChoice?: NewQuizChoice | null;
   score?: number;
   questionIndex: number;
+  onConfirmEliminate?: () => void;
+  onConfirmDouble?: () => void;
+  onConfirmChange?: () => void;
+  /** Which lifeline was used this 10-question session (only one allowed per session). */
+  sessionHelperUsed?: "eliminate" | "double" | "change" | null;
 }
 
 interface ChatMessage {
@@ -51,6 +56,9 @@ const DEFAULT_PREMADE_MESSAGES = [
   "ช่วยอธิบายแบบสั้น ๆ",
 ];
 
+/** Flip to true when Double Chance + Change Question are production-ready. */
+const SHOW_DOUBLE_AND_CHANGE_HELPERS = false;
+
 export default function ExplanationPanel({
   correctAnswer,
   correctExplanation,
@@ -65,7 +73,33 @@ export default function ExplanationPanel({
   selectedChoice,
   score,
   questionIndex,
+  onConfirmEliminate,
+  onConfirmDouble,
+  onConfirmChange,
+  sessionHelperUsed = null,
 }: Props) {
+  const helpersLocked =
+    !!sessionHelperUsed ||
+    helperStatus.eliminate ||
+    helperStatus.double ||
+    helperStatus.change;
+
+  const helperFooterLabel = (): string => {
+    if (sessionHelperUsed === "eliminate") {
+      return "Eliminate used — 1 helper per session";
+    }
+    if (sessionHelperUsed === "double") {
+      return "Double chance used — 1 helper per session";
+    }
+    if (sessionHelperUsed === "change") {
+      return "Change question used — 1 helper per session";
+    }
+    if (helperStatus.eliminate) return "Eliminate used";
+    if (helperStatus.double) return "Double chance used";
+    if (helperStatus.change) return "Change question used";
+    return "";
+  };
+
   const [openExplanation, setOpenExplanation] = useState(false);
   const [openHelper, setOpenHelper] = useState({
     eliminate: false,
@@ -398,30 +432,49 @@ export default function ExplanationPanel({
 
           {/* ... ปุ่มตัวช่วยและปุ่ม Next/Try Again ... */}
           {gameState === "wait" && (
-            <View className="flex-row justify-between my-[16] mx-[100]">
-              {/* ... ปุ่มตัวช่วย 3 ปุ่ม ... */}
-              <IconButton
-                iconImage="eliminateIcon"
-                isDisable={helperStatus["eliminate"]}
-                onPress={() =>
-                  setOpenHelper({ eliminate: true, double: false, change: false })
-                }
-              />
-              <IconButton
-                iconImage="doubleIcon"
-                isDisable={helperStatus["double"]}
-                onPress={() =>
-                  setOpenHelper({ eliminate: false, double: true, change: false })
-                }
-              />
-              <IconButton
-                iconImage="changeIcon"
-                isDisable={helperStatus["change"]}
-                onPress={() =>
-                  setOpenHelper({ eliminate: false, double: false, change: true })
-                }
-              />
-            </View>
+            <>
+              <View
+                className={`flex-row my-[16] mx-[100] ${
+                  SHOW_DOUBLE_AND_CHANGE_HELPERS ? "justify-between" : "justify-center"
+                }`}
+              >
+                <IconButton
+                  iconImage="eliminateIcon"
+                  isDisable={helpersLocked}
+                  used={
+                    helperStatus.eliminate || sessionHelperUsed === "eliminate"
+                  }
+                  onPress={() =>
+                    setOpenHelper({ eliminate: true, double: false, change: false })
+                  }
+                />
+                {SHOW_DOUBLE_AND_CHANGE_HELPERS && (
+                  <>
+                    <IconButton
+                      iconImage="doubleIcon"
+                      isDisable={helpersLocked}
+                      used={
+                        helperStatus.double || sessionHelperUsed === "double"
+                      }
+                      onPress={() =>
+                        setOpenHelper({ eliminate: false, double: true, change: false })
+                      }
+                    />
+                    <IconButton
+                      iconImage="changeIcon"
+                      isDisable={helpersLocked}
+                      used={
+                        helperStatus.change || sessionHelperUsed === "change"
+                      }
+                      onPress={() =>
+                        setOpenHelper({ eliminate: false, double: false, change: true })
+                      }
+                    />
+                  </>
+                )}
+              </View>
+              {helpersLocked }
+            </>
           )}
 
           {gameState !== "wait" && questionIndex <= 10 && (
@@ -434,32 +487,45 @@ export default function ExplanationPanel({
             title="Eliminate"
             subtitle="Eliminate 2 wrong answers"
             isVisible={openHelper["eliminate"]}
-            onPressPlay={() => { }}
+            onPressPlay={() => {
+              onConfirmEliminate?.();
+              setOpenHelper({ eliminate: false, double: false, change: false });
+            }}
             onClose={() =>
               setOpenHelper({ eliminate: false, double: false, change: false })
             }
             imageName="eliminate"
           />
-          <HelpModalPage
-            title="Double Chance"
-            subtitle="Get 2 choices to answer"
-            isVisible={openHelper["double"]}
-            onPressPlay={() => { }}
-            onClose={() =>
-              setOpenHelper({ eliminate: false, double: false, change: false })
-            }
-            imageName="double"
-          />
-          <HelpModalPage
-            title="Change Question"
-            subtitle="Change to a new question"
-            isVisible={openHelper["change"]}
-            onPressPlay={() => { }}
-            onClose={() =>
-              setOpenHelper({ eliminate: false, double: false, change: false })
-            }
-            imageName="change"
-          />
+          {SHOW_DOUBLE_AND_CHANGE_HELPERS && (
+            <>
+              <HelpModalPage
+                title="Double Chance"
+                subtitle="Get 2 choices to answer"
+                isVisible={openHelper["double"]}
+                onPressPlay={() => {
+                  onConfirmDouble?.();
+                  setOpenHelper({ eliminate: false, double: false, change: false });
+                }}
+                onClose={() =>
+                  setOpenHelper({ eliminate: false, double: false, change: false })
+                }
+                imageName="double"
+              />
+              <HelpModalPage
+                title="Change Question"
+                subtitle="Change to a new question"
+                isVisible={openHelper["change"]}
+                onPressPlay={() => {
+                  onConfirmChange?.();
+                  setOpenHelper({ eliminate: false, double: false, change: false });
+                }}
+                onClose={() =>
+                  setOpenHelper({ eliminate: false, double: false, change: false })
+                }
+                imageName="change"
+              />
+            </>
+          )}
           <PremadeMessagesModal
             isVisible={isPremadeModalVisible}
             onClose={() => setIsPremadeModalVisible(false)}

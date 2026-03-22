@@ -1,5 +1,6 @@
 import * as Speech from 'expo-speech';
-import { StyleSheet, Text, TouchableOpacity } from 'react-native';
+import React, { useRef } from 'react';
+import { Platform, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Markdown from "react-native-markdown-display";
 
@@ -12,13 +13,35 @@ interface Prop {
   incorrectExplanation?: string
 }
 
+const DOUBLE_TAP_MS = 400;
+
 export default function ChoiceBox({ text, status, onPress, disabled, correctExplanation, incorrectExplanation }: Prop) {
+  const lastWebTapRef = useRef(0);
+
   const speak = () => {
     Speech.stop()
     const isThai = /[\u0E00-\u0E7F]/.test(text) // regex เช็คอักษรไทย
     const lang = isThai ? 'th-TH' : 'en-US'
     Speech.speak(text, { language: lang })
   }
+
+  /**
+   * Chrome (desktop) requires Web Speech to run in a direct user-gesture handler.
+   * RNGH Tap.onEnd runs too late, so we use Touchable onPress on web.
+   * Double tap within DOUBLE_TAP_MS: speak + submit (same intent as native double-tap).
+   */
+  const handleWebPress = () => {
+    if (disabled) return;
+    const now = Date.now();
+    if (now - lastWebTapRef.current < DOUBLE_TAP_MS) {
+      lastWebTapRef.current = 0;
+      speak();
+      onPress?.();
+    } else {
+      lastWebTapRef.current = now;
+      speak();
+    }
+  };
 
   // Single tap: แค่พูดออกเสียง
   const singleTap = Gesture.Tap()
@@ -57,15 +80,34 @@ export default function ChoiceBox({ text, status, onPress, disabled, correctExpl
   }
   else if (disabled) { bgColor = "lightgrey" }
 
+  const inner = (
+    <>
+      <Text style={[styles.textChoice, { color: fontColor }]}>{text}</Text>
+      {status === "correct" ?
+        <Markdown style={markdownStyles}>{correctExplanation}</Markdown>
+        : status === "incorrect" ? (
+          <Markdown style={markdownStyles}>{incorrectExplanation}</Markdown>
+        ) : null}
+    </>
+  );
+
+  if (Platform.OS === 'web') {
+    return (
+      <TouchableOpacity
+        style={[styles.boxChoice, { backgroundColor: bgColor }]}
+        onPress={handleWebPress}
+        disabled={disabled}
+        activeOpacity={0.7}
+      >
+        {inner}
+      </TouchableOpacity>
+    );
+  }
+
   return (
     <GestureDetector gesture={gesture}>
       <TouchableOpacity style={[styles.boxChoice, { backgroundColor: bgColor }]}>
-        <Text style={[styles.textChoice, { color: fontColor }]}>{text}</Text>
-        {status === "correct" ?
-          <Markdown style={markdownStyles}>{correctExplanation}</Markdown>
-          : status === "incorrect" ? (
-            <Markdown style={markdownStyles}>{incorrectExplanation}</Markdown>
-          ) : null}
+        {inner}
       </TouchableOpacity>
     </GestureDetector>
   )
