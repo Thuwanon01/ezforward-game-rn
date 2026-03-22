@@ -31,6 +31,8 @@ interface Props {
   onConfirmEliminate?: () => void;
   onConfirmDouble?: () => void;
   onConfirmChange?: () => void;
+  /** Which lifeline was used this 10-question session (only one allowed per session). */
+  sessionHelperUsed?: "eliminate" | "double" | "change" | null;
 }
 
 interface ChatMessage {
@@ -74,9 +76,30 @@ export default function ExplanationPanel({
   onConfirmEliminate,
   onConfirmDouble,
   onConfirmChange,
+  sessionHelperUsed = null,
 }: Props) {
   const helpersLocked =
-    helperStatus.eliminate || helperStatus.double || helperStatus.change;
+    !!sessionHelperUsed ||
+    helperStatus.eliminate ||
+    helperStatus.double ||
+    helperStatus.change;
+
+  const helperFooterLabel = (): string => {
+    if (sessionHelperUsed === "eliminate") {
+      return "Eliminate used — 1 helper per session";
+    }
+    if (sessionHelperUsed === "double") {
+      return "Double chance used — 1 helper per session";
+    }
+    if (sessionHelperUsed === "change") {
+      return "Change question used — 1 helper per session";
+    }
+    if (helperStatus.eliminate) return "Eliminate used";
+    if (helperStatus.double) return "Double chance used";
+    if (helperStatus.change) return "Change question used";
+    return "";
+  };
+
   const [openExplanation, setOpenExplanation] = useState(false);
   const [openHelper, setOpenHelper] = useState({
     eliminate: false,
@@ -409,37 +432,49 @@ export default function ExplanationPanel({
 
           {/* ... ปุ่มตัวช่วยและปุ่ม Next/Try Again ... */}
           {gameState === "wait" && (
-            <View
-              className={`flex-row my-[16] mx-[100] ${
-                SHOW_DOUBLE_AND_CHANGE_HELPERS ? "justify-between" : "justify-center"
-              }`}
-            >
-              <IconButton
-                iconImage="eliminateIcon"
-                isDisable={helpersLocked}
-                onPress={() =>
-                  setOpenHelper({ eliminate: true, double: false, change: false })
-                }
-              />
-              {SHOW_DOUBLE_AND_CHANGE_HELPERS && (
-                <>
-                  <IconButton
-                    iconImage="doubleIcon"
-                    isDisable={helpersLocked}
-                    onPress={() =>
-                      setOpenHelper({ eliminate: false, double: true, change: false })
-                    }
-                  />
-                  <IconButton
-                    iconImage="changeIcon"
-                    isDisable={helpersLocked}
-                    onPress={() =>
-                      setOpenHelper({ eliminate: false, double: false, change: true })
-                    }
-                  />
-                </>
-              )}
-            </View>
+            <>
+              <View
+                className={`flex-row my-[16] mx-[100] ${
+                  SHOW_DOUBLE_AND_CHANGE_HELPERS ? "justify-between" : "justify-center"
+                }`}
+              >
+                <IconButton
+                  iconImage="eliminateIcon"
+                  isDisable={helpersLocked}
+                  used={
+                    helperStatus.eliminate || sessionHelperUsed === "eliminate"
+                  }
+                  onPress={() =>
+                    setOpenHelper({ eliminate: true, double: false, change: false })
+                  }
+                />
+                {SHOW_DOUBLE_AND_CHANGE_HELPERS && (
+                  <>
+                    <IconButton
+                      iconImage="doubleIcon"
+                      isDisable={helpersLocked}
+                      used={
+                        helperStatus.double || sessionHelperUsed === "double"
+                      }
+                      onPress={() =>
+                        setOpenHelper({ eliminate: false, double: true, change: false })
+                      }
+                    />
+                    <IconButton
+                      iconImage="changeIcon"
+                      isDisable={helpersLocked}
+                      used={
+                        helperStatus.change || sessionHelperUsed === "change"
+                      }
+                      onPress={() =>
+                        setOpenHelper({ eliminate: false, double: false, change: true })
+                      }
+                    />
+                  </>
+                )}
+              </View>
+              {helpersLocked }
+            </>
           )}
 
           {gameState !== "wait" && questionIndex <= 10 && (

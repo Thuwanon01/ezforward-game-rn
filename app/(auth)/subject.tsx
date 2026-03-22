@@ -29,9 +29,11 @@ export default function SelectSubjectPage() {
     const auth = useAuth();
     const repos = useRepositories(auth.accessToken).current;
     const [subjects, setSubjects] = useState<Subject[]>([]);
-    const [myLevel, setMyLevel] = useState<string[]>([]);
+    /** Single level gid; tap again to clear and re-enable other levels. */
+    const [myLevel, setMyLevel] = useState<string | null>(null);
     const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
-    const [selectedTopic, setSelectedTopic] = useState<string[]>([]);
+    /** Single topic gid; tap again to clear and re-enable other topics. */
+    const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
     const [questionQuantity, setQuestionQuantity] = useState(10);
     const [subjectsReady, setSubjectsReady] = useState(false);
 
@@ -44,27 +46,20 @@ export default function SelectSubjectPage() {
     const canPlay =
         subjectsReady &&
         selectedSubject != null &&
-        selectedTopic.length > 0 &&
-        myLevel.length > 0;
+        selectedTopic != null &&
+        myLevel != null;
 
     const handleSubmitSelection = async (
         selectedSubject: string | null,
         questionQuantity: number,
-        myLevel: string[],
-        selectedTopic: string[],
+        levelGid: string | null,
+        topicGid: string | null,
     ) => {
-        console.log("handleSubmitSelection", selectedSubject, questionQuantity, myLevel, selectedTopic);
-        // const response = await repos.gamev2.fetchCustomQuiz({
-        //     subject: selectedSubject as string,
-        //     quiz_limit: questionQuantity,
-        //     quiz_level: myLevel,
-        //     quiz_topic: selectedTopic,
-        // });
+        console.log("handleSubmitSelection", selectedSubject, questionQuantity, levelGid, topicGid);
         await AsyncStorage.setItem('selectedSubject', selectedSubject as string);
         await AsyncStorage.setItem('questionQuantity', questionQuantity.toString());
-        await AsyncStorage.setItem('myLevel', myLevel.join(','));
-        await AsyncStorage.setItem('selectedTopic', selectedTopic.join(','));
-        // console.log("response from selection subject", response);
+        await AsyncStorage.setItem('myLevel', levelGid ?? '');
+        await AsyncStorage.setItem('selectedTopic', topicGid ?? '');
     }
 
 
@@ -134,69 +129,86 @@ export default function SelectSubjectPage() {
                 {/* เลือกหัวข้อ */}
                 <View className='flex-row flex-wrap mt-4 justify-center'>
                     {englishSubjectsOnly.find(sub =>
-                        sub.gid === selectedSubject)?.topics.map((topic) =>
+                        sub.gid === selectedSubject)?.topics.map((topic) => {
+                            const isChosen = selectedTopic === topic.gid;
+                            const othersLocked =
+                                selectedTopic !== null && !isChosen;
+                            return (
                             <Button
+                                key={topic.gid}
                                 variant="solid"
                                 size="xs"
                                 action="primary"
+                                isDisabled={othersLocked}
                                 onPress={() => {
-                                    setSelectedTopic(prev => {
-                                        console.log(selectedTopic);
-                                        if (prev.includes(topic.gid)) {
-                                            return prev.filter(t => t !== topic.gid);
-                                        } else {
-                                            return [...prev, topic.gid];
-                                        }
-
-                                    })
+                                    if (othersLocked) return;
+                                    setSelectedTopic((prev) =>
+                                        prev === topic.gid ? null : topic.gid,
+                                    );
                                 }}
                                 className="mt-4 mx-2 rounded-2xl"
                                 style={{
-                                    backgroundColor: selectedTopic.includes(topic.gid)
-                                        ? '#FCC61D' : '#27548A', // Change color based on isPressed
                                     flexBasis: '35%',
+                                    backgroundColor: othersLocked
+                                        ? '#d1d5db'
+                                        : isChosen
+                                            ? '#FCC61D'
+                                            : '#27548A',
+                                    opacity: othersLocked ? 0.75 : 1,
                                 }}>
                                 <ButtonText
                                     className='text-white'
                                     style={{
-                                        color: selectedTopic.includes(topic.gid)
-                                            ? 'black' : 'white',
+                                        color: othersLocked
+                                            ? '#9ca3af'
+                                            : isChosen
+                                                ? 'black'
+                                                : 'white',
                                     }} >{topic.name}</ButtonText>
-                            </Button>)}
+                            </Button>);
+                        })}
                 </View>
 
 
                 {/* เลือกระดับ */}
                 <View className='flex-row flex-wrap mt-4 justify-center'>
                     {englishSubjectsOnly.find(sub =>
-                        sub.gid === selectedSubject)?.levels.map((level) =>
+                        sub.gid === selectedSubject)?.levels.map((level) => {
+                            const isChosen = myLevel === level.gid;
+                            const othersLocked = myLevel !== null && !isChosen;
+                            return (
                             <Button
+                                key={level.gid}
                                 variant="solid"
                                 size="xs"
                                 action="primary hover=true"
+                                isDisabled={othersLocked}
                                 onPress={() => {
-                                    setMyLevel(prev => {
-                                        console.log(myLevel);
-                                        if (prev.includes(level.gid)) {
-                                            return prev.filter(l => l !== level.gid);
-                                        } else {
-                                            return [...prev, level.gid];
-                                        }
-                                    })
+                                    if (othersLocked) return;
+                                    setMyLevel((prev) =>
+                                        prev === level.gid ? null : level.gid,
+                                    );
                                 }}
                                 className="mt-4 ml-2 rounded-2xl"
                                 style={{
-                                    backgroundColor: myLevel.includes(level.gid)
-                                        ? '#FCC61D' : '#27548A', // Change color based on isPressed
-
+                                    backgroundColor: othersLocked
+                                        ? '#d1d5db'
+                                        : isChosen
+                                            ? '#FCC61D'
+                                            : '#27548A',
+                                    opacity: othersLocked ? 0.75 : 1,
                                 }}>
                                 <ButtonText
                                     className='text-white'
                                     style={{
-                                        color: myLevel.includes(level.gid)
-                                            ? 'black' : 'white',
+                                        color: othersLocked
+                                            ? '#9ca3af'
+                                            : isChosen
+                                                ? 'black'
+                                                : 'white',
                                     }}>{level.name}</ButtonText>
-                            </Button>)}
+                            </Button>);
+                        })}
                 </View>
             </View>
 
@@ -242,7 +254,6 @@ export default function SelectSubjectPage() {
                         questionQuantity,
                         myLevel,
                         selectedTopic,
-
                     );
                     router.push('/game')
                 }}>

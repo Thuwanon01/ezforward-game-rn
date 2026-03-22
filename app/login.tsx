@@ -51,7 +51,7 @@ export default function LoginScreen() {
   };
 
   const handleRegister = () => {
-    router.push('/lab/register' as any); // ไปยังหน้าลงทะเบียน
+    router.push("/lab/regis");
   };
 
   return (

@@ -94,8 +94,9 @@ export class GameV2Repository extends BaseRepository {
     return data;
   }
 
+  /** Static subject/topic/level catalog for the selection screen. */
   async fetchSubjects(): Promise<Subject[]> {
-    return [
+    const base: Subject[] = [
       {
         gid: "RAM1111",
         name: "English",
@@ -144,5 +145,7 @@ export class GameV2Repository extends BaseRepository {
         ],
       },
     ];
+
+    return base;
   }
 }

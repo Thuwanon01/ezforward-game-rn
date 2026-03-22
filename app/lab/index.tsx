@@ -9,7 +9,8 @@ export default function Index() {
         "/lab/testcode",
         "/lab/loginScreen",
         "/lab/gameMunMun",
-        "/lab/register"
+        "/lab/register",
+        "/lab/regis"
     ]
 
     return (

@@ -68,11 +68,18 @@ export interface QuizAnswerResponse {
     choices: QuizChoiceWithAnswer[];
 }
 
+/** Level row for a subject; `available === false` means no quiz content in DB yet (UI disables). */
+export interface SubjectLevel {
+    name: string;
+    gid: string;
+    available?: boolean;
+}
+
 export interface Subject {
     gid: string;
     name: string;
     topics: { name: string; gid: string }[];
-    levels: { name: string; gid: string }[];
+    levels: SubjectLevel[];
 }
 
 // Top-level payload
