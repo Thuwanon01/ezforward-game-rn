@@ -13,7 +13,7 @@ import { playSound } from "@/utils/sound";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
-import { Text, View } from "react-native";
+import { Modal, Text, TouchableOpacity, View } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 
 const HELPER_ELIMINATE = "eliminate";
@@ -57,7 +57,11 @@ export default function GamePage() {
   const [gameState, setGameState] = useState<"wait" | "correct" | "incorrect">(
     "wait"
   );
-  const [score, setScore] = useState(0);
+  /** Correct answers in the current session only (resets after summary or new session). */
+  const [sessionScore, setSessionScore] = useState(0);
+  const [sessionTotal, setSessionTotal] = useState(10);
+  const [sessionCompleteModalVisible, setSessionCompleteModalVisible] =
+    useState(false);
   const [selectedChoice, setSelectedChoice] = useState<NewQuizChoice | null>(
     null
   );
@@ -116,6 +120,7 @@ export default function GamePage() {
       }))
     );
     setCurrentQuestionIndex(questionData.progress.current);
+    setSessionTotal(questionData.progress.total);
     setStatus("wait");
     setGameState("wait");
     setExplanationStatus(false);
@@ -183,7 +188,7 @@ export default function GamePage() {
     if (isCorrect) {
       setGameState("correct");
       setStatus("correct");
-      setScore((s) => s + 1);
+      setSessionScore((s) => s + 1);
       playSound("yessound.mp3");
     } else {
       const usedDoubleThisRound =
@@ -258,7 +263,26 @@ export default function GamePage() {
   };
 
   const nextHandler = () => {
+    if (
+      sessionTotal > 0 &&
+      currentQuestionIndex >= sessionTotal
+    ) {
+      setSessionCompleteModalVisible(true);
+      return;
+    }
     fetchData();
+  };
+
+  const handleContinueNextSession = () => {
+    setSessionCompleteModalVisible(false);
+    setSessionScore(0);
+    void fetchData();
+  };
+
+  const handleBackToSubject = () => {
+    setSessionCompleteModalVisible(false);
+    setSessionScore(0);
+    router.push("/subject");
   };
 
   const visibleChoices = choices.filter(
@@ -277,7 +301,9 @@ export default function GamePage() {
 
         <View className="flex-row justify-end">
           <View className="flex-row mx-6 mt-4 bg-[#FCC61D] px-3 py-1 rounded-[20] border border-[#183B4E]/20">
-            <Text className="text-xl font-bold text-[#183B4E]">{score}</Text>
+            <Text className="text-xl font-bold text-[#183B4E]">
+              {sessionScore}
+            </Text>
           </View>
         </View>
 
@@ -307,6 +333,40 @@ export default function GamePage() {
           })}
         </View>
       </ScrollView>
+
+      <Modal
+        visible={sessionCompleteModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={handleContinueNextSession}
+      >
+        <View className="flex-1 justify-center items-center bg-black/50 px-6">
+          <View className="bg-[#FFFDE8] rounded-2xl p-6 w-full max-w-sm border border-[#183B4E]/20">
+            <Text className="text-2xl font-bold text-center text-[#183B4E]">
+              Session complete
+            </Text>
+            <Text className="text-lg text-center text-[#183B4E]/80 mt-3">
+              You got {sessionScore} out of {sessionTotal} correct.
+            </Text>
+            <TouchableOpacity
+              onPress={handleContinueNextSession}
+              className="mt-6 py-3 rounded-full bg-[#FCC61D] items-center border border-[#183B4E]/20"
+            >
+              <Text className="text-lg font-bold text-white">
+                Continue playing
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={handleBackToSubject}
+              className="mt-3 py-3 rounded-full bg-[#183B4E]/10 items-center"
+            >
+              <Text className="text-lg font-bold text-[#183B4E]">
+                Back to select subject
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
 
       <View className="flex-shrink-0">
         <ExplanationPanel
