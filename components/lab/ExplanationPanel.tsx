@@ -54,6 +54,9 @@ const DEFAULT_PREMADE_MESSAGES = [
   "ช่วยอธิบายแบบสั้น ๆ",
 ];
 
+/** Flip to true when Double Chance + Change Question are production-ready. */
+const SHOW_DOUBLE_AND_CHANGE_HELPERS = false;
+
 export default function ExplanationPanel({
   correctAnswer,
   correctExplanation,
@@ -406,8 +409,11 @@ export default function ExplanationPanel({
 
           {/* ... ปุ่มตัวช่วยและปุ่ม Next/Try Again ... */}
           {gameState === "wait" && (
-            <View className="flex-row justify-between my-[16] mx-[100]">
-              {/* ... ปุ่มตัวช่วย 3 ปุ่ม ... */}
+            <View
+              className={`flex-row my-[16] mx-[100] ${
+                SHOW_DOUBLE_AND_CHANGE_HELPERS ? "justify-between" : "justify-center"
+              }`}
+            >
               <IconButton
                 iconImage="eliminateIcon"
                 isDisable={helpersLocked}
@@ -415,20 +421,24 @@ export default function ExplanationPanel({
                   setOpenHelper({ eliminate: true, double: false, change: false })
                 }
               />
-              <IconButton
-                iconImage="doubleIcon"
-                isDisable={helpersLocked}
-                onPress={() =>
-                  setOpenHelper({ eliminate: false, double: true, change: false })
-                }
-              />
-              <IconButton
-                iconImage="changeIcon"
-                isDisable={helpersLocked}
-                onPress={() =>
-                  setOpenHelper({ eliminate: false, double: false, change: true })
-                }
-              />
+              {SHOW_DOUBLE_AND_CHANGE_HELPERS && (
+                <>
+                  <IconButton
+                    iconImage="doubleIcon"
+                    isDisable={helpersLocked}
+                    onPress={() =>
+                      setOpenHelper({ eliminate: false, double: true, change: false })
+                    }
+                  />
+                  <IconButton
+                    iconImage="changeIcon"
+                    isDisable={helpersLocked}
+                    onPress={() =>
+                      setOpenHelper({ eliminate: false, double: false, change: true })
+                    }
+                  />
+                </>
+              )}
             </View>
           )}
 
@@ -451,32 +461,36 @@ export default function ExplanationPanel({
             }
             imageName="eliminate"
           />
-          <HelpModalPage
-            title="Double Chance"
-            subtitle="Get 2 choices to answer"
-            isVisible={openHelper["double"]}
-            onPressPlay={() => {
-              onConfirmDouble?.();
-              setOpenHelper({ eliminate: false, double: false, change: false });
-            }}
-            onClose={() =>
-              setOpenHelper({ eliminate: false, double: false, change: false })
-            }
-            imageName="double"
-          />
-          <HelpModalPage
-            title="Change Question"
-            subtitle="Change to a new question"
-            isVisible={openHelper["change"]}
-            onPressPlay={() => {
-              onConfirmChange?.();
-              setOpenHelper({ eliminate: false, double: false, change: false });
-            }}
-            onClose={() =>
-              setOpenHelper({ eliminate: false, double: false, change: false })
-            }
-            imageName="change"
-          />
+          {SHOW_DOUBLE_AND_CHANGE_HELPERS && (
+            <>
+              <HelpModalPage
+                title="Double Chance"
+                subtitle="Get 2 choices to answer"
+                isVisible={openHelper["double"]}
+                onPressPlay={() => {
+                  onConfirmDouble?.();
+                  setOpenHelper({ eliminate: false, double: false, change: false });
+                }}
+                onClose={() =>
+                  setOpenHelper({ eliminate: false, double: false, change: false })
+                }
+                imageName="double"
+              />
+              <HelpModalPage
+                title="Change Question"
+                subtitle="Change to a new question"
+                isVisible={openHelper["change"]}
+                onPressPlay={() => {
+                  onConfirmChange?.();
+                  setOpenHelper({ eliminate: false, double: false, change: false });
+                }}
+                onClose={() =>
+                  setOpenHelper({ eliminate: false, double: false, change: false })
+                }
+                imageName="change"
+              />
+            </>
+          )}
           <PremadeMessagesModal
             isVisible={isPremadeModalVisible}
             onClose={() => setIsPremadeModalVisible(false)}
