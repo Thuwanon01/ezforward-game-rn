@@ -19,6 +19,9 @@ export default function HeaderPanel({ title, onPressBack, onPressMenu, openMenu 
     const goToSettings = () => {
         router.push('/subject');
     }
+    const goToHowToPlay = () => {
+        router.push('/how-to-play');
+    }
 
     return (
         <View className='w-full h-12 flex-row justify-between items-center px-4 border-b border-gray-300 bg-[#27548A]'>
@@ -68,6 +71,15 @@ export default function HeaderPanel({ title, onPressBack, onPressMenu, openMenu 
                                         { width: panelWidth, transform: [{ translateX }] },
                                     ]}>
                                     <Text style={styles.title}>{title}</Text>
+
+                                    <Pressable
+                                        style={styles.item}
+                                        onPress={() => {
+                                            onClose();
+                                            goToHowToPlay();
+                                        }}>
+                                        <Text style={styles.itemText}>📖 วิธีเล่น</Text>
+                                    </Pressable>
 
                                     <Pressable
                                         style={styles.item}
