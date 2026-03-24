@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Subject Page Design</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #f0f0f0;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 32px 16px;
+    gap: 32px;
+    flex-wrap: wrap;
+  }
+
+  .phone {
+    width: 375px;
+    min-height: 780px;
+    border-radius: 40px;
+    overflow: hidden;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.22);
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .label {
+    text-align: center;
+    margin-bottom: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #555;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  /* ========== OPTION A: Card Layout ========== */
+  .option-a {
+    background: linear-gradient(160deg, #183B4E 0%, #1e4d66 100%);
+    padding: 0;
+  }
+  .option-a .header {
+    padding: 52px 24px 28px;
+    text-align: center;
+  }
+  .option-a .header .mascot {
+    width: 72px; height: 72px;
+    background: rgba(252,198,29,0.18);
+    border-radius: 50%;
+    margin: 0 auto 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 36px;
+  }
+  .option-a .header h1 { color: #fff; font-size: 22px; font-weight: 700; }
+  .option-a .header p { color: rgba(255,255,255,0.55); font-size: 13px; margin-top: 4px; }
+
+  .option-a .body {
+    background: #f7f5e8;
+    border-radius: 28px 28px 0 0;
+    padding: 28px 20px 32px;
+    min-height: 560px;
+  }
+
+  .section-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #183B4E;
+    opacity: 0.5;
+    margin-bottom: 10px;
+  }
+
+  /* Subject Selector */
+  .subject-selector {
+    background: white;
+    border-radius: 14px;
+    padding: 4px;
+    display: flex;
+    gap: 4px;
+    margin-bottom: 22px;
+    box-shadow: 0 2px 8px rgba(24,59,78,0.08);
+  }
+  .subject-tab {
+    flex: 1;
+    padding: 10px 8px;
+    border-radius: 10px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    color: #183B4E;
+    opacity: 0.4;
+    transition: all 0.2s;
+  }
+  .subject-tab.active {
+    background: #183B4E;
+    color: white;
+    opacity: 1;
+  }
+
+  /* Topic pills */
+  .pills-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 22px;
+  }
+  .pill {
+    padding: 8px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 2px solid transparent;
+  }
+  .pill-default { background: white; color: #183B4E; border-color: #e2e8f0; }
+  .pill-selected { background: #FCC61D; color: #183B4E; border-color: #FCC61D; }
+  .pill-locked { background: #f1f5f9; color: #94a3b8; border-color: #f1f5f9; }
+
+  /* Level grid */
+  .level-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 24px;
+  }
+  .level-card {
+    background: white;
+    border-radius: 12px;
+    padding: 12px 8px;
+    text-align: center;
+    border: 2px solid #e2e8f0;
+    cursor: pointer;
+  }
+  .level-card.selected {
+    border-color: #FCC61D;
+    background: #fffbeb;
+  }
+  .level-card.locked { opacity: 0.35; }
+  .level-badge {
+    font-size: 15px;
+    font-weight: 800;
+    color: #183B4E;
+    display: block;
+  }
+  .level-desc {
+    font-size: 10px;
+    color: #94a3b8;
+    margin-top: 2px;
+  }
+
+  .reset-btn {
+    display: flex; align-items: center; justify-content: center;
+    gap: 6px;
+    width: 100%;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1.5px dashed #cbd5e1;
+    background: transparent;
+    color: #94a3b8;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    margin-bottom: 20px;
+  }
+
+  .play-btn {
+    width: 100%;
+    padding: 16px;
+    border-radius: 16px;
+    background: #FCC61D;
+    color: #183B4E;
+    font-size: 17px;
+    font-weight: 800;
+    text-align: center;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(252,198,29,0.4);
+  }
+  .play-btn.disabled {
+    background: #e2e8f0;
+    color: #94a3b8;
+    box-shadow: none;
+  }
+
+  /* ========== OPTION B: Minimal Clean ========== */
+  .option-b {
+    background: #fffac9;
+    padding: 0;
+  }
+  .option-b .top-bar {
+    padding: 52px 20px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .option-b .top-bar h1 { font-size: 20px; font-weight: 800; color: #183B4E; }
+  .option-b .avatar {
+    width: 40px; height: 40px;
+    background: #183B4E;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-weight: 700; font-size: 14px;
+  }
+
+  .option-b .body { padding: 4px 20px 32px; }
+
+  .progress-row {
+    display: flex; gap: 6px; margin-bottom: 24px;
+  }
+  .progress-dot {
+    height: 4px; border-radius: 4px; flex: 1; background: #e2e8f0;
+  }
+  .progress-dot.done { background: #FCC61D; }
+
+  .step-title {
+    font-size: 13px; font-weight: 700; color: #183B4E;
+    margin-bottom: 10px; opacity: 0.45;
+    text-transform: uppercase; letter-spacing: 0.8px;
+  }
+
+  .big-pill-wrap {
+    display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px;
+  }
+  .big-pill {
+    padding: 14px 16px;
+    border-radius: 14px;
+    background: white;
+    border: 2px solid #e8e4c8;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+  }
+  .big-pill.selected {
+    border-color: #FCC61D;
+    background: #fffbeb;
+  }
+  .big-pill .pill-name { font-size: 14px; font-weight: 700; color: #183B4E; }
+  .big-pill .pill-sub { font-size: 11px; color: #94a3b8; margin-top: 2px; }
+  .check { width: 22px; height: 22px; border-radius: 50%; background: #FCC61D; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+  .uncheck { width: 22px; height: 22px; border-radius: 50%; border: 2px solid #e2e8f0; }
+
+  .b-level-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+  .b-level {
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 13px; font-weight: 700;
+    background: white;
+    border: 2px solid #e8e4c8;
+    color: #183B4E;
+    cursor: pointer;
+  }
+  .b-level.selected { background: #FCC61D; border-color: #FCC61D; }
+
+  .b-reset {
+    display: flex; align-items: center; gap: 6px;
+    padding: 0 0 16px;
+    background: transparent;
+    border: none;
+    color: #f87171;
+    font-size: 13px; font-weight: 600;
+    cursor: pointer;
+  }
+
+  .b-play {
+    width: 100%;
+    padding: 16px;
+    border-radius: 999px;
+    background: #183B4E;
+    color: #FCC61D;
+    font-size: 17px; font-weight: 800;
+    text-align: center;
+    cursor: pointer;
+  }
+  .b-play.disabled { background: #cbd5e1; color: white; }
+
+  /* ========== OPTION C: Gamified ========== */
+  .option-c { background: #1a1a2e; }
+  .option-c .header {
+    padding: 52px 20px 20px;
+    text-align: center;
+  }
+  .option-c .header h1 { color: #FCC61D; font-size: 24px; font-weight: 900; letter-spacing: -0.5px; }
+  .option-c .header p { color: rgba(255,255,255,0.4); font-size: 13px; margin-top: 4px; }
+
+  .option-c .body { padding: 0 16px 32px; }
+
+  .c-section { margin-bottom: 20px; }
+  .c-section-title {
+    color: rgba(255,255,255,0.35);
+    font-size: 10px; font-weight: 700; letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .c-topic-wrap { display: flex; flex-wrap: wrap; gap: 8px; }
+  .c-topic {
+    padding: 9px 14px;
+    border-radius: 10px;
+    font-size: 13px; font-weight: 600;
+    background: rgba(255,255,255,0.07);
+    color: rgba(255,255,255,0.5);
+    border: 1.5px solid rgba(255,255,255,0.1);
+    cursor: pointer;
+  }
+  .c-topic.selected {
+    background: rgba(252,198,29,0.15);
+    color: #FCC61D;
+    border-color: rgba(252,198,29,0.5);
+  }
+
+  .c-level-wrap { display: flex; gap: 8px; }
+  .c-level {
+    flex: 1;
+    padding: 14px 4px;
+    border-radius: 12px;
+    text-align: center;
+    background: rgba(255,255,255,0.05);
+    border: 1.5px solid rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.35);
+    font-size: 14px; font-weight: 800;
+    cursor: pointer;
+  }
+  .c-level.selected {
+    background: linear-gradient(135deg, #FCC61D, #f59e0b);
+    color: #1a1a2e;
+    border-color: transparent;
+    box-shadow: 0 4px 14px rgba(252,198,29,0.35);
+  }
+
+  .c-reset {
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    padding: 10px;
+    margin-bottom: 16px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: transparent;
+    color: rgba(255,255,255,0.35);
+    font-size: 13px;
+    cursor: pointer;
+  }
+
+  .c-play {
+    width: 100%;
+    padding: 16px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #FCC61D 0%, #f59e0b 100%);
+    color: #1a1a2e;
+    font-size: 17px; font-weight: 900;
+    text-align: center;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(252,198,29,0.4);
+    letter-spacing: 0.5px;
+  }
+  .c-play.disabled {
+    background: rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.25);
+    box-shadow: none;
+  }
+
+  .divider { height: 1px; background: rgba(255,255,255,0.07); margin: 16px 0; }
+</style>
+</head>
+<body>
+
+<!-- Option A: Dark Header + Card Body -->
+<div>
+  <p class="label">Option A — Dark Header + Card</p>
+  <div class="phone option-a">
+    <div class="header">
+      <div class="mascot">🎮</div>
+      <h1>Choose Your Subject</h1>
+      <p>Select topic and level to start playing</p>
+    </div>
+    <div class="body">
+      <p class="section-label">Subject</p>
+      <div class="subject-selector">
+        <div class="subject-tab active">🇬🇧 English</div>
+        <div class="subject-tab">📐 Math</div>
+        <div class="subject-tab">🔬 Science</div>
+      </div>
+
+      <p class="section-label">Topic</p>
+      <div class="pills-wrap">
+        <div class="pill pill-selected">Future Tense ✓</div>
+        <div class="pill pill-locked">Past Tense</div>
+        <div class="pill pill-locked">Present Tense</div>
+        <div class="pill pill-locked">Present Perfect</div>
+      </div>
+
+      <p class="section-label">Level</p>
+      <div class="level-grid">
+        <div class="level-card locked"><span class="level-badge">A1</span><span class="level-desc">Beginner</span></div>
+        <div class="level-card locked"><span class="level-badge">A2</span><span class="level-desc">Elementary</span></div>
+        <div class="level-card selected"><span class="level-badge">B1 ✓</span><span class="level-desc">Intermediate</span></div>
+        <div class="level-card locked"><span class="level-badge">B2</span><span class="level-desc">Upper-Int</span></div>
+        <div class="level-card locked"><span class="level-badge">C1</span><span class="level-desc">Advanced</span></div>
+        <div class="level-card locked"><span class="level-badge">C2</span><span class="level-desc">Mastery</span></div>
+      </div>
+
+      <button class="reset-btn">↺ Reset selection</button>
+      <div class="play-btn">▶ Play Now</div>
+    </div>
+  </div>
+</div>
+
+<!-- Option B: Minimal Yellow -->
+<div>
+  <p class="label">Option B — Minimal Clean</p>
+  <div class="phone option-b">
+    <div class="top-bar">
+      <h1>Select Subject</h1>
+      <div class="avatar">TW</div>
+    </div>
+    <div class="body">
+      <div class="progress-row">
+        <div class="progress-dot done"></div>
+        <div class="progress-dot done"></div>
+        <div class="progress-dot"></div>
+      </div>
+
+      <p class="step-title">Step 1 — Topic</p>
+      <div class="big-pill-wrap">
+        <div class="big-pill selected">
+          <div><div class="pill-name">Future Simple Tense</div><div class="pill-sub">12 questions available</div></div>
+          <div class="check">✓</div>
+        </div>
+        <div class="big-pill">
+          <div><div class="pill-name">Past Simple Tense</div><div class="pill-sub">18 questions available</div></div>
+          <div class="uncheck"></div>
+        </div>
+        <div class="big-pill">
+          <div><div class="pill-name">Present Simple Tense</div><div class="pill-sub">24 questions available</div></div>
+          <div class="uncheck"></div>
+        </div>
+      </div>
+
+      <p class="step-title">Step 2 — Level</p>
+      <div class="b-level-row">
+        <div class="b-level">A1</div>
+        <div class="b-level selected">B1</div>
+        <div class="b-level">A2</div>
+        <div class="b-level">B2</div>
+        <div class="b-level">C1</div>
+        <div class="b-level">C2</div>
+      </div>
+
+      <button class="b-reset">✕ Reset selection</button>
+      <div class="b-play">Play →</div>
+    </div>
+  </div>
+</div>
+
+<!-- Option C: Gamified Dark -->
+<div>
+  <p class="label">Option C — Gamified Dark</p>
+  <div class="phone option-c">
+    <div class="header">
+      <h1>CHOOSE YOUR BATTLE</h1>
+      <p>Pick a topic and difficulty level</p>
+    </div>
+    <div class="body">
+      <div class="c-section">
+        <p class="c-section-title">⚡ Topic</p>
+        <div class="c-topic-wrap">
+          <div class="c-topic selected">Future Tense</div>
+          <div class="c-topic">Past Tense</div>
+          <div class="c-topic">Present Tense</div>
+          <div class="c-topic">Present Perfect</div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="c-section">
+        <p class="c-section-title">🎯 Difficulty</p>
+        <div class="c-level-wrap">
+          <div class="c-level">A1</div>
+          <div class="c-level">A2</div>
+          <div class="c-level selected">B1</div>
+          <div class="c-level">B2</div>
+          <div class="c-level">C1</div>
+          <div class="c-level">C2</div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <button class="c-reset">↺ Clear choices</button>
+      <div class="c-play">⚔ START GAME</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
