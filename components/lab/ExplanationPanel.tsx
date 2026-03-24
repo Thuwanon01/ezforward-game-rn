@@ -299,166 +299,153 @@ export default function ExplanationPanel({
   );
 
   return (
-    //All box of footer
-
-    <ScrollView className="max-h-[800px]">
+    <ScrollView style={{ maxHeight: 800 }}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
-        <View className="bg-[#27548A] rounded-t-xl">
-          {/* Condition to show pop-up arrow */}
-          {explanationStatus && (
-            <View className="flex-row justify-center mt-[12]">
-              <IconButton
-                iconImage={openExplanation ? "downArrow" : "upArrow"}
-                onPress={toggleExplanation}
-                isDisable={false}
-              />
-            </View>
-          )}
+        <View style={panelStyles.container}>
 
-          {/* ... ส่วนแสดงคำอธิบาย ... */}
-          {explanationStatus && openExplanation && (
-            <View className="mx-[40]">
-              <View>
-                {/* --- ส่วน UI แชทที่อัปเดตแล้ว --- */}
-                <View className="mt-6 border-t border-gray-500 pt-4">
-                  {/* <FlatList
-                    data={chatHistory}
-                    renderItem={renderChatItem}
-                    keyExtractor={(item) => item.id.toString()}
-                    className="max-h-48 mb-2"
-                  /> */}
-                  {chatHistory.map((item) => (
-                    <React.Fragment key={item.id}>
-                      {renderChatItem({ item })}
-                    </React.Fragment>
-                  ))}
-
-                  {isChatLoading && (
-                    <ActivityIndicator color="white" className="my-2" />
-                  )}
-
-                  {/* Chat Input Bar */}
-                  <View className="flex-row items-end bg-gray-700 rounded-2xl p-2">
-                    <TouchableOpacity
-                      onPress={() => setIsPremadeModalVisible(true)}
-                      className="p-2"
-                    >
-                      <PlusCircleIcon color="white" size={28} />
-                    </TouchableOpacity>
-                    <TextInput
-                      className="flex-1 text-white text-lg px-2"
-                      style={{ maxHeight: 120 }}
-                      placeholder="Ask something..."
-                      placeholderTextColor="#9ca3af"
-                      value={inputValue}
-                      onChangeText={setInputValue}
-                      editable={!isChatLoading}
-                      multiline
-                    />
-                    <TouchableOpacity
-                      onPress={handleSendMessage}
-                      disabled={isChatLoading || !inputValue.trim()}
-                      className="p-2 bg-blue-600 rounded-full"
-                    >
-                      <PaperAirplaneIcon color="white" size={24} />
-                    </TouchableOpacity>
-                  </View>
-
-                  {/* Feedback Buttons */}
-                  <View className="flex-row items-center justify-end mt-4 space-x-4">
-                    <TouchableOpacity
-                      onPress={() => handleFeedback("like")}
-
-                    >
-                      <HandThumbUpIcon
-
-                        color={
-                          feedback === "like"
-                            ? "#22c55e"
-                            : "white"
-                        }
-                        size={28}
-                      />
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      onPress={() => handleFeedback("dislike")}
-
-                    >
-                      <HandThumbDownIcon
-
-                        color={
-                          feedback === "dislike"
-                            ? "#ef4444"
-                            : "white"
-                        }
-                        size={28}
-                      />
-                    </TouchableOpacity>
-                  </View>
-
-                  <View className="h-[8]"></View>
-                  <Markdown style={styles}>{explanation}</Markdown>
-                </View>
-              </View>
-            </View>
-          )}
-
-          {/* ... ปุ่มตัวช่วยและปุ่ม Next/Try Again ... */}
+          {/* ── WAIT STATE: Lifeline buttons ── */}
           {gameState === "wait" && (
-            <>
-              <View
-                className={`flex-row my-[16] mx-[100] ${
-                  SHOW_DOUBLE_AND_CHANGE_HELPERS ? "justify-between" : "justify-center"
-                }`}
-              >
-                <IconButton
-                  iconImage="eliminateIcon"
-                  isDisable={helpersLocked}
-                  used={
-                    helperStatus.eliminate || sessionHelperUsed === "eliminate"
-                  }
-                  onPress={() =>
-                    setOpenHelper({ eliminate: true, double: false, change: false })
-                  }
-                />
+            <View style={panelStyles.lifelineArea}>
+              <View style={panelStyles.lifelineRow}>
+                <TouchableOpacity
+                  style={[
+                    panelStyles.lifelineBtn,
+                    (helpersLocked) && panelStyles.lifelineBtnUsed,
+                  ]}
+                  onPress={() => setOpenHelper({ eliminate: true, double: false, change: false })}
+                  disabled={helpersLocked}
+                >
+                  <Text style={panelStyles.lifelineIcon}>✂️</Text>
+                  <Text style={panelStyles.lifelineLabel}>ELIMINATE</Text>
+                </TouchableOpacity>
+
                 {SHOW_DOUBLE_AND_CHANGE_HELPERS && (
                   <>
-                    <IconButton
-                      iconImage="doubleIcon"
-                      isDisable={helpersLocked}
-                      used={
-                        helperStatus.double || sessionHelperUsed === "double"
-                      }
-                      onPress={() =>
-                        setOpenHelper({ eliminate: false, double: true, change: false })
-                      }
-                    />
-                    <IconButton
-                      iconImage="changeIcon"
-                      isDisable={helpersLocked}
-                      used={
-                        helperStatus.change || sessionHelperUsed === "change"
-                      }
-                      onPress={() =>
-                        setOpenHelper({ eliminate: false, double: false, change: true })
-                      }
-                    />
+                    <TouchableOpacity
+                      style={[panelStyles.lifelineBtn, helpersLocked && panelStyles.lifelineBtnUsed]}
+                      onPress={() => setOpenHelper({ eliminate: false, double: true, change: false })}
+                      disabled={helpersLocked}
+                    >
+                      <Text style={panelStyles.lifelineIcon}>2️⃣</Text>
+                      <Text style={panelStyles.lifelineLabel}>DOUBLE</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[panelStyles.lifelineBtn, helpersLocked && panelStyles.lifelineBtnUsed]}
+                      onPress={() => setOpenHelper({ eliminate: false, double: false, change: true })}
+                      disabled={helpersLocked}
+                    >
+                      <Text style={panelStyles.lifelineIcon}>🔀</Text>
+                      <Text style={panelStyles.lifelineLabel}>CHANGE</Text>
+                    </TouchableOpacity>
                   </>
                 )}
               </View>
               {helpersLocked && (
-            <Text className="text-center text-xs text-white/60 mb-2">
-              {helperFooterLabel()}
-            </Text>
-          )}
-            </>
+                <Text style={panelStyles.lifelineUsedLabel}>{helperFooterLabel()}</Text>
+              )}
+            </View>
           )}
 
+          {/* ── ANSWERED STATE: Result + Explanation + Next ── */}
           {gameState !== "wait" && questionIndex <= sessionTotal && (
-            <View className="flex-row justify-end my-[16] mx-[40]">
-              <TextButton text="Next" onPress={onPress} isDisable={isFetching} />
+            <View style={panelStyles.resultArea}>
+
+              {/* Result badge */}
+              <View style={[
+                panelStyles.resultBadge,
+                gameState === 'correct' ? panelStyles.resultBadgeCorrect : panelStyles.resultBadgeIncorrect,
+              ]}>
+                <Text style={panelStyles.resultIcon}>
+                  {gameState === 'correct' ? '✅' : '❌'}
+                </Text>
+                <View>
+                  <Text style={panelStyles.resultLabel}>
+                    {gameState === 'correct' ? 'Correct!' : 'Incorrect'}
+                  </Text>
+                  <Text style={panelStyles.resultAnswer}>
+                    {gameState === 'correct'
+                      ? correctAnswer
+                      : `Correct: ${correctAnswer}`}
+                  </Text>
+                </View>
+              </View>
+
+              {/* Explanation toggle */}
+              {explanationStatus && (
+                <TouchableOpacity style={panelStyles.explanationToggle} onPress={toggleExplanation}>
+                  <Text style={panelStyles.explanationToggleText}>
+                    💡 {openExplanation ? 'Hide explanation' : 'View explanation'}
+                  </Text>
+                  <Text style={panelStyles.explanationChevron}>
+                    {openExplanation ? '▲' : '▼'}
+                  </Text>
+                </TouchableOpacity>
+              )}
+
+              {/* Explanation body + chat */}
+              {explanationStatus && openExplanation && (
+                <View style={panelStyles.explanationBody}>
+                  <View style={panelStyles.chatSection}>
+                    {chatHistory.map((item) => (
+                      <React.Fragment key={item.id}>
+                        {renderChatItem({ item })}
+                      </React.Fragment>
+                    ))}
+
+                    {isChatLoading && (
+                      <ActivityIndicator color="white" style={{ marginVertical: 8 }} />
+                    )}
+
+                    {/* Chat Input Bar */}
+                    <View style={panelStyles.chatInputBar}>
+                      <TouchableOpacity onPress={() => setIsPremadeModalVisible(true)} style={{ padding: 8 }}>
+                        <PlusCircleIcon color="white" size={28} />
+                      </TouchableOpacity>
+                      <TextInput
+                        style={panelStyles.chatInput}
+                        placeholder="Ask something..."
+                        placeholderTextColor="#9ca3af"
+                        value={inputValue}
+                        onChangeText={setInputValue}
+                        editable={!isChatLoading}
+                        multiline
+                      />
+                      <TouchableOpacity
+                        onPress={handleSendMessage}
+                        disabled={isChatLoading || !inputValue.trim()}
+                        style={panelStyles.chatSendBtn}
+                      >
+                        <PaperAirplaneIcon color="white" size={24} />
+                      </TouchableOpacity>
+                    </View>
+
+                    {/* Feedback Buttons */}
+                    <View style={panelStyles.feedbackRow}>
+                      <TouchableOpacity onPress={() => handleFeedback("like")}>
+                        <HandThumbUpIcon color={feedback === "like" ? "#22c55e" : "white"} size={28} />
+                      </TouchableOpacity>
+                      <TouchableOpacity onPress={() => handleFeedback("dislike")}>
+                        <HandThumbDownIcon color={feedback === "dislike" ? "#ef4444" : "white"} size={28} />
+                      </TouchableOpacity>
+                    </View>
+
+                    <Markdown style={markdownStyles}>{explanation}</Markdown>
+                  </View>
+                </View>
+              )}
+
+              {/* Next button */}
+              <TouchableOpacity
+                style={[panelStyles.nextBtn, isFetching && panelStyles.nextBtnDisabled]}
+                onPress={onPress}
+                disabled={isFetching}
+              >
+                <Text style={[panelStyles.nextBtnText, isFetching && panelStyles.nextBtnTextDisabled]}>
+                  Next Question →
+                </Text>
+              </TouchableOpacity>
             </View>
           )}
           {/* ย้าย Modals มาไว้ที่นี่ (นอก ScrollView แต่ใน KAV) */}
@@ -518,9 +505,167 @@ export default function ExplanationPanel({
   )
 }
 
-const styles = StyleSheet.create({
+const panelStyles = StyleSheet.create({
+  container: {
+    backgroundColor: '#183B4E',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+  },
+  // ── Wait state ──
+  lifelineArea: {
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+  },
+  lifelineRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 24,
+  },
+  lifelineBtn: {
+    width: 60,
+    height: 60,
+    borderRadius: 14,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 3,
+  },
+  lifelineBtnUsed: {
+    opacity: 0.35,
+  },
+  lifelineIcon: {
+    fontSize: 22,
+  },
+  lifelineLabel: {
+    fontSize: 9,
+    fontWeight: '600',
+    color: 'rgba(255,255,255,0.5)',
+    letterSpacing: 0.4,
+  },
+  lifelineUsedLabel: {
+    textAlign: 'center',
+    fontSize: 11,
+    color: 'rgba(255,255,255,0.5)',
+    marginTop: 8,
+  },
+  // ── Answered state ──
+  resultArea: {
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 8,
+    gap: 10,
+  },
+  resultBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    padding: 12,
+    borderRadius: 12,
+    marginBottom: 2,
+  },
+  resultBadgeCorrect: {
+    backgroundColor: 'rgba(52,211,153,0.15)',
+  },
+  resultBadgeIncorrect: {
+    backgroundColor: 'rgba(248,113,113,0.15)',
+  },
+  resultIcon: {
+    fontSize: 20,
+  },
+  resultLabel: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: 'white',
+  },
+  resultAnswer: {
+    fontSize: 12,
+    color: 'rgba(255,255,255,0.55)',
+    marginTop: 1,
+  },
+  explanationToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    padding: 10,
+    paddingHorizontal: 12,
+    backgroundColor: 'rgba(255,255,255,0.07)',
+    borderRadius: 10,
+  },
+  explanationToggleText: {
+    flex: 1,
+    fontSize: 13,
+    color: 'rgba(255,255,255,0.65)',
+  },
+  explanationChevron: {
+    fontSize: 11,
+    color: 'rgba(255,255,255,0.4)',
+  },
+  explanationBody: {
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderRadius: 12,
+    padding: 12,
+  },
+  chatSection: {
+    gap: 4,
+  },
+  chatInputBar: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    backgroundColor: '#374151',
+    borderRadius: 16,
+    padding: 8,
+    marginTop: 8,
+  },
+  chatInput: {
+    flex: 1,
+    color: 'white',
+    fontSize: 16,
+    paddingHorizontal: 8,
+    maxHeight: 120,
+  },
+  chatSendBtn: {
+    padding: 8,
+    backgroundColor: '#2563eb',
+    borderRadius: 999,
+  },
+  feedbackRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 16,
+    marginTop: 12,
+    marginBottom: 4,
+  },
+  nextBtn: {
+    paddingVertical: 14,
+    borderRadius: 14,
+    backgroundColor: '#FCC61D',
+    alignItems: 'center',
+    shadowColor: '#FCC61D',
+    shadowOpacity: 0.35,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 6,
+    marginTop: 4,
+    marginBottom: 8,
+  },
+  nextBtnDisabled: {
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    shadowOpacity: 0,
+    elevation: 0,
+  },
+  nextBtnText: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#183B4E',
+  },
+  nextBtnTextDisabled: {
+    color: 'rgba(255,255,255,0.4)',
+  },
+});
+
+const markdownStyles = StyleSheet.create({
   body: {
-    color: 'white'
+    color: 'white',
   },
   code_inline: {
     borderWidth: 1,
@@ -529,5 +674,5 @@ const styles = StyleSheet.create({
     padding: 8,
     borderRadius: 4,
     lineHeight: 40,
-  }
-})
+  },
+});

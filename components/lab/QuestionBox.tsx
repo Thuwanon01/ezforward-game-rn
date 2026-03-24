@@ -2,9 +2,6 @@ import * as Speech from 'expo-speech';
 import React from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-
-// สำหรับเปลี่ยนรูปภาพตามสถานะที่โดนรับมา
-
 const imagesSource = {
   wait: require('../../assets/images/ram.png'),
   reading: require('../../assets/images/PixVerse-V5-ram-read.gif'),
@@ -12,12 +9,9 @@ const imagesSource = {
   incorrect: require('../../assets/images/PixVerse-V5-ram-sad.gif'),
 };
 
-// component QuestionBox จะรับ props 2 ตัวคือ question (ข้อความคำถาม) และ status (สถานะของรูปภาพ)
-
 export default function QuestionBox({ question, status, onPressQuestion, questionIndex }:
   { question: string, status: string, onPressQuestion: () => void, questionIndex?: number }) {
 
-  /** Speak synchronously in the press handler so Web Speech stays in Chrome's user-gesture chain (Safari is more lenient). */
   const handlePress = () => {
     Speech.stop();
     const isThai = /[\u0E00-\u0E7F]/.test(question);
@@ -27,18 +21,17 @@ export default function QuestionBox({ question, status, onPressQuestion, questio
   };
 
   return (
-    <TouchableOpacity className='QuestionBox' style={styles.container} onPress={handlePress}>
-      <View style={styles.parentBox}>
-        {/* เอา TouchableOpacity มาครอบ Text แล้วผูกกับ onPressQuestion */}
-        <View style={{ position: 'absolute', top: 10, left: 10 }}>
-          <Text style={{ fontSize: 16, fontWeight: '500', color: '#183B4E' }}>
-            {questionIndex !== undefined ? `Question ${questionIndex}` : ''}
-          </Text>
-        </View>
+    <TouchableOpacity style={styles.container} onPress={handlePress} activeOpacity={0.9}>
+      {questionIndex !== undefined && (
+        <Text style={styles.qIndex}>Question {questionIndex}</Text>
+      )}
+      <View style={styles.card}>
         <Text style={styles.questionText}>{question}</Text>
-        <View>
+
+        {/* Mascot circle — overflows bottom-right of card */}
+        <View style={styles.mascotCircle}>
           <Image
-            style={styles.absoluteChild}
+            style={styles.mascotImage}
             source={imagesSource[status as keyof typeof imagesSource]}
           />
         </View>
@@ -49,42 +42,63 @@ export default function QuestionBox({ question, status, onPressQuestion, questio
 
 const styles = StyleSheet.create({
   container: {
-    // flex: 1,
-    justifyContent: 'flex-start',
-    alignItems: 'center',
-    paddingHorizontal: 24,
-    paddingBottom: 40
-    // backgroundColor: '#fffac9ff',
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 44,
   },
-  parentBox: {
+  qIndex: {
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 0.8,
+    textTransform: 'uppercase',
+    color: '#183B4E',
+    opacity: 0.45,
+    marginBottom: 8,
+  },
+  card: {
     width: '100%',
-    height: 225,
-    backgroundColor: '#FCC61D', // สีเหลือง
-    justifyContent: 'center',
-    alignItems: 'center',
-
-    // กำหนดให้เป็น relative เพื่อให้ตัวลูกอ้างอิงตำแหน่งจากกล่องนี้
-    position: 'relative',
-    borderWidth: 1,
+    minHeight: 140,
+    backgroundColor: '#FCC61D',
     borderRadius: 20,
-    boxShadow: '0 4px 8px rgba(178, 178, 178, 1)',
-    marginTop: 20,
-    borderColor: 'grey'
+    paddingVertical: 20,
+    paddingHorizontal: 16,
+    paddingRight: 60,
+    justifyContent: 'center',
+    position: 'relative',
+    shadowColor: '#FCC61D',
+    shadowOpacity: 0.4,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 4,
+    overflow: 'visible',
   },
   questionText: {
     color: '#183B4E',
-    fontSize: 20,
-    fontWeight: '600',
-    padding: 10,
-    textAlign: 'center'
+    fontSize: 18,
+    fontWeight: '700',
+    lineHeight: 26,
+    textAlign: 'center',
   },
-  absoluteChild: {
-    width: 104,
-    height: 134,
-    boxShadow: '0 4px 8px rgba(178, 178, 178, 1)',
-    // --- จุดสำคัญอยู่ตรงนี้ ---
-    position: 'absolute', // ทำให้ Component นี้ลอยได้
-    bottom: -113,             // ห่างจากขอบล่างของ parentBox -113 pixels
-    right: -203.5          // ห่างจากขอบขวาของ parentBox -203.5 pixels
+  mascotCircle: {
+    position: 'absolute',
+    right: -8,
+    bottom: -32,
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: 'white',
+    borderWidth: 3,
+    borderColor: '#FCC61D',
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 4,
+  },
+  mascotImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 36,
   },
 });

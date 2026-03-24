@@ -1,35 +1,30 @@
 import * as Speech from 'expo-speech';
 import React, { useRef } from 'react';
-import { Platform, StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import Markdown from "react-native-markdown-display";
+
+const ALPHA_LABELS = ['A', 'B', 'C', 'D', 'E', 'F'];
 
 interface Prop {
   text: string
   status: 'correct' | 'incorrect' | undefined | 'wait'
   onPress?: () => void
   disabled?: boolean
-  correctExplanation?: string
-  incorrectExplanation?: string
+  index?: number
 }
 
 const DOUBLE_TAP_MS = 400;
 
-export default function ChoiceBox({ text, status, onPress, disabled, correctExplanation, incorrectExplanation }: Prop) {
+export default function ChoiceBox({ text, status, onPress, disabled, index }: Prop) {
   const lastWebTapRef = useRef(0);
 
   const speak = () => {
-    Speech.stop()
-    const isThai = /[\u0E00-\u0E7F]/.test(text) // regex เช็คอักษรไทย
-    const lang = isThai ? 'th-TH' : 'en-US'
-    Speech.speak(text, { language: lang })
-  }
+    Speech.stop();
+    const isThai = /[\u0E00-\u0E7F]/.test(text);
+    const lang = isThai ? 'th-TH' : 'en-US';
+    Speech.speak(text, { language: lang });
+  };
 
-  /**
-   * Chrome (desktop) requires Web Speech to run in a direct user-gesture handler.
-   * RNGH Tap.onEnd runs too late, so we use Touchable onPress on web.
-   * Double tap within DOUBLE_TAP_MS: speak + submit (same intent as native double-tap).
-   */
   const handleWebPress = () => {
     if (disabled) return;
     const now = Date.now();
@@ -43,62 +38,54 @@ export default function ChoiceBox({ text, status, onPress, disabled, correctExpl
     }
   };
 
-  // Single tap: แค่พูดออกเสียง
-  const singleTap = Gesture.Tap()
-    .onEnd(() => {
-      speak()
-    })
+  const singleTap = Gesture.Tap().onEnd(() => { speak(); });
 
-  // Double tap: run onPress
   const doubleTap = Gesture.Tap()
     .maxDuration(400)
     .numberOfTaps(2)
     .onEnd(() => {
       if (onPress) {
-        speak()
-        onPress()
+        speak();
+        onPress();
       }
-    })
+    });
 
-  const gesture =
-    disabled
-      ? Gesture.Tap().enabled(false) // dummy gesture ปิดการทำงาน
-      : Gesture.Exclusive(doubleTap, singleTap)
+  const gesture = disabled
+    ? Gesture.Tap().enabled(false)
+    : Gesture.Exclusive(doubleTap, singleTap);
 
+  const isCorrect = status === 'correct';
+  const isIncorrect = status === 'incorrect';
 
-  // กำหนดสีพื้นหลังตามสถานะ
-  const isCorrect = status === "correct"
-  let bgColor = "white" // สีพื้นหลังเริ่มต้น
-  let fontColor = "black"
-  if (isCorrect) {
-    bgColor = "#9DFF9F"
-    fontColor = "black"
-  }
-  else if (status === "incorrect") {
-    bgColor = "#FFB3B3"
-    fontColor = "black"
-  }
-  else if (disabled) { bgColor = "lightgrey" }
+  const alphaLabel = index !== undefined ? (ALPHA_LABELS[index] ?? String(index + 1)) : null;
+
+  const cardStyle = [
+    styles.card,
+    isCorrect && styles.cardCorrect,
+    isIncorrect && styles.cardIncorrect,
+    disabled && !isCorrect && !isIncorrect && styles.cardDisabled,
+  ];
+
+  const alphaStyle = [
+    styles.alpha,
+    isCorrect && styles.alphaCorrect,
+    isIncorrect && styles.alphaIncorrect,
+  ];
 
   const inner = (
-    <>
-      <Text style={[styles.textChoice, { color: fontColor }]}>{text}</Text>
-      {status === "correct" ?
-        <Markdown style={markdownStyles}>{correctExplanation}</Markdown>
-        : status === "incorrect" ? (
-          <Markdown style={markdownStyles}>{incorrectExplanation}</Markdown>
-        ) : null}
-    </>
+    <View style={cardStyle}>
+      {alphaLabel !== null && (
+        <View style={alphaStyle}>
+          <Text style={styles.alphaText}>{alphaLabel}</Text>
+        </View>
+      )}
+      <Text style={styles.choiceText}>{text}</Text>
+    </View>
   );
 
   if (Platform.OS === 'web') {
     return (
-      <TouchableOpacity
-        style={[styles.boxChoice, { backgroundColor: bgColor }]}
-        onPress={handleWebPress}
-        disabled={disabled}
-        activeOpacity={0.7}
-      >
+      <TouchableOpacity onPress={handleWebPress} disabled={disabled} activeOpacity={0.8}>
         {inner}
       </TouchableOpacity>
     );
@@ -106,38 +93,62 @@ export default function ChoiceBox({ text, status, onPress, disabled, correctExpl
 
   return (
     <GestureDetector gesture={gesture}>
-      <TouchableOpacity style={[styles.boxChoice, { backgroundColor: bgColor }]}>
+      <TouchableOpacity activeOpacity={0.8}>
         {inner}
       </TouchableOpacity>
     </GestureDetector>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
-  boxChoice: {
-    borderWidth: 2,
-    borderRadius: 10,
-    borderColor: 'lightblue',
-    margin: 10,
-    padding: 10,
+  card: {
+    flexDirection: 'row',
     alignItems: 'center',
+    gap: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderRadius: 14,
+    backgroundColor: 'white',
+    borderWidth: 2,
+    borderColor: '#e8e4c8',
+    marginHorizontal: 20,
+    marginVertical: 5,
   },
-  textChoice: {
-    fontSize: 20,
-    fontWeight: 'bold',
+  cardCorrect: {
+    backgroundColor: '#d1fae5',
+    borderColor: '#34d399',
   },
-})
-
-const markdownStyles = StyleSheet.create({
-  body: {
-    color: "black",
+  cardIncorrect: {
+    backgroundColor: '#fee2e2',
+    borderColor: '#f87171',
   },
-  code_inline: {
-    borderWidth: 1,
-    borderColor: "#FCC61D",
-    backgroundColor: "#FCC61D",
-    padding: 8,
-    borderRadius: 4,
-    lineHeight: 40,
+  cardDisabled: {
+    opacity: 0.45,
+  },
+  alpha: {
+    width: 28,
+    height: 28,
+    borderRadius: 8,
+    backgroundColor: '#183B4E',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  alphaCorrect: {
+    backgroundColor: '#10b981',
+  },
+  alphaIncorrect: {
+    backgroundColor: '#ef4444',
+  },
+  alphaText: {
+    color: 'white',
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  choiceText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#183B4E',
+    flex: 1,
   },
 });

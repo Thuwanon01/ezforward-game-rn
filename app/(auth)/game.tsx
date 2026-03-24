@@ -444,11 +444,6 @@ export default function GamePage() {
     (c) => !eliminatedChoiceIds.includes(c.id)
   );
 
-  const sessionProgressPercent =
-    sessionTotal > 0
-      ? Math.min(100, (sessionScore / sessionTotal) * 100)
-      : 0;
-
   return (
     <View className="flex-1 flex-col justify-between bg-[#fffac9]">
       <ScrollView className="flex-1">
@@ -457,19 +452,9 @@ export default function GamePage() {
           onPressBack={logOutHandler}
           onPressMenu={settingHandler}
           openMenu={openMenu}
-        ></HeaderPanel>
-
-        <View className="relative mx-6 mt-4 h-4 rounded-full bg-[#183B4E]/15 border border-[#183B4E]/15 overflow-hidden">
-          <View
-            className="absolute left-0 top-0 bottom-0 bg-[#FCC61D]"
-            style={{ width: `${sessionProgressPercent}%` }}
-          />
-          <View className="absolute inset-0 justify-center items-center">
-            <Text className="text-m font-bold text-[#183B4E]">
-              {sessionScore} / {sessionTotal}
-            </Text>
-          </View>
-        </View>
+          questionIndex={currentQuestionIndex}
+          sessionTotal={sessionTotal}
+        />
 
         <QuestionBox
           question={question?.text || "Loading question..."}
@@ -490,8 +475,7 @@ export default function GamePage() {
                   handleSubmitAnswer(choice.id, index);
                 }}
                 disabled={gameState !== "wait"}
-                correctExplanation={correctExplanation}
-                incorrectExplanation={incorrectExplanation}
+                index={index}
               />
             );
           })}

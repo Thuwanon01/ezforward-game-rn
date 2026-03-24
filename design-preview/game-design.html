@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Game Page Design</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: #1e293b;
+  padding: 32px 20px 60px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 40px;
+  justify-content: center;
+}
+.col { display: flex; flex-direction: column; gap: 32px; align-items: center; }
+.label {
+  text-align: center;
+  font-size: 11px; font-weight: 700; letter-spacing: 1px;
+  text-transform: uppercase; color: #94a3b8;
+  margin-bottom: 6px;
+}
+.phone {
+  width: 375px;
+  border-radius: 40px;
+  overflow: hidden;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+  position: relative;
+  flex-shrink: 0;
+  background: #fffac9;
+}
+
+/* ─── HEADER ─── */
+.header {
+  background: #183B4E;
+  padding: 48px 16px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.header-icon {
+  width: 36px; height: 36px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; cursor: pointer;
+}
+.header-title { color: white; font-size: 16px; font-weight: 700; letter-spacing: 0.3px; }
+
+/* ─── PROGRESS ─── */
+.progress-wrap {
+  background: #183B4E;
+  padding: 0 16px 16px;
+}
+.progress-bar-bg {
+  height: 28px;
+  background: rgba(255,255,255,0.12);
+  border-radius: 999px;
+  overflow: hidden;
+  position: relative;
+}
+.progress-bar-fill {
+  position: absolute; left: 0; top: 0; bottom: 0;
+  background: linear-gradient(90deg, #FCC61D, #f59e0b);
+  border-radius: 999px;
+  transition: width 0.4s;
+}
+.progress-text {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700;
+  color: #183B4E;
+  z-index: 1;
+}
+
+/* ─── BODY ─── */
+.body {
+  background: #fffac9;
+  padding: 20px 16px 0;
+}
+
+/* Question Index */
+.q-index {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.8px;
+  color: #183B4E; opacity: 0.45;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+/* Question Card */
+.question-card {
+  background: #FCC61D;
+  border-radius: 20px;
+  padding: 20px 16px 16px;
+  position: relative;
+  min-height: 140px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(252,198,29,0.35);
+  overflow: visible;
+}
+.question-card .q-text {
+  font-size: 18px; font-weight: 700; color: #183B4E;
+  line-height: 1.4; text-align: center;
+  padding: 0 52px 0 0;
+}
+.mascot {
+  position: absolute; right: -8px; bottom: -20px;
+  width: 80px; height: 80px;
+  background: white;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  border: 3px solid #FCC61D;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+  overflow: hidden;
+}
+.mascot img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+.sound-btn {
+  position: absolute; left: 12px; top: 12px;
+  width: 28px; height: 28px;
+  background: rgba(24,59,78,0.12);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+}
+
+/* Choices */
+.choices { padding: 28px 0 0; display: flex; flex-direction: column; gap: 10px; }
+.choice {
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: white;
+  border: 2px solid #e8e4c8;
+  display: flex; align-items: center; gap: 12px;
+  cursor: pointer;
+}
+.choice:hover { border-color: #183B4E; }
+.choice.correct { background: #d1fae5; border-color: #34d399; }
+.choice.incorrect { background: #fee2e2; border-color: #f87171; }
+.choice.disabled { opacity: 0.45; }
+.choice-alpha {
+  width: 28px; height: 28px; border-radius: 8px;
+  background: #183B4E; color: white;
+  font-size: 13px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.choice.correct .choice-alpha { background: #10b981; }
+.choice.incorrect .choice-alpha { background: #ef4444; }
+.choice-text { font-size: 15px; font-weight: 600; color: #183B4E; flex: 1; }
+
+/* Footer (Explanation Panel) */
+.footer {
+  background: #183B4E;
+  border-radius: 24px 24px 0 0;
+  margin-top: 20px;
+  padding: 16px;
+}
+.footer-wait {
+  display: flex; justify-content: center; gap: 24px; padding: 4px 0;
+}
+.lifeline-btn {
+  width: 52px; height: 52px; border-radius: 14px;
+  background: rgba(255,255,255,0.1);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  cursor: pointer; gap: 3px;
+}
+.lifeline-btn.used { opacity: 0.35; }
+.lifeline-icon { font-size: 22px; }
+.lifeline-label { font-size: 9px; font-weight: 600; color: rgba(255,255,255,0.5); letter-spacing: 0.4px; }
+
+.footer-result { padding: 4px 0 8px; }
+.result-badge {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  margin-bottom: 10px;
+}
+.result-badge.correct-badge { background: rgba(52,211,153,0.15); }
+.result-badge.incorrect-badge { background: rgba(248,113,113,0.15); }
+.result-icon { font-size: 20px; }
+.result-label { font-size: 13px; font-weight: 700; color: white; }
+.result-answer { font-size: 12px; color: rgba(255,255,255,0.55); margin-top: 1px; }
+
+.explanation-toggle {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 12px;
+  background: rgba(255,255,255,0.07);
+  border-radius: 10px;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+.explanation-toggle-text { font-size: 13px; color: rgba(255,255,255,0.65); flex: 1; }
+.chevron { font-size: 12px; color: rgba(255,255,255,0.4); }
+
+.explanation-body {
+  background: rgba(255,255,255,0.05);
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 10px;
+}
+.explanation-text { font-size: 13px; color: rgba(255,255,255,0.7); line-height: 1.6; }
+
+.next-btn {
+  width: 100%; padding: 14px;
+  border-radius: 14px;
+  background: #FCC61D;
+  text-align: center;
+  font-size: 15px; font-weight: 800; color: #183B4E;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(252,198,29,0.35);
+}
+
+/* ─── MODAL ─── */
+.modal-wrap {
+  width: 375px;
+  border-radius: 40px;
+  overflow: hidden;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+  background: rgba(0,0,0,0.6);
+  min-height: 400px;
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px;
+  flex-shrink: 0;
+}
+.modal-card {
+  background: white;
+  border-radius: 24px;
+  padding: 24px;
+  width: 100%;
+  text-align: center;
+}
+.modal-icon { font-size: 44px; margin-bottom: 12px; }
+.modal-title { font-size: 20px; font-weight: 800; color: #183B4E; margin-bottom: 6px; }
+.modal-sub { font-size: 14px; color: #64748b; line-height: 1.5; margin-bottom: 20px; }
+.modal-score {
+  background: #f8fafc;
+  border-radius: 14px;
+  padding: 14px;
+  margin-bottom: 20px;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.modal-score-num { font-size: 32px; font-weight: 900; color: #183B4E; }
+.modal-score-sep { font-size: 20px; color: #cbd5e1; }
+.modal-score-total { font-size: 24px; font-weight: 700; color: #94a3b8; }
+.modal-btn {
+  width: 100%; padding: 14px;
+  border-radius: 14px; text-align: center;
+  font-size: 15px; font-weight: 700;
+  cursor: pointer; margin-bottom: 8px;
+}
+.modal-btn-primary { background: #FCC61D; color: #183B4E; }
+.modal-btn-secondary { background: #f1f5f9; color: #475569; }
+
+/* Lifeline modal */
+.lifeline-modal-icon {
+  width: 72px; height: 72px;
+  background: linear-gradient(135deg, #FCC61D, #f59e0b);
+  border-radius: 20px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 36px;
+  margin: 0 auto 16px;
+  box-shadow: 0 8px 20px rgba(252,198,29,0.35);
+}
+
+/* ─── MENU ─── */
+.menu-wrap {
+  width: 375px;
+  border-radius: 40px;
+  overflow: hidden;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+  background: rgba(0,0,0,0.55);
+  min-height: 500px;
+  display: flex;
+  flex-shrink: 0;
+}
+.menu-panel {
+  width: 260px;
+  background: white;
+  padding: 48px 16px 24px;
+  display: flex; flex-direction: column;
+}
+.menu-game-title {
+  font-size: 18px; font-weight: 800; color: #183B4E;
+  margin-bottom: 4px;
+}
+.menu-subtitle { font-size: 12px; color: #94a3b8; margin-bottom: 24px; }
+.menu-divider { height: 1px; background: #f1f5f9; margin-bottom: 16px; }
+.menu-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px;
+  border-radius: 12px;
+  cursor: pointer;
+  margin-bottom: 4px;
+}
+.menu-item:hover { background: #f8fafc; }
+.menu-item-icon {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+}
+.menu-item-text { font-size: 14px; font-weight: 600; color: #334155; }
+.menu-item-sub { font-size: 11px; color: #94a3b8; }
+.menu-close {
+  margin-top: auto;
+  padding: 12px;
+  background: #183B4E;
+  border-radius: 12px;
+  text-align: center;
+  color: white; font-size: 14px; font-weight: 600;
+  cursor: pointer;
+}
+
+/* No content modal */
+.no-content-card {
+  background: white;
+  border-radius: 24px;
+  padding: 28px 24px;
+  width: 100%;
+  text-align: center;
+}
+.spinner {
+  width: 32px; height: 32px;
+  border: 3px solid #e2e8f0;
+  border-top-color: #183B4E;
+  border-radius: 50%;
+  margin: 16px auto 0;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<!-- ────────────────── COL 1: MAIN GAME STATES ────────────────── -->
+<div class="col">
+
+  <!-- State 1: Waiting for answer -->
+  <div>
+    <p class="label">Main — Waiting</p>
+    <div class="phone">
+      <div class="header">
+        <div class="header-icon">☰</div>
+        <span class="header-title">GameMunMun</span>
+        <div class="header-icon">⏻</div>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" style="width:30%"></div>
+          <div class="progress-text">3 / 10</div>
+        </div>
+      </div>
+      <div class="body">
+        <p class="q-index">Question 3 of 10</p>
+        <div class="question-card">
+          <div class="sound-btn">🔊</div>
+          <p class="q-text">She _____ to the store tomorrow morning.</p>
+          <div class="mascot"><img src="../assets/images/ram.png" alt="ram"/></div>
+        </div>
+        <div class="choices">
+          <div class="choice"><div class="choice-alpha">A</div><span class="choice-text">will go</span></div>
+          <div class="choice"><div class="choice-alpha">B</div><span class="choice-text">is going</span></div>
+          <div class="choice"><div class="choice-alpha">C</div><span class="choice-text">went</span></div>
+          <div class="choice"><div class="choice-alpha">D</div><span class="choice-text">has gone</span></div>
+        </div>
+      </div>
+      <div class="footer" style="margin-top:20px">
+        <div class="footer-wait">
+          <div class="lifeline-btn"><span class="lifeline-icon">✂️</span><span class="lifeline-label">ELIMINATE</span></div>
+          <div class="lifeline-btn lifeline-btn-off" style="opacity:0.25"><span class="lifeline-icon">2️⃣</span><span class="lifeline-label">DOUBLE</span></div>
+          <div class="lifeline-btn lifeline-btn-off" style="opacity:0.25"><span class="lifeline-icon">🔀</span><span class="lifeline-label">CHANGE</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- State 2: Correct Answer -->
+  <div>
+    <p class="label">Main — Correct Answer</p>
+    <div class="phone">
+      <div class="header">
+        <div class="header-icon">☰</div>
+        <span class="header-title">GameMunMun</span>
+        <div class="header-icon">⏻</div>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" style="width:40%"></div>
+          <div class="progress-text">4 / 10</div>
+        </div>
+      </div>
+      <div class="body">
+        <p class="q-index">Question 3 of 10</p>
+        <div class="question-card">
+          <div class="sound-btn">🔊</div>
+          <p class="q-text">She _____ to the store tomorrow morning.</p>
+          <div class="mascot"><img src="../assets/images/PixVerse-V5-ram-happy.gif" alt="ram happy"/></div>
+        </div>
+        <div class="choices">
+          <div class="choice correct"><div class="choice-alpha">A</div><span class="choice-text">will go ✓</span></div>
+          <div class="choice disabled"><div class="choice-alpha" style="background:#94a3b8">B</div><span class="choice-text">is going</span></div>
+          <div class="choice disabled"><div class="choice-alpha" style="background:#94a3b8">C</div><span class="choice-text">went</span></div>
+          <div class="choice disabled"><div class="choice-alpha" style="background:#94a3b8">D</div><span class="choice-text">has gone</span></div>
+        </div>
+      </div>
+      <div class="footer" style="margin-top:20px">
+        <div class="footer-result">
+          <div class="result-badge correct-badge">
+            <span class="result-icon">✅</span>
+            <div><div class="result-label">Correct!</div><div class="result-answer">will go — Future Simple Tense</div></div>
+          </div>
+          <div class="explanation-toggle">
+            <span class="explanation-toggle-text">💡 View explanation</span>
+            <span class="chevron">▼</span>
+          </div>
+          <div class="next-btn">Next Question →</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ────────────────── COL 2: INCORRECT + EXPLANATION OPEN ────────────────── -->
+<div class="col">
+
+  <!-- State 3: Incorrect + Explanation open -->
+  <div>
+    <p class="label">Main — Incorrect + Explanation</p>
+    <div class="phone">
+      <div class="header">
+        <div class="header-icon">☰</div>
+        <span class="header-title">GameMunMun</span>
+        <div class="header-icon">⏻</div>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" style="width:30%"></div>
+          <div class="progress-text">3 / 10</div>
+        </div>
+      </div>
+      <div class="body">
+        <p class="q-index">Question 3 of 10</p>
+        <div class="question-card">
+          <div class="sound-btn">🔊</div>
+          <p class="q-text">She _____ to the store tomorrow morning.</p>
+          <div class="mascot"><img src="../assets/images/PixVerse-V5-ram-sad.gif" alt="ram sad"/></div>
+        </div>
+        <div class="choices">
+          <div class="choice correct"><div class="choice-alpha">A</div><span class="choice-text">will go ✓</span></div>
+          <div class="choice incorrect"><div class="choice-alpha">B</div><span class="choice-text">is going ✗</span></div>
+          <div class="choice disabled"><div class="choice-alpha" style="background:#94a3b8">C</div><span class="choice-text">went</span></div>
+          <div class="choice disabled"><div class="choice-alpha" style="background:#94a3b8">D</div><span class="choice-text">has gone</span></div>
+        </div>
+      </div>
+      <div class="footer" style="margin-top:12px">
+        <div class="footer-result">
+          <div class="result-badge incorrect-badge">
+            <span class="result-icon">❌</span>
+            <div><div class="result-label">Incorrect</div><div class="result-answer">Correct: will go</div></div>
+          </div>
+          <div class="explanation-toggle" style="background:rgba(255,255,255,0.12)">
+            <span class="explanation-toggle-text">💡 Hide explanation</span>
+            <span class="chevron">▲</span>
+          </div>
+          <div class="explanation-body">
+            <p class="explanation-text">"Will go" is the correct form for Future Simple Tense. Use "will + base verb" for actions planned in the future.</p>
+          </div>
+          <div class="next-btn">Next Question →</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- State 4: Eliminate used (2 choices hidden) -->
+  <div>
+    <p class="label">Main — Eliminate Used</p>
+    <div class="phone">
+      <div class="header">
+        <div class="header-icon">☰</div>
+        <span class="header-title">GameMunMun</span>
+        <div class="header-icon">⏻</div>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" style="width:20%"></div>
+          <div class="progress-text">2 / 10</div>
+        </div>
+      </div>
+      <div class="body">
+        <p class="q-index">Question 2 of 10</p>
+        <div class="question-card">
+          <div class="sound-btn">🔊</div>
+          <p class="q-text">She _____ to the store tomorrow morning.</p>
+          <div class="mascot"><img src="../assets/images/ram.png" alt="ram"/></div>
+        </div>
+        <div class="choices">
+          <div class="choice"><div class="choice-alpha">A</div><span class="choice-text">will go</span></div>
+          <div class="choice"><div class="choice-alpha">B</div><span class="choice-text">is going</span></div>
+        </div>
+      </div>
+      <div class="footer" style="margin-top:20px">
+        <div class="footer-wait">
+          <div class="lifeline-btn used"><span class="lifeline-icon">✂️</span><span class="lifeline-label">USED</span></div>
+          <div class="lifeline-btn" style="opacity:0.25"><span class="lifeline-icon">2️⃣</span><span class="lifeline-label">DOUBLE</span></div>
+          <div class="lifeline-btn" style="opacity:0.25"><span class="lifeline-icon">🔀</span><span class="lifeline-label">CHANGE</span></div>
+        </div>
+        <p style="text-align:center;font-size:11px;color:rgba(255,255,255,0.4);margin-top:8px">Eliminate used — 1 helper per session</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ────────────────── COL 3: MODALS ────────────────── -->
+<div class="col">
+
+  <!-- Session Complete Modal -->
+  <div>
+    <p class="label">Modal — Session Complete</p>
+    <div class="modal-wrap">
+      <div class="modal-card">
+        <div class="modal-icon">🎉</div>
+        <div class="modal-title">Session Complete!</div>
+        <div class="modal-sub">Great effort on this session.<br>Here's how you did:</div>
+        <div class="modal-score">
+          <span class="modal-score-num">7</span>
+          <span class="modal-score-sep">/</span>
+          <span class="modal-score-total">10</span>
+        </div>
+        <div class="modal-btn modal-btn-primary">▶ Continue Playing</div>
+        <div class="modal-btn modal-btn-secondary">← Back to Subjects</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- No Content Modal -->
+  <div>
+    <p class="label">Modal — No Content</p>
+    <div class="modal-wrap">
+      <div class="no-content-card">
+        <div class="modal-icon">🚧</div>
+        <div class="modal-title">Not Ready Yet</div>
+        <div class="modal-sub">We're still preparing questions for this topic and level.<br><br>Redirecting you back to selection...</div>
+        <div class="spinner"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Eliminate Lifeline Modal -->
+  <div>
+    <p class="label">Modal — Eliminate Lifeline</p>
+    <div class="modal-wrap">
+      <div class="modal-card">
+        <div class="lifeline-modal-icon">✂️</div>
+        <div class="modal-title">Eliminate</div>
+        <div class="modal-sub">Remove 2 wrong answers from the choices. You can only use 1 helper per session.</div>
+        <div class="modal-btn modal-btn-primary">Use Eliminate</div>
+        <div class="modal-btn modal-btn-secondary">Cancel</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ────────────────── COL 4: SLIDING MENU ────────────────── -->
+<div class="col">
+  <div>
+    <p class="label">Sliding Menu</p>
+    <div class="menu-wrap">
+      <div class="menu-panel">
+        <div class="menu-game-title">GameMunMun</div>
+        <div class="menu-subtitle">Future Simple Tense · B1</div>
+        <div class="menu-divider"></div>
+        <div class="menu-item">
+          <div class="menu-item-icon" style="background:#fffbeb">📈</div>
+          <div><div class="menu-item-text">Student Graph</div><div class="menu-item-sub">View your progress</div></div>
+        </div>
+        <div class="menu-item">
+          <div class="menu-item-icon" style="background:#f0fdf4">📋</div>
+          <div><div class="menu-item-text">Answer History</div><div class="menu-item-sub">Review past answers</div></div>
+        </div>
+        <div class="menu-item">
+          <div class="menu-item-icon" style="background:#eff6ff">⚙️</div>
+          <div><div class="menu-item-text">Change Subject</div><div class="menu-item-sub">Back to selection</div></div>
+        </div>
+        <div class="menu-divider" style="margin-top:8px"></div>
+        <div class="menu-item" style="margin-top:4px">
+          <div class="menu-item-icon" style="background:#fff1f2">🚪</div>
+          <div><div class="menu-item-text" style="color:#ef4444">Log Out</div></div>
+        </div>
+        <div class="menu-close" style="margin-top:16px">✕ Close Menu</div>
+      </div>
+      <div style="flex:1;background:rgba(0,0,0,0.45)"></div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
