@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How to Play Design</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: #1e293b;
+  padding: 40px 20px 60px;
+  display: flex;
+  gap: 40px;
+  justify-content: center;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+.label {
+  text-align: center;
+  font-size: 11px; font-weight: 700; letter-spacing: 1px;
+  text-transform: uppercase; color: #94a3b8;
+  margin-bottom: 10px;
+}
+.phone {
+  width: 375px;
+  height: 780px;
+  border-radius: 40px;
+  overflow: hidden;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+  display: flex;
+  flex-direction: column;
+  background: #f7f5e8;
+  flex-shrink: 0;
+}
+
+/* Header */
+.header {
+  background: #183B4E;
+  padding: 52px 20px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-shrink: 0;
+}
+.header-mascot {
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  background: rgba(252,198,29,0.15);
+  border: 2px solid rgba(252,198,29,0.35);
+  overflow: hidden;
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.header-mascot img { width: 48px; height: 48px; object-fit: cover; border-radius: 50%; }
+.header-text {}
+.header-title { font-size: 18px; font-weight: 800; color: white; }
+.header-sub { font-size: 12px; color: rgba(255,255,255,0.45); margin-top: 2px; }
+
+/* Body */
+.body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Section label */
+.section-label {
+  font-size: 10px; font-weight: 700; letter-spacing: 1px;
+  text-transform: uppercase; color: #183B4E; opacity: 0.4;
+  margin-bottom: 2px;
+}
+
+/* Mechanic card */
+.mech-card {
+  background: white;
+  border-radius: 16px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  border: 1.5px solid #e8e4c8;
+}
+.mech-icon-wrap {
+  width: 40px; height: 40px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+.mech-content { flex: 1; }
+.mech-title { font-size: 13px; font-weight: 700; color: #183B4E; margin-bottom: 3px; }
+.mech-desc { font-size: 12px; color: rgba(24,59,78,0.6); line-height: 1.5; }
+.mech-tag {
+  display: inline-block;
+  background: rgba(252,198,29,0.2);
+  border-radius: 6px;
+  padding: 2px 7px;
+  font-size: 10px; font-weight: 700;
+  color: #183B4E;
+  margin-top: 5px;
+}
+
+/* Highlight card */
+.highlight-card {
+  background: #fffbeb;
+  border-radius: 16px;
+  border: 2px solid #FCC61D;
+  padding: 14px 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+/* Details toggle */
+.details-toggle {
+  background: white;
+  border-radius: 14px;
+  border: 1.5px solid #e2e8f0;
+  padding: 13px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+}
+.details-toggle-text { font-size: 13px; font-weight: 600; color: #183B4E; }
+.details-toggle-chevron { font-size: 14px; color: rgba(24,59,78,0.4); }
+
+/* Details body */
+.details-body {
+  background: white;
+  border-radius: 14px;
+  border: 1.5px solid #e2e8f0;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.detail-section-title {
+  font-size: 12px; font-weight: 700;
+  color: #183B4E; margin-bottom: 4px;
+}
+.detail-bullet {
+  font-size: 12px; color: rgba(24,59,78,0.7);
+  line-height: 1.6; padding-left: 4px;
+}
+.detail-bullet::before { content: '• '; }
+
+/* Footer */
+.footer {
+  flex-shrink: 0;
+  background: #f7f5e8;
+  border-top: 1px solid rgba(24,59,78,0.1);
+  padding: 14px 16px 20px;
+}
+.cta-btn {
+  background: #FCC61D;
+  border-radius: 16px;
+  padding: 15px;
+  text-align: center;
+  font-size: 15px; font-weight: 800;
+  color: #183B4E;
+  box-shadow: 0 4px 16px rgba(252,198,29,0.4);
+  cursor: pointer;
+}
+</style>
+</head>
+<body>
+
+<!-- Main view -->
+<div>
+  <p class="label">Main View</p>
+  <div class="phone">
+    <div class="header">
+      <div class="header-mascot">
+        <img src="../assets/images/ram-small.png" alt="ram"/>
+      </div>
+      <div class="header-text">
+        <div class="header-title">วิธีเล่น GameMunMun</div>
+        <div class="header-sub">อ่านครั้งเดียวพอเข้าใจ</div>
+      </div>
+    </div>
+
+    <div class="body">
+      <div class="section-label">การกดในหน้าเกม</div>
+
+      <!-- Score bar -->
+      <div class="mech-card">
+        <div class="mech-icon-wrap" style="background:#fef9c3">📊</div>
+        <div class="mech-content">
+          <div class="mech-title">แถบคะแนนด้านบน</div>
+          <div class="mech-desc">แสดงคะแนนที่ตอบถูก / จำนวนข้อทั้งหมด เช่น 3/10</div>
+        </div>
+      </div>
+
+      <!-- Question tap -->
+      <div class="mech-card">
+        <div class="mech-icon-wrap" style="background:#fef9c3">🔊</div>
+        <div class="mech-content">
+          <div class="mech-title">กล่องคำถาม</div>
+          <div class="mech-desc">แตะ 1 ครั้ง → อ่านออกเสียง + แอนิเมชันมาสคอต</div>
+        </div>
+      </div>
+
+      <!-- Choice single/double tap -->
+      <div class="highlight-card">
+        <div class="mech-icon-wrap" style="background:rgba(252,198,29,0.2)">👆</div>
+        <div class="mech-content">
+          <div class="mech-title">ตัวเลือกคำตอบ</div>
+          <div class="mech-desc">
+            แตะ <strong>1 ครั้ง</strong> → อ่านออกเสียง<br/>
+            แตะ <strong>2 ครั้งติดกัน</strong> → ส่งคำตอบ
+          </div>
+          <span class="mech-tag">สำคัญที่สุด</span>
+        </div>
+      </div>
+
+      <!-- After answer -->
+      <div class="mech-card">
+        <div class="mech-icon-wrap" style="background:#dcfce7">✅</div>
+        <div class="mech-content">
+          <div class="mech-title">หลังตอบแล้ว</div>
+          <div class="mech-desc">ดูผลถูก/ผิดและคำอธิบายใต้ตัวเลือก → กด "Next" ไปข้อถัดไป</div>
+        </div>
+      </div>
+
+      <!-- Session end -->
+      <div class="mech-card">
+        <div class="mech-icon-wrap" style="background:#ede9fe">🎉</div>
+        <div class="mech-content">
+          <div class="mech-title">จบชุดข้อ</div>
+          <div class="mech-desc">ป๊อปอัปสรุปรอบ → เล่นต่อ หรือ กลับเลือกวิชา</div>
+        </div>
+      </div>
+
+      <!-- Helper -->
+      <div class="mech-card">
+        <div class="mech-icon-wrap" style="background:#fee2e2">✂️</div>
+        <div class="mech-content">
+          <div class="mech-title">ตัวช่วย Eliminate</div>
+          <div class="mech-desc">ใช้ได้ 1 ครั้งต่อรอบ — แตะไอคอน → ยืนยัน → ตัดตัวเลือกผิด 2 ข้อ</div>
+        </div>
+      </div>
+
+      <!-- Details toggle -->
+      <div class="details-toggle">
+        <span class="details-toggle-text">รายละเอียดเพิ่มเติม (เส้นทางแอป · ประวัติ · กราฟ)</span>
+        <span class="details-toggle-chevron">▼</span>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div class="cta-btn">เข้าใจแล้ว — ไปเลือกวิชา ▶</div>
+    </div>
+  </div>
+</div>
+
+<!-- Details open view -->
+<div>
+  <p class="label">Details Expanded</p>
+  <div class="phone">
+    <div class="header">
+      <div class="header-mascot">
+        <img src="../assets/images/ram-small.png" alt="ram"/>
+      </div>
+      <div class="header-text">
+        <div class="header-title">วิธีเล่น GameMunMun</div>
+        <div class="header-sub">อ่านครั้งเดียวพอเข้าใจ</div>
+      </div>
+    </div>
+
+    <div class="body">
+      <div class="section-label">การกดในหน้าเกม</div>
+      <div class="mech-card">
+        <div class="mech-icon-wrap" style="background:#fef9c3">👆</div>
+        <div class="mech-content">
+          <div class="mech-title">ตัวเลือกคำตอบ</div>
+          <div class="mech-desc">แตะ 1 ครั้ง → อ่านออกเสียง &nbsp;|&nbsp; แตะ 2 ครั้ง → ส่งคำตอบ</div>
+          <span class="mech-tag">สำคัญที่สุด</span>
+        </div>
+      </div>
+      <div class="mech-card">
+        <div class="mech-icon-wrap" style="background:#fef9c3">📊</div>
+        <div class="mech-content">
+          <div class="mech-title">แถบคะแนน / กล่องคำถาม / ตัวช่วย</div>
+          <div class="mech-desc">คะแนน · อ่านเสียง · Eliminate (1 ครั้ง/รอบ)</div>
+        </div>
+      </div>
+
+      <!-- Details toggle open -->
+      <div class="details-toggle" style="border-color:#FCC61D; background:#fffbeb">
+        <span class="details-toggle-text" style="color:#183B4E">รายละเอียดเพิ่มเติม</span>
+        <span class="details-toggle-chevron">▲</span>
+      </div>
+
+      <div class="details-body">
+        <div>
+          <div class="detail-section-title">เส้นทางหลังเข้าสู่ระบบ</div>
+          <div class="detail-bullet">หลังล็อกอินมาที่หน้านี้ก่อน — กดปุ่มด้านล่างจอไปเลือกวิชา</div>
+          <div class="detail-bullet">หน้าเลือกวิชา: เลือกวิชา หัวข้อ ระดับ — แตะปุ่มเดิมอีกครั้งเพื่อยกเลิก</div>
+          <div class="detail-bullet">เมนูประแจ: Student Graph · Answer History · Settings</div>
+        </div>
+        <div>
+          <div class="detail-section-title">Answer History</div>
+          <div class="detail-bullet">สรุปตามช่วงวันที่: Total, Correct, Incorrect, Accuracy Rate</div>
+          <div class="detail-bullet">กรองวันที่ / ปุ่มลัด Today · 7 Days · 30 Days · Custom</div>
+        </div>
+        <div>
+          <div class="detail-section-title">Student Graph</div>
+          <div class="detail-bullet">การ์ดสรุปจำนวนข้อที่เล่นและถูก-ผิดโดยรวม</div>
+          <div class="detail-bullet">Learning Topics: แตะหัวข้อเพื่อขยายดูคะแนนแต่ละระดับ</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div class="cta-btn">เข้าใจแล้ว — ไปเลือกวิชา ▶</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
