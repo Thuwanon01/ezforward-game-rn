@@ -214,6 +214,24 @@ export default function SelectSubjectPage() {
                 </View>
             </View>
 
+            {/* ปุ่ม Reset */}
+            {(selectedTopic !== null || myLevel !== null) && (
+                <Button
+                    variant="solid"
+                    size="sm"
+                    onPress={() => {
+                        setSelectedTopic(null);
+                        setMyLevel(null);
+                    }}
+                    className="mt-5 self-center rounded-2xl"
+                    style={{ backgroundColor: '#183B4E' }}
+                >
+                    <ButtonText className="text-white text-sm font-semibold">
+                        Reset selection
+                    </ButtonText>
+                </Button>
+            )}
+
             {/* เลือกจำนวนข้อสอบ */}
             {/* <View className='mt-4 justify-center items-center'>
                 <Text className='text-2xl font-bold text-center text-gray-800'>
