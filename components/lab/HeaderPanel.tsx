@@ -41,7 +41,7 @@ function SlidingMenu({ visible, onClose, title, onLogout }: MenuProps) {
             duration: 300,
             useNativeDriver: true,
         }).start();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [visible]);
 
     const goToStudentGraph = () => { router.push('/studentGraph'); };
