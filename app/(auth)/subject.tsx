@@ -1,25 +1,19 @@
 import { Subject } from '@/apis/types';
-import { Button, ButtonText } from '@/components/ui/button';
-import { ChevronDownIcon } from '@/components/ui/icon';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
-import {
-    Select,
-    SelectBackdrop,
-    SelectContent,
-    SelectDragIndicator,
-    SelectDragIndicatorWrapper,
-    SelectIcon,
-    SelectInput,
-    SelectItem,
-    SelectPortal,
-    SelectTrigger,
-} from '@/components/ui/select';
 import { useAuth } from '@/contexts/AuthContext';
 import useRepositories from '@/hooks/useRepositories';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { Image, Text, View } from 'react-native';
+import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
+
+const LEVEL_DESC: Record<string, string> = {
+    a1: 'Beginner',
+    a2: 'Elementary',
+    b1: 'Intermediate',
+    b2: 'Upper-Int',
+    c1: 'Advanced',
+    c2: 'Mastery',
+};
 
 function isEnglishSubject(s: Subject): boolean {
     return s.name.trim().toLowerCase() === 'english';
@@ -29,19 +23,11 @@ export default function SelectSubjectPage() {
     const auth = useAuth();
     const repos = useRepositories(auth.accessToken).current;
     const [subjects, setSubjects] = useState<Subject[]>([]);
-    /** Single level gid; tap again to clear and re-enable other levels. */
     const [myLevel, setMyLevel] = useState<string | null>(null);
     const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
-    /** Single topic gid; tap again to clear and re-enable other topics. */
     const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
-    const [questionQuantity, setQuestionQuantity] = useState(10);
+    const [questionQuantity] = useState(10);
     const [subjectsReady, setSubjectsReady] = useState(false);
-
-    /** แสดงใน dropdown เฉพาะวิชา English (ชื่อตรงกับที่ API ส่ง) */
-    const englishSubjectsOnly = subjects.filter(isEnglishSubject);
-
-    const selectedSubjectLabel =
-        englishSubjectsOnly.find((s) => s.gid === selectedSubject)?.name ?? undefined;
 
     const canPlay =
         subjectsReady &&
@@ -49,19 +35,19 @@ export default function SelectSubjectPage() {
         selectedTopic != null &&
         myLevel != null;
 
+    const currentSubject = subjects.find((s) => s.gid === selectedSubject) ?? null;
+
     const handleSubmitSelection = async (
-        selectedSubject: string | null,
-        questionQuantity: number,
+        subjectGid: string | null,
+        qty: number,
         levelGid: string | null,
         topicGid: string | null,
     ) => {
-        console.log("handleSubmitSelection", selectedSubject, questionQuantity, levelGid, topicGid);
-        await AsyncStorage.setItem('selectedSubject', selectedSubject as string);
-        await AsyncStorage.setItem('questionQuantity', questionQuantity.toString());
+        await AsyncStorage.setItem('selectedSubject', subjectGid as string);
+        await AsyncStorage.setItem('questionQuantity', qty.toString());
         await AsyncStorage.setItem('myLevel', levelGid ?? '');
         await AsyncStorage.setItem('selectedTopic', topicGid ?? '');
-    }
-
+    };
 
     useEffect(() => {
         let cancelled = false;
@@ -69,12 +55,9 @@ export default function SelectSubjectPage() {
             try {
                 const list = await repos.gamev2.fetchSubjects();
                 if (cancelled) return;
-                console.log('Subjects', list);
                 setSubjects(list);
                 const english = list.filter(isEnglishSubject);
-                if (english.length > 0) {
-                    setSelectedSubject(english[0].gid);
-                }
+                if (english.length > 0) setSelectedSubject(english[0].gid);
             } catch (error) {
                 if (!cancelled) console.error('Failed to load subjects:', error);
             } finally {
@@ -82,211 +65,282 @@ export default function SelectSubjectPage() {
             }
         };
         setup();
-        return () => {
-            cancelled = true;
-        };
+        return () => { cancelled = true; };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (
-        <View className='flex-1  items-center bg-[#fffac9ff]'>
-            <View>
-                <Image
-                    source={require('@/assets/images/ram-small.png')} // path รูปภาพ
-                    className=" self-center" // กำหนดขนาดและระยะห่าง
-                />
-
-                <Text
-                    className='text-2xl font-bold text-center text-gray-800 mb-4'>
-                    Select your subject and level
+        <View style={{ flex: 1, backgroundColor: '#183B4E' }}>
+            {/* ── Dark Header ── */}
+            <View style={{ paddingTop: 56, paddingBottom: 28, alignItems: 'center', paddingHorizontal: 24 }}>
+                <Text style={{ fontSize: 24, fontWeight: '800', color: '#fff', marginBottom: 4 }}>
+                    Choose Your Subject
+                </Text>
+                <Text style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)' }}>
+                    Select topic and level to start playing
                 </Text>
             </View>
 
-            {/* เลือกวิชา — controlled + auto English หลังโหลดจาก API (key ให้ label ตรงกับค่าเริ่มหลัง fetch) */}
-            <Select
-                key={selectedSubject ?? 'pending-subject'}
-                selectedValue={selectedSubject}
-                selectedLabel={selectedSubjectLabel}
-                onValueChange={(value) => setSelectedSubject(value)}
-                placeholder="Select Subject"
-            >
-                <SelectTrigger variant="outline" size="md">
-                    <SelectInput placeholder="Select Subject" />
-                    <SelectIcon className="mr-3" as={ChevronDownIcon} />
-                </SelectTrigger>
-                <SelectPortal>
-                    <SelectBackdrop />
-                    <SelectContent>
-                        <SelectDragIndicatorWrapper>
-                            <SelectDragIndicator />
-                        </SelectDragIndicatorWrapper>
-                        {englishSubjectsOnly.map((subject) => (
-                            <SelectItem key={subject.gid} label={subject.name} value={subject.gid} />
+            {/* ── White Card Body ── */}
+            <View style={{ flex: 1, backgroundColor: '#f7f5e8', borderTopLeftRadius: 28, borderTopRightRadius: 28, overflow: 'hidden' }}>
+                <ScrollView contentContainerStyle={{ padding: 24, paddingBottom: 40 }} showsVerticalScrollIndicator={false}>
+
+                    {/* Subject Tabs */}
+                    <Text style={styles.sectionLabel}>Subject</Text>
+                    <View style={styles.tabRow}>
+                        {subjects.map((s) => (
+                            <TouchableOpacity
+                                key={s.gid}
+                                onPress={() => {
+                                    setSelectedSubject(s.gid);
+                                    setSelectedTopic(null);
+                                    setMyLevel(null);
+                                }}
+                                style={[
+                                    styles.tab,
+                                    selectedSubject === s.gid && styles.tabActive,
+                                ]}
+                            >
+                                <Text style={[
+                                    styles.tabText,
+                                    selectedSubject === s.gid && styles.tabTextActive,
+                                ]}>
+                                    {s.name}
+                                </Text>
+                            </TouchableOpacity>
                         ))}
-                    </SelectContent>
-                </SelectPortal>
-            </Select>
+                    </View>
 
-            {/* เลือกหัวข้อและระดับ */}
-            <View>
-                {/* เลือกหัวข้อ */}
-                <View className='flex-row flex-wrap mt-4 justify-center'>
-                    {englishSubjectsOnly.find(sub =>
-                        sub.gid === selectedSubject)?.topics.map((topic) => {
+                    {/* Topic Pills */}
+                    <Text style={[styles.sectionLabel, { marginTop: 20 }]}>Topic</Text>
+                    <View style={styles.pillRow}>
+                        {currentSubject?.topics.map((topic) => {
                             const isChosen = selectedTopic === topic.gid;
-                            const othersLocked =
-                                selectedTopic !== null && !isChosen;
+                            const locked = selectedTopic !== null && !isChosen;
                             return (
-                            <Button
-                                key={topic.gid}
-                                variant="solid"
-                                size="xs"
-                                action="primary"
-                                isDisabled={othersLocked}
-                                onPress={() => {
-                                    if (othersLocked) return;
-                                    setSelectedTopic((prev) =>
-                                        prev === topic.gid ? null : topic.gid,
-                                    );
-                                }}
-                                className="mt-4 mx-2 rounded-2xl"
-                                style={{
-                                    flexBasis: '35%',
-                                    backgroundColor: othersLocked
-                                        ? '#d1d5db'
-                                        : isChosen
-                                            ? '#FCC61D'
-                                            : '#27548A',
-                                    opacity: othersLocked ? 0.75 : 1,
-                                }}>
-                                <ButtonText
-                                    className='text-white'
-                                    style={{
-                                        color: othersLocked
-                                            ? '#9ca3af'
-                                            : isChosen
-                                                ? 'black'
-                                                : 'white',
-                                    }} >{topic.name}</ButtonText>
-                            </Button>);
+                                <TouchableOpacity
+                                    key={topic.gid}
+                                    disabled={locked}
+                                    onPress={() => setSelectedTopic((prev) => prev === topic.gid ? null : topic.gid)}
+                                    style={[
+                                        styles.pill,
+                                        isChosen && styles.pillSelected,
+                                        locked && styles.pillLocked,
+                                    ]}
+                                >
+                                    <Text style={[
+                                        styles.pillText,
+                                        isChosen && styles.pillTextSelected,
+                                        locked && styles.pillTextLocked,
+                                    ]}>
+                                        {isChosen ? `${topic.name} ✓` : topic.name}
+                                    </Text>
+                                </TouchableOpacity>
+                            );
                         })}
-                </View>
+                    </View>
 
-
-                {/* เลือกระดับ */}
-                <View className='flex-row flex-wrap mt-4 justify-center'>
-                    {englishSubjectsOnly.find(sub =>
-                        sub.gid === selectedSubject)?.levels.map((level) => {
+                    {/* Level Grid */}
+                    <Text style={[styles.sectionLabel, { marginTop: 20 }]}>Level</Text>
+                    <View style={styles.levelGrid}>
+                        {currentSubject?.levels.map((level) => {
                             const isChosen = myLevel === level.gid;
-                            const othersLocked = myLevel !== null && !isChosen;
+                            const locked = myLevel !== null && !isChosen;
                             return (
-                            <Button
-                                key={level.gid}
-                                variant="solid"
-                                size="xs"
-                                action="primary hover=true"
-                                isDisabled={othersLocked}
-                                onPress={() => {
-                                    if (othersLocked) return;
-                                    setMyLevel((prev) =>
-                                        prev === level.gid ? null : level.gid,
-                                    );
-                                }}
-                                className="mt-4 ml-2 rounded-2xl"
-                                style={{
-                                    backgroundColor: othersLocked
-                                        ? '#d1d5db'
-                                        : isChosen
-                                            ? '#FCC61D'
-                                            : '#27548A',
-                                    opacity: othersLocked ? 0.75 : 1,
-                                }}>
-                                <ButtonText
-                                    className='text-white'
-                                    style={{
-                                        color: othersLocked
-                                            ? '#9ca3af'
-                                            : isChosen
-                                                ? 'black'
-                                                : 'white',
-                                    }}>{level.name}</ButtonText>
-                            </Button>);
+                                <TouchableOpacity
+                                    key={level.gid}
+                                    disabled={locked}
+                                    onPress={() => setMyLevel((prev) => prev === level.gid ? null : level.gid)}
+                                    style={[
+                                        styles.levelCard,
+                                        isChosen && styles.levelCardSelected,
+                                        locked && styles.levelCardLocked,
+                                    ]}
+                                >
+                                    <Text style={[styles.levelBadge, isChosen && { color: '#183B4E' }]}>
+                                        {level.name}{isChosen ? ' ✓' : ''}
+                                    </Text>
+                                    <Text style={styles.levelDesc}>
+                                        {LEVEL_DESC[level.gid] ?? ''}
+                                    </Text>
+                                </TouchableOpacity>
+                            );
                         })}
-                </View>
-            </View>
+                    </View>
 
-            {/* ปุ่ม Reset */}
-            {(selectedTopic !== null || myLevel !== null) && (
-                <Button
-                    variant="solid"
-                    size="sm"
-                    onPress={() => {
-                        setSelectedTopic(null);
-                        setMyLevel(null);
-                    }}
-                    className="mt-5 self-center rounded-2xl"
-                    style={{ backgroundColor: '#183B4E' }}
-                >
-                    <ButtonText className="text-white text-sm font-semibold">
-                        Reset selection
-                    </ButtonText>
-                </Button>
-            )}
+                    {/* Reset Button */}
+                    {(selectedTopic !== null || myLevel !== null) && (
+                        <TouchableOpacity
+                            onPress={() => { setSelectedTopic(null); setMyLevel(null); }}
+                            style={styles.resetBtn}
+                        >
+                            <Text style={styles.resetText}>↺  Reset selection</Text>
+                        </TouchableOpacity>
+                    )}
 
-            {/* เลือกจำนวนข้อสอบ */}
-            {/* <View className='mt-4 justify-center items-center'>
-                <Text className='text-2xl font-bold text-center text-gray-800'>
-                    Number of questions
-                </Text>
-                <Input className='mt-2 w-20 rounded-3xl '>
-                    <InputField
-                        placeholder="10"
-                        value={questionQuantity.toString()}
-                        onChange={(e) => {
-                            const value = e.nativeEvent.text;
-                            const numericValue = parseInt(value, 10);
-                            if (!isNaN(numericValue)) {
-                                setQuestionQuantity(numericValue);
-                            } else {
-                                setQuestionQuantity(0); // or any default value you prefer
-                            }
-                            console.log(questionQuantity);
+                    {/* Play Button */}
+                    <TouchableOpacity
+                        disabled={!canPlay}
+                        onPress={async () => {
+                            if (!canPlay || selectedSubject == null) return;
+                            await handleSubmitSelection(selectedSubject, questionQuantity, myLevel, selectedTopic);
+                            router.push('/game');
                         }}
+                        style={[styles.playBtn, !canPlay && styles.playBtnDisabled]}
+                    >
+                        <Text style={[styles.playBtnText, !canPlay && styles.playBtnTextDisabled]}>
+                            ▶  Play Now
+                        </Text>
+                    </TouchableOpacity>
 
-                    />
-                </Input>
-            </View> */}
-
-            <Button
-                variant="solid"
-                size="md"
-                action="primary hover=true"
-                className={
-                    canPlay
-                        ? 'mt-6 px-10 py-3 rounded-3xl bg-[#FCC61D]'
-                        : 'mt-6 px-10 py-3 rounded-3xl bg-gray-400'
-                }
-                style={!canPlay ? { opacity: 1 } : undefined}
-                isDisabled={!canPlay}
-                onPress={async () => {
-                    if (!canPlay || selectedSubject == null) return;
-                    await handleSubmitSelection(
-                        selectedSubject,
-                        questionQuantity,
-                        myLevel,
-                        selectedTopic,
-                    );
-                    router.push('/game')
-                }}>
-                <ButtonText
-                    className={
-                        canPlay ? 'text-xl text-black' : 'text-xl text-gray-200'
-                    }
-                >
-                    Play
-                </ButtonText>
-            </Button>
+                </ScrollView>
+            </View>
         </View>
-
-    )
+    );
 }
 
+const styles = {
+    sectionLabel: {
+        fontSize: 11,
+        fontWeight: '700' as const,
+        letterSpacing: 1,
+        textTransform: 'uppercase' as const,
+        color: '#183B4E',
+        opacity: 0.45,
+        marginBottom: 10,
+    },
+    tabRow: {
+        flexDirection: 'row' as const,
+        backgroundColor: '#fff',
+        borderRadius: 14,
+        padding: 4,
+        gap: 4,
+        shadowColor: '#183B4E',
+        shadowOpacity: 0.08,
+        shadowRadius: 8,
+        elevation: 2,
+    },
+    tab: {
+        flex: 1,
+        paddingVertical: 10,
+        borderRadius: 10,
+        alignItems: 'center' as const,
+    },
+    tabActive: {
+        backgroundColor: '#183B4E',
+    },
+    tabText: {
+        fontSize: 13,
+        fontWeight: '600' as const,
+        color: '#183B4E',
+        opacity: 0.4,
+    },
+    tabTextActive: {
+        color: '#fff',
+        opacity: 1,
+    },
+    pillRow: {
+        flexDirection: 'row' as const,
+        flexWrap: 'wrap' as const,
+        gap: 8,
+    },
+    pill: {
+        paddingVertical: 8,
+        paddingHorizontal: 14,
+        borderRadius: 20,
+        backgroundColor: '#fff',
+        borderWidth: 2,
+        borderColor: '#e2e8f0',
+    },
+    pillSelected: {
+        backgroundColor: '#FCC61D',
+        borderColor: '#FCC61D',
+    },
+    pillLocked: {
+        backgroundColor: '#f1f5f9',
+        borderColor: '#f1f5f9',
+    },
+    pillText: {
+        fontSize: 13,
+        fontWeight: '600' as const,
+        color: '#183B4E',
+    },
+    pillTextSelected: {
+        color: '#183B4E',
+    },
+    pillTextLocked: {
+        color: '#94a3b8',
+    },
+    levelGrid: {
+        flexDirection: 'row' as const,
+        flexWrap: 'wrap' as const,
+        gap: 8,
+    },
+    levelCard: {
+        width: '30%' as const,
+        backgroundColor: '#fff',
+        borderRadius: 12,
+        paddingVertical: 12,
+        paddingHorizontal: 8,
+        alignItems: 'center' as const,
+        borderWidth: 2,
+        borderColor: '#e2e8f0',
+    },
+    levelCardSelected: {
+        borderColor: '#FCC61D',
+        backgroundColor: '#fffbeb',
+    },
+    levelCardLocked: {
+        opacity: 0.35,
+    },
+    levelBadge: {
+        fontSize: 15,
+        fontWeight: '800' as const,
+        color: '#183B4E',
+    },
+    levelDesc: {
+        fontSize: 10,
+        color: '#94a3b8',
+        marginTop: 2,
+    },
+    resetBtn: {
+        marginTop: 20,
+        paddingVertical: 11,
+        borderRadius: 10,
+        borderWidth: 1.5,
+        borderColor: '#cbd5e1',
+        borderStyle: 'dashed' as const,
+        alignItems: 'center' as const,
+    },
+    resetText: {
+        fontSize: 13,
+        fontWeight: '500' as const,
+        color: '#94a3b8',
+    },
+    playBtn: {
+        marginTop: 16,
+        paddingVertical: 16,
+        borderRadius: 16,
+        backgroundColor: '#FCC61D',
+        alignItems: 'center' as const,
+        shadowColor: '#FCC61D',
+        shadowOpacity: 0.4,
+        shadowRadius: 12,
+        shadowOffset: { width: 0, height: 4 },
+        elevation: 6,
+    },
+    playBtnDisabled: {
+        backgroundColor: '#e2e8f0',
+        shadowOpacity: 0,
+        elevation: 0,
+    },
+    playBtnText: {
+        fontSize: 17,
+        fontWeight: '800' as const,
+        color: '#183B4E',
+        letterSpacing: 0.3,
+    },
+    playBtnTextDisabled: {
+        color: '#94a3b8',
+    },
+};
