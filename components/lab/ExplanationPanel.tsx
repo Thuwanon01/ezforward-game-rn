@@ -372,11 +372,11 @@ export default function ExplanationPanel({
                 </View>
               </View>
 
-              {/* Explanation toggle */}
+              {/* Explanation toggle (chat / extra context) */}
               {explanationStatus && (
                 <TouchableOpacity style={panelStyles.explanationToggle} onPress={toggleExplanation}>
                   <Text style={panelStyles.explanationToggleText}>
-                    💡 {openExplanation ? 'Hide explanation' : 'View explanation'}
+                    💬 {openExplanation ? 'Hide chat' : 'Ask AI about this question'}
                   </Text>
                   <Text style={panelStyles.explanationChevron}>
                     {openExplanation ? '▲' : '▼'}
@@ -384,7 +384,7 @@ export default function ExplanationPanel({
                 </TouchableOpacity>
               )}
 
-              {/* Explanation body + chat */}
+              {/* Chat section */}
               {explanationStatus && openExplanation && (
                 <View style={panelStyles.explanationBody}>
                   <View style={panelStyles.chatSection}>
@@ -431,7 +431,6 @@ export default function ExplanationPanel({
                       </TouchableOpacity>
                     </View>
 
-                    <Markdown style={markdownStyles}>{explanation}</Markdown>
                   </View>
                 </View>
               )}

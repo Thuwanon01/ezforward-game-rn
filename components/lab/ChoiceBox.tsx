@@ -2,6 +2,7 @@ import * as Speech from 'expo-speech';
 import React, { useRef } from 'react';
 import { Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import Markdown from "react-native-markdown-display";
 
 const ALPHA_LABELS = ['A', 'B', 'C', 'D', 'E', 'F'];
 
@@ -11,11 +12,13 @@ interface Prop {
   onPress?: () => void
   disabled?: boolean
   index?: number
+  correctExplanation?: string
+  incorrectExplanation?: string
 }
 
 const DOUBLE_TAP_MS = 400;
 
-export default function ChoiceBox({ text, status, onPress, disabled, index }: Prop) {
+export default function ChoiceBox({ text, status, onPress, disabled, index, correctExplanation, incorrectExplanation }: Prop) {
   const lastWebTapRef = useRef(0);
 
   const speak = () => {
@@ -58,6 +61,7 @@ export default function ChoiceBox({ text, status, onPress, disabled, index }: Pr
   const isIncorrect = status === 'incorrect';
 
   const alphaLabel = index !== undefined ? (ALPHA_LABELS[index] ?? String(index + 1)) : null;
+  const explanation = isCorrect ? correctExplanation : isIncorrect ? incorrectExplanation : null;
 
   const cardStyle = [
     styles.card,
@@ -74,12 +78,17 @@ export default function ChoiceBox({ text, status, onPress, disabled, index }: Pr
 
   const inner = (
     <View style={cardStyle}>
-      {alphaLabel !== null && (
-        <View style={alphaStyle}>
-          <Text style={styles.alphaText}>{alphaLabel}</Text>
-        </View>
-      )}
-      <Text style={styles.choiceText}>{text}</Text>
+      <View style={styles.choiceRow}>
+        {alphaLabel !== null && (
+          <View style={alphaStyle}>
+            <Text style={styles.alphaText}>{alphaLabel}</Text>
+          </View>
+        )}
+        <Text style={styles.choiceText}>{text}</Text>
+      </View>
+      {explanation ? (
+        <Markdown style={markdownStyles}>{explanation}</Markdown>
+      ) : null}
     </View>
   );
 
@@ -102,9 +111,6 @@ export default function ChoiceBox({ text, status, onPress, disabled, index }: Pr
 
 const styles = StyleSheet.create({
   card: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
     paddingVertical: 14,
     paddingHorizontal: 16,
     borderRadius: 14,
@@ -124,6 +130,11 @@ const styles = StyleSheet.create({
   },
   cardDisabled: {
     opacity: 0.45,
+  },
+  choiceRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
   },
   alpha: {
     width: 28,
@@ -150,5 +161,20 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#183B4E',
     flex: 1,
+  },
+});
+
+const markdownStyles = StyleSheet.create({
+  body: {
+    color: '#183B4E',
+    marginTop: 8,
+  },
+  code_inline: {
+    borderWidth: 1,
+    borderColor: '#FCC61D',
+    backgroundColor: '#FCC61D',
+    padding: 8,
+    borderRadius: 4,
+    lineHeight: 40,
   },
 });

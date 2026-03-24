@@ -18,7 +18,7 @@ interface Props {
     onPressBack: () => void
     onPressMenu: () => void
     openMenu: boolean
-    questionIndex?: number
+    sessionScore?: number
     sessionTotal?: number
 }
 
@@ -109,8 +109,8 @@ function SlidingMenu({ visible, onClose, title, onLogout }: MenuProps) {
     );
 }
 
-export default function HeaderPanel({ title, onPressBack, onPressMenu, openMenu, questionIndex = 0, sessionTotal = 10 }: Props) {
-    const progressPercent = sessionTotal > 0 ? Math.min(100, (questionIndex / sessionTotal) * 100) : 0;
+export default function HeaderPanel({ title, onPressBack, onPressMenu, openMenu, sessionScore = 0, sessionTotal = 10 }: Props) {
+    const progressPercent = sessionTotal > 0 ? Math.min(100, (sessionScore / sessionTotal) * 100) : 0;
 
     return (
         <View style={{ backgroundColor: '#183B4E' }}>
@@ -128,7 +128,7 @@ export default function HeaderPanel({ title, onPressBack, onPressMenu, openMenu,
                 <View style={styles.progressBg}>
                     <View style={[styles.progressFill, { width: `${progressPercent}%` as any }]} />
                     <View style={styles.progressTextWrap}>
-                        <Text style={styles.progressText}>{questionIndex} / {sessionTotal}</Text>
+                        <Text style={styles.progressText}>{sessionScore} / {sessionTotal}</Text>
                     </View>
                 </View>
             </View>

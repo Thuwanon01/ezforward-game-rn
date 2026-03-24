@@ -452,7 +452,7 @@ export default function GamePage() {
           onPressBack={logOutHandler}
           onPressMenu={settingHandler}
           openMenu={openMenu}
-          questionIndex={currentQuestionIndex}
+          sessionScore={sessionScore}
           sessionTotal={sessionTotal}
         />
 
@@ -476,6 +476,8 @@ export default function GamePage() {
                 }}
                 disabled={gameState !== "wait"}
                 index={index}
+                correctExplanation={correctExplanation}
+                incorrectExplanation={incorrectExplanation}
               />
             );
           })}
