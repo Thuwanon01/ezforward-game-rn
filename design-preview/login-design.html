@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login Page Design</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: #1e293b;
+  padding: 40px 20px 60px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 40px;
+  justify-content: center;
+  align-items: flex-start;
+}
+.col { display: flex; flex-direction: column; gap: 32px; align-items: center; }
+.label {
+  text-align: center;
+  font-size: 11px; font-weight: 700; letter-spacing: 1px;
+  text-transform: uppercase; color: #94a3b8;
+  margin-bottom: 6px;
+}
+
+/* Phone shell */
+.phone {
+  width: 375px;
+  height: 720px;
+  border-radius: 40px;
+  overflow: hidden;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  background: #183B4E;
+}
+
+/* ── Top Hero Section ── */
+.hero {
+  background: #183B4E;
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 56px 24px 32px;
+  gap: 12px;
+}
+.mascot-wrap {
+  width: 96px; height: 96px;
+  border-radius: 50%;
+  background: rgba(252,198,29,0.15);
+  border: 3px solid rgba(252,198,29,0.35);
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+}
+.mascot-wrap img {
+  width: 86px; height: 86px;
+  object-fit: cover; border-radius: 50%;
+}
+.app-name {
+  font-size: 26px; font-weight: 900;
+  color: white; letter-spacing: 0.5px;
+}
+.app-tagline {
+  font-size: 13px; color: rgba(255,255,255,0.45);
+  letter-spacing: 0.3px;
+}
+
+/* ── Card Body ── */
+.card {
+  flex: 1;
+  background: #f7f5e8;
+  border-radius: 28px 28px 0 0;
+  padding: 32px 24px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow: hidden;
+}
+.card-title {
+  font-size: 20px; font-weight: 800;
+  color: #183B4E;
+  margin-bottom: 4px;
+}
+.card-sub {
+  font-size: 13px; color: rgba(24,59,78,0.5);
+  margin-bottom: 4px;
+}
+
+/* Input field */
+.input-group { display: flex; flex-direction: column; gap: 6px; }
+.input-label {
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 0.8px; text-transform: uppercase;
+  color: #183B4E; opacity: 0.45;
+}
+.input-field {
+  background: white;
+  border: 2px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 14px 16px;
+  font-size: 15px; color: #183B4E;
+  display: flex; align-items: center; gap: 10px;
+}
+.input-field.focused { border-color: #FCC61D; }
+.input-field.filled { border-color: #cbd5e1; }
+.input-icon { font-size: 16px; opacity: 0.45; }
+.input-text { flex: 1; font-size: 15px; color: #183B4E; }
+.input-placeholder { color: #94a3b8; }
+
+/* Error message */
+.error-msg {
+  background: #fee2e2;
+  border: 1.5px solid #fca5a5;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 13px;
+  color: #dc2626;
+  display: flex; align-items: center; gap: 8px;
+}
+
+/* Sign In button */
+.signin-btn {
+  padding: 16px;
+  border-radius: 16px;
+  background: #FCC61D;
+  text-align: center;
+  font-size: 16px; font-weight: 800;
+  color: #183B4E;
+  box-shadow: 0 4px 16px rgba(252,198,29,0.4);
+  cursor: pointer;
+  margin-top: 4px;
+}
+.signin-btn.loading {
+  background: #e2e8f0;
+  box-shadow: none;
+  color: #94a3b8;
+}
+
+/* Loading spinner (CSS only) */
+.spinner {
+  width: 20px; height: 20px;
+  border: 3px solid rgba(24,59,78,0.15);
+  border-top-color: #183B4E;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 8px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Register link */
+.register-row {
+  display: flex; justify-content: center; align-items: center;
+  gap: 4px; font-size: 13px;
+  margin-top: auto;
+}
+.register-row .muted { color: rgba(24,59,78,0.45); }
+.register-row .link { color: #183B4E; font-weight: 700; text-decoration: underline; cursor: pointer; }
+
+/* Divider */
+.divider {
+  display: flex; align-items: center; gap: 12px;
+  color: rgba(24,59,78,0.3); font-size: 12px;
+}
+.divider::before, .divider::after {
+  content: ''; flex: 1; height: 1px; background: rgba(24,59,78,0.12);
+}
+</style>
+</head>
+<body>
+
+<!-- ── State 1: Default (empty) ── -->
+<div class="col">
+  <p class="label">Default — Empty</p>
+  <div class="phone">
+    <div class="hero">
+      <div class="mascot-wrap">
+        <img src="../assets/images/ram-small.png" alt="ram"/>
+      </div>
+      <div class="app-name">EzRam</div>
+      <div class="app-tagline">English Practice Game</div>
+    </div>
+    <div class="card">
+      <div>
+        <div class="card-title">Welcome back</div>
+        <div class="card-sub">Sign in to continue playing</div>
+      </div>
+
+      <div class="input-group">
+        <div class="input-label">Username</div>
+        <div class="input-field">
+          <span class="input-icon">👤</span>
+          <span class="input-text input-placeholder">Enter your username</span>
+        </div>
+      </div>
+
+      <div class="input-group">
+        <div class="input-label">Password</div>
+        <div class="input-field">
+          <span class="input-icon">🔒</span>
+          <span class="input-text input-placeholder">Enter your password</span>
+        </div>
+      </div>
+
+      <div class="signin-btn">Sign In</div>
+
+      <div class="divider">or</div>
+
+      <div class="register-row">
+        <span class="muted">Don't have an account?</span>
+        <span class="link">Register here</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── State 2: Filled (ready to submit) ── -->
+<div class="col">
+  <p class="label">Filled — Ready</p>
+  <div class="phone">
+    <div class="hero">
+      <div class="mascot-wrap">
+        <img src="../assets/images/ram-small.png" alt="ram"/>
+      </div>
+      <div class="app-name">EzRam</div>
+      <div class="app-tagline">English Practice Game</div>
+    </div>
+    <div class="card">
+      <div>
+        <div class="card-title">Welcome back</div>
+        <div class="card-sub">Sign in to continue playing</div>
+      </div>
+
+      <div class="input-group">
+        <div class="input-label">Username</div>
+        <div class="input-field filled">
+          <span class="input-icon">👤</span>
+          <span class="input-text">student01</span>
+        </div>
+      </div>
+
+      <div class="input-group">
+        <div class="input-label">Password</div>
+        <div class="input-field filled">
+          <span class="input-icon">🔒</span>
+          <span class="input-text">••••••••</span>
+        </div>
+      </div>
+
+      <div class="signin-btn">▶ Sign In</div>
+
+      <div class="divider">or</div>
+
+      <div class="register-row">
+        <span class="muted">Don't have an account?</span>
+        <span class="link">Register here</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── State 3: Loading ── -->
+<div class="col">
+  <p class="label">Loading</p>
+  <div class="phone">
+    <div class="hero">
+      <div class="mascot-wrap">
+        <img src="../assets/images/PixVerse-V5-ram-read.gif" alt="ram reading"/>
+      </div>
+      <div class="app-name">EzRam</div>
+      <div class="app-tagline">English Practice Game</div>
+    </div>
+    <div class="card">
+      <div>
+        <div class="card-title">Welcome back</div>
+        <div class="card-sub">Sign in to continue playing</div>
+      </div>
+
+      <div class="input-group">
+        <div class="input-label">Username</div>
+        <div class="input-field" style="opacity:0.5">
+          <span class="input-icon">👤</span>
+          <span class="input-text">student01</span>
+        </div>
+      </div>
+
+      <div class="input-group">
+        <div class="input-label">Password</div>
+        <div class="input-field" style="opacity:0.5">
+          <span class="input-icon">🔒</span>
+          <span class="input-text">••••••••</span>
+        </div>
+      </div>
+
+      <div class="signin-btn loading">
+        <span class="spinner"></span>Signing in...
+      </div>
+
+      <div class="divider">or</div>
+
+      <div class="register-row" style="opacity:0.4">
+        <span class="muted">Don't have an account?</span>
+        <span class="link">Register here</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── State 4: Error ── -->
+<div class="col">
+  <p class="label">Error — Wrong Password</p>
+  <div class="phone">
+    <div class="hero">
+      <div class="mascot-wrap">
+        <img src="../assets/images/PixVerse-V5-ram-sad.gif" alt="ram sad"/>
+      </div>
+      <div class="app-name">EzRam</div>
+      <div class="app-tagline">English Practice Game</div>
+    </div>
+    <div class="card">
+      <div>
+        <div class="card-title">Welcome back</div>
+        <div class="card-sub">Sign in to continue playing</div>
+      </div>
+
+      <div class="input-group">
+        <div class="input-label">Username</div>
+        <div class="input-field" style="border-color:#fca5a5">
+          <span class="input-icon">👤</span>
+          <span class="input-text">student01</span>
+        </div>
+      </div>
+
+      <div class="input-group">
+        <div class="input-label">Password</div>
+        <div class="input-field" style="border-color:#fca5a5">
+          <span class="input-icon">🔒</span>
+          <span class="input-text">••••••••</span>
+        </div>
+      </div>
+
+      <div class="error-msg">⚠️ ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง</div>
+
+      <div class="signin-btn">Try Again</div>
+
+      <div class="divider">or</div>
+
+      <div class="register-row">
+        <span class="muted">Don't have an account?</span>
+        <span class="link">Register here</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
