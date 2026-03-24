@@ -64,6 +64,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         const data = await repos.auth.loginWithRefreshToken(refreshToken)
         const { access, refresh } = data
         await AsyncStorage.setItem('accessToken', access);
+        await AsyncStorage.setItem('refreshToken', refresh);
 
         // ยิง GET Request ขอ User
         try {

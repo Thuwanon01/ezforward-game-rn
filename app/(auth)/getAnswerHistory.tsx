@@ -2,10 +2,10 @@ import { Button, ButtonText } from '@/components/ui/button'
 import { useAuth } from '@/contexts/AuthContext'
 import useRepositories from '@/hooks/useRepositories'
 import React from 'react'
-import { StyleSheet, Text, View } from 'react-native'
+import { Text, View } from 'react-native'
 
 
-export default function getAnswerHistory() {
+export default function GetAnswerHistory() {
     const auth = useAuth()
     const repos = useRepositories(auth.accessToken).current;
 
@@ -28,4 +28,3 @@ export default function getAnswerHistory() {
     )
 }
 
-const styles = StyleSheet.create({})

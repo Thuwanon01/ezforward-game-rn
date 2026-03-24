@@ -74,16 +74,24 @@ async function clearPersistedGameSession(): Promise<void> {
   await AsyncStorage.removeItem(GAME_SESSION_STORAGE_KEY);
 }
 
+/**
+ * Pick IDs to eliminate. Always ensures at least 2 choices remain visible.
+ * NOTE: correct answer may still be picked since we don't know it before submitting.
+ * The server validates the final answer regardless.
+ */
 function pickTwoRandomChoiceIds(choiceIds: number[]): number[] {
-  if (choiceIds.length <= 2) {
-    return [...choiceIds];
-  }
+  // Need at least 3 choices: 2 to eliminate + 1 remaining for user to pick.
+  // We target leaving at least 2 visible, so need at least 4.
+  // If not enough, eliminate min(count - 2, 2) and never leave 0 choices.
+  const maxToEliminate = Math.max(0, choiceIds.length - 2);
+  if (maxToEliminate === 0) return [];
+  const toEliminate = Math.min(2, maxToEliminate);
   const shuffled = [...choiceIds];
   for (let i = shuffled.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
   }
-  return shuffled.slice(0, 2);
+  return shuffled.slice(0, toEliminate);
 }
 
 export default function GamePage() {
@@ -131,6 +139,7 @@ export default function GamePage() {
   const noContentRedirectRef = useRef<ReturnType<typeof setTimeout> | null>(
     null
   );
+  const [isFetching, setIsFetching] = useState(false);
 
   const router = useRouter();
 
@@ -139,6 +148,7 @@ export default function GamePage() {
 
   useEffect(() => {
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -200,6 +210,7 @@ export default function GamePage() {
   };
 
   const fetchData = async () => {
+    setIsFetching(true);
     const selectedSubject = await AsyncStorage.getItem("selectedSubject");
     const myLevelStr = await AsyncStorage.getItem("myLevel");
     const selectedTopicStr = await AsyncStorage.getItem("selectedTopic");
@@ -214,6 +225,7 @@ export default function GamePage() {
         selectedTopicStr as string
       );
     } catch {
+      setIsFetching(false);
       goBackToSubjectAfterQuestionError();
       return;
     }
@@ -254,12 +266,14 @@ export default function GamePage() {
     setAnswer(null);
     setSelectedChoice(null);
     resetPerQuestionHelperState();
+    setIsFetching(false);
   };
 
   const handleConfirmEliminate = () => {
     if (sessionHelperUsed) return;
-    if (!choices.length) return;
+    if (choices.length <= 2) return; // not enough choices to safely eliminate
     const ids = pickTwoRandomChoiceIds(choices.map((c) => c.id));
+    if (ids.length === 0) return;
     setEliminatedChoiceIds(ids);
     setSessionHelperUsed("eliminate");
     setHelperStatus((h) => ({ ...h, eliminate: true }));
@@ -557,6 +571,8 @@ export default function GamePage() {
           questionIndex={currentQuestionIndex}
           question={question}
           selectedChoice={selectedChoice}
+          sessionTotal={sessionTotal}
+          isFetching={isFetching}
           onConfirmEliminate={handleConfirmEliminate}
           onConfirmDouble={handleConfirmDouble}
           onConfirmChange={handleConfirmChange}

@@ -1,7 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useRouter } from 'expo-router';
-import React, { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, FlatList, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { HandThumbDownIcon, HandThumbUpIcon, PaperAirplaneIcon, PlusCircleIcon } from "react-native-heroicons/solid";
 import Markdown from 'react-native-markdown-display';
 import HelpModalPage from './HelpModalPage';
@@ -33,6 +32,8 @@ interface Props {
   onConfirmChange?: () => void;
   /** Which lifeline was used this 10-question session (only one allowed per session). */
   sessionHelperUsed?: "eliminate" | "double" | "change" | null;
+  sessionTotal?: number;
+  isFetching?: boolean;
 }
 
 interface ChatMessage {
@@ -41,12 +42,6 @@ interface ChatMessage {
   text: string;
 }
 
-interface Feedback {
-  id: number;
-  messageId: number;
-  userId: number;
-  type: FeedbackState;
-}
 type FeedbackState = 'like' | 'dislike' | null;
 
 const PREMADE_MESSAGES_STORAGE_KEY = "premadeMessages";
@@ -77,6 +72,8 @@ export default function ExplanationPanel({
   onConfirmDouble,
   onConfirmChange,
   sessionHelperUsed = null,
+  sessionTotal = 10,
+  isFetching = false,
 }: Props) {
   const helpersLocked =
     !!sessionHelperUsed ||
@@ -106,7 +103,6 @@ export default function ExplanationPanel({
     double: false,
     change: false,
   });
-  const router = useRouter();
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [isChatLoading, setIsChatLoading] = useState(false);
@@ -118,36 +114,23 @@ export default function ExplanationPanel({
 
   const auth = useAuth();
   const repos = useRepositories(auth.accessToken).current;
-  const flatListRef = useRef<FlatList>(null);
 
-  // useEffect สำหรับ "โหลดข้อมูล" (ทำงานครั้งเดียว)
+  // โหลดแค่ premade messages (chat history จะถูก clear ทุกครั้งที่ question เปลี่ยน)
   useEffect(() => {
-    const loadData = async () => {
+    const loadPremadeMessages = async () => {
       try {
-        const savedPremadeMessages = await AsyncStorage.getItem(
-          PREMADE_MESSAGES_STORAGE_KEY
-        );
-        if (savedPremadeMessages) {
-          setPremadeMessages(JSON.parse(savedPremadeMessages));
+        const saved = await AsyncStorage.getItem(PREMADE_MESSAGES_STORAGE_KEY);
+        if (saved) {
+          setPremadeMessages(JSON.parse(saved));
         } else {
           setPremadeMessages(DEFAULT_PREMADE_MESSAGES);
         }
-
-
-        const savedChat = await AsyncStorage.getItem('chatHistory');
-        const savedFeedback = await AsyncStorage.getItem('explanationFeedback');
-        if (savedChat) {
-          setChatHistory(JSON.parse(savedChat));
-        }
-        if (savedFeedback === 'like' || savedFeedback === 'dislike') {
-          setFeedback(savedFeedback);
-        }
       } catch (error) {
-        console.error("Failed to load data from storage", error);
+        console.error("Failed to load premade messages", error);
       }
     };
-    loadData();
-  }, []); // '[]' ทำงานแค่ครั้งเดียว
+    loadPremadeMessages();
+  }, []);
 
 
   // --- เพิ่ม useEffect ใหม่สำหรับเคลียร์ข้อมูล ---
@@ -465,13 +448,17 @@ export default function ExplanationPanel({
                   </>
                 )}
               </View>
-              {helpersLocked }
+              {helpersLocked && (
+            <Text className="text-center text-xs text-white/60 mb-2">
+              {helperFooterLabel()}
+            </Text>
+          )}
             </>
           )}
 
-          {gameState !== "wait" && questionIndex <= 10 && (
+          {gameState !== "wait" && questionIndex <= sessionTotal && (
             <View className="flex-row justify-end my-[16] mx-[40]">
-              <TextButton text="Next" onPress={onPress} />
+              <TextButton text="Next" onPress={onPress} isDisable={isFetching} />
             </View>
           )}
           {/* ย้าย Modals มาไว้ที่นี่ (นอก ScrollView แต่ใน KAV) */}

@@ -3,7 +3,7 @@ import { Button, ButtonText } from '@/components/ui/button';
 import React, { useState } from 'react';
 import { Text, View } from 'react-native';
 
-export default function testComponent() {
+export default function TestComponent() {
     const [helperStatus, setHelperStatus] = useState({ "eliminate": false, "double": false, "change": false })
     const [explanationStatus, setExplanationStatus] = useState(false)
     const [correctAnswer, setCorrectAnswer] = useState("A. will take")

@@ -5,9 +5,6 @@ import React, { useState } from 'react';
 import { ActivityIndicator, Image, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 
-{/* กำหนด URL ของ API หลังบ้าน */ }
-const API_URL = 'https://job8001.dobybot.com/users/api/token/'; // กำหนด URL ของ API หลังบ้าน
-
 export default function LoginScreen() {
   const router = useRouter();
   const [username, setUsername] = useState('');
@@ -35,7 +32,7 @@ export default function LoginScreen() {
     } catch (error: any) {
       if (error instanceof FetchError) {
         console.log(error.response)
-        if (error.response?.status == 401) {
+        if (error.response?.status === 401) {
           setMessage(error.response._data.detail)
         }
         else {
@@ -100,7 +97,7 @@ export default function LoginScreen() {
         </TouchableOpacity>
 
         <View className="flex-row justify-center mt-6">
-          <Text className="text-gray-500">Don't have an account? </Text>
+          <Text className="text-gray-500">Don&apos;t have an account? </Text>
           <TouchableOpacity onPress={handleRegister} disabled={loading}>
             <Text className="text-blue-500 font-bold">Register here</Text>
           </TouchableOpacity>

@@ -53,7 +53,7 @@ interface Props {
     onToggleDetails: (id: number) => void;
 }
 
-const AnswerHistoryItem: React.FC<Props> = React.memo(({ item, isExpanded, onToggleDetails }) => {
+const AnswerHistoryItem: React.FC<Props> = React.memo(function AnswerHistoryItem({ item, isExpanded, onToggleDetails }) {
     const correctChoice = item.parsedQuestion?.choices?.find((c) => c.is_correct);
     const explanation = item.parsedSelectedChoice?.answer_explanation ?? '';
     const explanationShort =
