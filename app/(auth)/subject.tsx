@@ -75,6 +75,8 @@ export default function SelectSubjectPage() {
                 if (english.length > 0) {
                     setSelectedSubject(english[0].gid);
                 }
+            } catch (error) {
+                if (!cancelled) console.error('Failed to load subjects:', error);
             } finally {
                 if (!cancelled) setSubjectsReady(true);
             }
@@ -247,9 +249,9 @@ export default function SelectSubjectPage() {
                 }
                 style={!canPlay ? { opacity: 1 } : undefined}
                 isDisabled={!canPlay}
-                onPress={() => {
+                onPress={async () => {
                     if (!canPlay || selectedSubject == null) return;
-                    handleSubmitSelection(
+                    await handleSubmitSelection(
                         selectedSubject,
                         questionQuantity,
                         myLevel,

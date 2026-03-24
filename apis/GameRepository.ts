@@ -4,6 +4,7 @@ import { QuizAnswerResponse, QuizResponse } from "./types";
 export class GameRepository extends BaseRepository {
     async getQuestion() {
         const data = await this.sfetch("")
+        return data
     }
 
     async fetchSubmitAnswer(question_id: number, choice_id: number): Promise<QuizAnswerResponse> {
@@ -18,7 +19,7 @@ export class GameRepository extends BaseRepository {
     }
 
     async fetchSuggestedQuestion(): Promise<QuizResponse> {
-        const data = this.sfetch('/quizzes/api/random-quiz/')
+        const data = await this.sfetch('/quizzes/api/random-quiz/')
         return data
     }
 }

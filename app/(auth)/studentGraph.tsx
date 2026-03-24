@@ -46,31 +46,43 @@ export default function studentGraph() {
     };
 
     useEffect(() => {
-        // Fetch student graph data here if needed
-        fetchAnswerSummary();
-        fetchStudentGraph();
+        let cancelled = false;
+
+        const pad = (n: number) => String(n).padStart(2, '0');
+        const toYmd = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+        const today = new Date();
+        const thirtyDaysAgo = new Date(today);
+        thirtyDaysAgo.setDate(today.getDate() - 30);
+
+        const run = async () => {
+            try {
+                const [summary, graph] = await Promise.all([
+                    repos.gamev2.fetchAnswerSummary({
+                        answered_date__gte: toYmd(thirtyDaysAgo),
+                        answered_date__lte: toYmd(today),
+                    }),
+                    repos.gamev2.fetchStudentGraph(),
+                ]);
+
+                if (cancelled) return;
+
+                setTotalPlayedQuestions(summary.total);
+                setTotalCorrectAnswers(summary.correct);
+                setTotalIncorrectAnswers(summary.incorrect);
+                setStudentDB(graph.student);
+                setStudentKnowledgeGraph(graph.student_knowledge_graph);
+            } catch (error) {
+                if (!cancelled) console.error('Failed to load student graph:', error);
+            }
+        };
+
+        run();
+        return () => { cancelled = true; };
     }, []);
 
     const handleBackPress = () => {
         // Handle back button press
         router.push("/game");
-    }
-
-    const fetchAnswerSummary = async () => {
-        const summary = await repos.gamev2.fetchAnswerSummary({
-            answered_date__gte: "2025-09-01",
-            answered_date__lte: "2025-10-15"
-        })
-        console.log("total played", summary.total);
-        setTotalPlayedQuestions(summary.total);
-        setTotalCorrectAnswers(summary.correct);
-        setTotalIncorrectAnswers(summary.incorrect);
-    }
-    const fetchStudentGraph = async () => {
-        const graph = await repos.gamev2.fetchStudentGraph();
-        console.log("student graph", graph);
-        setStudentDB(graph.student);
-        setStudentKnowledgeGraph(graph.student_knowledge_graph);
     }
 
     const renderBottomLeaf = (item: bottomLayerTopicNode) => (

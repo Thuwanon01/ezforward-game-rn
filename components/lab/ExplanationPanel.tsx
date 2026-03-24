@@ -122,22 +122,6 @@ export default function ExplanationPanel({
 
   // useEffect สำหรับ "โหลดข้อมูล" (ทำงานครั้งเดียว)
   useEffect(() => {
-    const clearChatData = async () => {
-      console.log("New question detected, clearing chat history...");
-      // เคลียร์ State ของ chat
-      setChatHistory([]);
-      setFeedback(null);
-      setInputValue("");
-
-      // เคลียร์ข้อมูลใน AsyncStorage
-      try {
-        await AsyncStorage.removeItem("chatHistory");
-        await AsyncStorage.removeItem("explanationFeedback");
-      } catch (error) {
-        console.error("Failed to clear data from storage", error);
-      }
-    };
-
     const loadData = async () => {
       try {
         const savedPremadeMessages = await AsyncStorage.getItem(
@@ -151,11 +135,11 @@ export default function ExplanationPanel({
 
 
         const savedChat = await AsyncStorage.getItem('chatHistory');
-        const savedFeedback = await AsyncStorage.getItem('explanationFeedback') as FeedbackState;
+        const savedFeedback = await AsyncStorage.getItem('explanationFeedback');
         if (savedChat) {
           setChatHistory(JSON.parse(savedChat));
         }
-        if (savedFeedback) {
+        if (savedFeedback === 'like' || savedFeedback === 'dislike') {
           setFeedback(savedFeedback);
         }
       } catch (error) {
@@ -276,7 +260,11 @@ export default function ExplanationPanel({
     setFeedback(updatedFeedback);
 
     try {
-      await AsyncStorage.setItem('explanationFeedback', updatedFeedback || '');
+      if (updatedFeedback) {
+        await AsyncStorage.setItem('explanationFeedback', updatedFeedback);
+      } else {
+        await AsyncStorage.removeItem('explanationFeedback');
+      }
       console.log("Feedback saved:", updatedFeedback);
       if (updatedFeedback) {
         const llmRepo: any = repos.llm;
@@ -358,7 +346,11 @@ export default function ExplanationPanel({
                     keyExtractor={(item) => item.id.toString()}
                     className="max-h-48 mb-2"
                   /> */}
-                  {chatHistory.map((item) => renderChatItem({ item }))}
+                  {chatHistory.map((item) => (
+                    <React.Fragment key={item.id}>
+                      {renderChatItem({ item })}
+                    </React.Fragment>
+                  ))}
 
                   {isChatLoading && (
                     <ActivityIndicator color="white" className="my-2" />

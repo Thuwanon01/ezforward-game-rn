@@ -293,14 +293,20 @@ export default function GamePage() {
 
     const choiceCutting = eliminatedChoiceIds.map(String);
 
-    const answerData = await repos.gamev2.fetchSubmitAnswer(
-      question.id as string,
-      choiceId,
-      0,
-      0,
-      useHelper,
-      choiceCutting
-    );
+    let answerData: Awaited<ReturnType<typeof repos.gamev2.fetchSubmitAnswer>>;
+    try {
+      answerData = await repos.gamev2.fetchSubmitAnswer(
+        question.id as string,
+        choiceId,
+        0,
+        0,
+        useHelper,
+        choiceCutting
+      );
+    } catch (error) {
+      console.error("Failed to submit answer:", error);
+      return;
+    }
     console.log("Submitted answer data:", answerData);
     setExplanationStatus(true);
     setAnswer(answerData);
