@@ -19,6 +19,11 @@ function isEnglishSubject(s: Subject): boolean {
     return s.name.trim().toLowerCase() === 'english';
 }
 
+function isSupportedSubject(s: Subject): boolean {
+    const name = s.name.trim().toLowerCase();
+    return name !== 'math' && name !== 'mathematics';
+}
+
 export default function SelectSubjectPage() {
     const auth = useAuth();
     const repos = useRepositories(auth.accessToken).current;
@@ -55,7 +60,7 @@ export default function SelectSubjectPage() {
             try {
                 const list = await repos.gamev2.fetchSubjects();
                 if (cancelled) return;
-                setSubjects(list);
+                setSubjects(list.filter(isSupportedSubject));
                 const english = list.filter(isEnglishSubject);
                 if (english.length > 0) setSelectedSubject(english[0].gid);
             } catch (error) {
